@@ -31,3 +31,9 @@ header h1 {
     font-family: 'Courier New';
     cursor: pointer;
 }
+
+.logo {
+    width: 120px; /* or whatever size you want */
+    height: auto; /* keeps aspect ratio */
+  }
+  

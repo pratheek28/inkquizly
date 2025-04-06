@@ -1,13 +1,15 @@
 import { useState } from "react";
+import NavigationBar from "./NavigationBar"
 import styles from "./LandingPage.module.css";
 
 function LandingPage() {
     return (
-        <div className={styles.pRow}>
-            <p>
-                Intentially Left Blank!
-            </p>
+        <div>
+            <NavigationBar />
+            <div className={styles.pRow}>
+            </div>
         </div>
+        
     );
 }
 

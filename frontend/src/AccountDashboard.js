@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import NavigationBar from "./NavigationBar"
 import styles from "./AccountDashboard.module.css"
 
 function AccountDashboard() {
@@ -33,15 +34,20 @@ function AccountDashboard() {
         })
         .then(data => {
             if (data.message.includes("SUCCEESS")) {
-                navigate("/Canvas", { state: { notes: data.notes } });
+                navigate("/CanvasEditor", { state: { notes: data.notes } });
             }
         });
     };
 
+    const handleNew = (e) => {
+        navigate("/CanvasEditor");
+    };
+
     return (
         <div className={styles.buttonRowWrapper}>
+            <NavigationBar/>
         <div className={styles.buttonRow}>
-            <button>New!</button>
+            <button onClick={(handleNew)}>New!</button>
             <button onClick={() => setShowDropdown(!showDropdown)}>
                 Open previous notes
             </button>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styles from './Login.module.css';
 import { useNavigate } from 'react-router-dom';
+import NavigationBar from "./NavigationBar"
 
 function Login() {
     const navigate = useNavigate();
@@ -47,6 +48,7 @@ function Login() {
  
     return (
         <div>
+            <NavigationBar />
             <form onSubmit={handleSubmit} className={styles.form_container} >
                 <h1>Log In!</h1>
 

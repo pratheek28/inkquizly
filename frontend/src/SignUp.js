@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from './SignUp.module.css';
+import NavigationBar from "./NavigationBar"
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -23,7 +24,6 @@ function SignUp() {
     e.preventDefault();
     fetch("http://127.0.0.1:5000/getSignUpDetails", {
       method: "POST",
-      credentials: 'include',
       headers: {
         "Content-Type": "application/json"
       },
@@ -41,6 +41,7 @@ function SignUp() {
 
   return (
     <div>
+      <NavigationBar />
       <form onSubmit={handleSubmit} className={styles.form_container}>
         <h1>Sign Up!</h1>
 

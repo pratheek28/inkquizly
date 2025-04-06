@@ -1,9 +1,23 @@
 .pRow {
-    position: fixed;
-    top: 10%;
-    left: 45%;
+    position: relative;
+    height: 100vh;
+    width: 100vw; /* FULL WIDTH! */
+    background-image: url("/Users/pratheeksunilkumar/inkquizly/frontend/public/images/ bgLanding.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
 }
 
 .pRow p {
     color: white;
+    font-size: 2rem;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 1rem 2rem;
+    border-radius: 8px;
 }
