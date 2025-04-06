@@ -37,10 +37,10 @@ def ocr_from_base64(b64_str):
         return ""  # Or raise a custom exception
 
 # returns response by taking 'subtitle' and generates a concise AI summary of that given 'subtitle'
-def summarize_user_written(b64_subtitle):
+def summarize_user_written(subtitle):
     response = model.generate_content("Can you generate a response to this that max 20 lines and is super understandable to any students? " \
     "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-    f"and be able also to learn the implications of this and its application: {ocr_from_base64(b64_subtitle)}")
+    f"and be able also to learn the implications of this and its application: {subtitle}")
     return response
 
 # returns response by taking 'topic' and 'question' and answers the question WITHIN that topic ~ also allows saves chat history for follow-ups
@@ -76,3 +76,14 @@ def get_top_image_URL(b64_subtitle, specific):
 def summarize_AI_written(b64_subtitle, b64_phrase):
     response = model.generate_content(f"Can you generate a response to the following phrase that is max 3 sentences to define the following: {ocr_from_base64(b64_phrase)}, WITHIN this topic: {ocr_from_base64(b64_subtitle)}")
     return response
+
+def AI_study_schedule(numDays, subtitle_confidence):
+    # Initialize an empty string
+    subtitles_str = ""
+    keys = list(subtitle_confidence.keys())
+    for i, subtitle in enumerate(keys):
+        subtitles_str += f"{subtitle} -> {subtitle_confidence[subtitle]}"
+        if i < len(keys) - 1:
+            subtitles_str += ", "
+    response = model.generate_content("I want you to create a study plan based on scientific methods like pomodoro and other proven tecniques that are" \
+    f"efficient. Also, you need to consider that the exam is in {numDays} days from now, and depending on the urgency, review the most critical topic in the topic: {subtitles_str}.")
