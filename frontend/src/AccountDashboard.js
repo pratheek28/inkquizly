@@ -1,10 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import styles from "./AccountDashboard.module.css"
 
 function AccountDashboard() {
     const location = useLocation();
     const navigate = useNavigate();
     const user = location.state?.user;
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [selectedOption, setSelectedOption] = useState(null);
+
 
     useEffect(() => {
         if (!user) {
@@ -14,11 +18,43 @@ function AccountDashboard() {
 
     if (!user) return null;
 
+    const handleOptionClick = (option) => {
+        setSelectedOption(option);
+    };    
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        fetch("http://127.0.0.1:5000/getNotes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(selectedOption)
+        })
+        .then(data => {
+            if (data.message.includes("SUCCEESS")) {
+                navigate("/Canvas", { state: { notes: data.notes } });
+            }
+        });
+    };
+
     return (
-        <div>
-            <h1>Welcome {user.name}</h1>
-            <p>Email: {user.email}</p>
-            <p>Password: {user.password}</p>
+        <div className={styles.buttonRowWrapper}>
+        <div className={styles.buttonRow}>
+            <button>New!</button>
+            <button onClick={() => setShowDropdown(!showDropdown)}>
+                Open previous notes
+            </button>
+        </div>
+
+        {showDropdown && (
+            <div className={styles.dropdown}>
+                <a className={styles.option} onClick={() => {handleOptionClick(user.name); handleSubmit()}}>{user.name}</a><br />
+                {/* Repeat above for the following: */}
+                <a className={styles.option}>{user.email}</a><br />
+                <a className={styles.option}>{user.password}</a>
+            </div>
+        )}
         </div>
     );
 }

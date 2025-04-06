@@ -1,9 +1,33 @@
-.pRow {
-    position: fixed;
-    top: 10%;
-    left: 45%;
+.buttonRowWrapper {
+    position: relative;
+    display: inline-block;
 }
 
-.pRow p {
+.buttonRow {
+    display: flex;
+    gap: 10px;
+}
+
+.buttonRow button {
+    width: 50%;
+}
+
+
+.dropdown {
+    position: absolute;
+    top: 100%; /* puts it right below the buttons */
+    left: 0;
+    background-color: #222;
+    border: 1px solid #444;
+    padding: 10px;
+    margin-top: 5px;
+    z-index: 100;
+    border-radius: 5px;
+}
+
+.option {
     color: white;
+    font-weight: bold;
+    margin: 5px 0;
+    display: block;
 }

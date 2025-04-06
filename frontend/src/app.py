@@ -15,13 +15,13 @@ CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:3000", "http://localh
 
 bcrypt = Bcrypt(app)
 
-ApiClient = os.environ['ApiClient']
-endpoint = os.environ['Endpoints']
+# ApiClient = os.environ['ApiClient']
+# endpoint = os.environ['Endpoints']
 
 
-client = DataAPIClient(ApiClient) #FIX ME: USE ENV VAR ON VERCEL
+client = DataAPIClient("AstraCS:SJhgQhsNgggKxufCHncCCXoe:4afbec1c9ea56f024aa1ce249855ef1b7001817640de6832e2883308ced7d6d0") #FIX ME: USE ENV VAR ON VERCEL
 db = client.get_database_by_api_endpoint(
-  endpoint #ENV VAR
+  "https://d48eb3bc-cf69-4655-baca-a381b7ee3136-us-east-2.apps.astra.datastax.com" #ENV VAR
 )
 print("Connected!")
 
@@ -102,13 +102,12 @@ def getLoginDetails():
             }
             return jsonify(response)
         if bcrypt.check_password_hash(existingUser[0]["password"], password):
-            
+            #HERE IS WHERE I GET THE NOTE NAMES AND NUM OF NOTES FOR DROPDOWN LIST!!
             return jsonify({
             "message": "Success: Logged in!",
             "user": {
-                "email": email,
-                "name": "Pratheek",  
-                "password": password
+                "name": noteName,
+                
             }
         })
         else:
@@ -123,6 +122,13 @@ def getLoginDetails():
         return jsonify(response)
     
 
+
+@app.route("/getNote", methods=['POST', 'OPTIONS'])
+def getNote():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204
+    data = request.get_json()
+    #FROM DATA GET NOTE DATA FROM DATABASE AND RETURN IT WITH JSNOFINY
 
 
 @app.after_request
