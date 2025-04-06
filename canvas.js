@@ -10,10 +10,13 @@ const CanvasEditor = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   // New state for floating icon options
   const [showFloatingOptions, setShowFloatingOptions] = useState(false);
+  const [showPomodoroRect, setShowPomodoroRect] = useState(false); // New state for Pomodoro rectangle
   const canvasRef = useRef([]); // Ref for the canvas element
   const [showTextbox, setShowTextbox] = useState(false);
   const [diagramInput, setDiagramInput] = useState('');
   const [showGrid, setShowGrid] = useState(false);
+  const [pomodoroTime, setPomodoroTime] = useState(1500); // 25 minutes in seconds
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   // State for floating icon (draggable)
   const [floatingIconPosition, setFloatingIconPosition] = useState({
@@ -63,6 +66,30 @@ const CanvasEditor = () => {
     if (saved) setDiagramInput(saved);
   }, []);
 
+  // Add this useEffect for the countdown timer:
+  useEffect(() => {
+    let timerId;
+    if (isTimerRunning) {
+      timerId = setInterval(() => {
+        setPomodoroTime(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(timerId);
+            setIsTimerRunning(false);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timerId);
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes < 10 ? '0' + minutes : minutes}:${secs < 10 ? '0' + secs : secs}`;
+  };
+
   const handleDiagramClick = () => {
     setShowTextbox(true);
   };
@@ -86,7 +113,7 @@ const CanvasEditor = () => {
     setShowColorPicker(false);
   };
 
-  // Add this new function inside your CanvasEditor component
+  // MCQ Button function (unchanged)
   const handleMCQButtonClick = () => {
     const canvas = canvases[activeCanvasIndex];
     if (canvas) {
@@ -101,7 +128,7 @@ const CanvasEditor = () => {
         fill: 'white',
         stroke: 'black',
         strokeWidth: 2,
-        selectable: false, // user cannot click this rectangle
+        selectable: false,
       });
       canvas.add(questionRect);
   
@@ -117,10 +144,8 @@ const CanvasEditor = () => {
       });
       canvas.add(questionText);
   
-      // Calculate starting Y position for additional rectangles
       let nextTop = questionRect.top + questionRect.height + gap;
   
-      // Function to create an additional rectangle
       const createAdditionalRect = (textContent) => {
         const rect = new fabric.Rect({
           left: questionRect.left,
@@ -130,11 +155,10 @@ const CanvasEditor = () => {
           fill: 'grey',
           stroke: 'black',
           strokeWidth: 2,
-          selectable: true, // user can click this rectangle
+          selectable: true,
         });
         canvas.add(rect);
   
-        // Add editable text to the additional rectangle
         const text = new fabric.Textbox(textContent, {
           left: rect.left + 10,
           top: rect.top + 10,
@@ -146,11 +170,9 @@ const CanvasEditor = () => {
         });
         canvas.add(text);
   
-        // Update next top position for following rectangles
         nextTop = rect.top + rect.height + gap;
       };
   
-      // Create three additional rectangles with initial text content
       createAdditionalRect('A: ');
       createAdditionalRect('B: ');
       createAdditionalRect('C: ');
@@ -160,9 +182,12 @@ const CanvasEditor = () => {
       console.log("No active canvas available to add rectangles.");
     }
   };
-  
-  
-  
+
+  // Modified handlePomodoroClick (unchanged)
+  const handlePomodoroClick = () => {
+    setShowPomodoroRect(true);
+  };
+
   const handleCanvasClick = (index) => {
     setActiveCanvasIndex(index);
     console.log('Canvas', index, 'clicked');
@@ -259,7 +284,6 @@ const CanvasEditor = () => {
             }
           });
         } else if (activeTool === 'subhl') {
-          // Special Highlighter tool handler
           canvas.isDrawingMode = false;
           let startX, startY;
           let highlightRect = null;
@@ -268,7 +292,6 @@ const CanvasEditor = () => {
             const pointer = canvas.getPointer(e.e);
             startX = pointer.x;
             startY = pointer.y;
-
             highlightRect = new fabric.Rect({
               left: startX,
               top: startY,
@@ -280,24 +303,20 @@ const CanvasEditor = () => {
               selectable: false,
               evented: false,
             });
-
             canvas.add(highlightRect);
           };
 
           const onMouseMove = (e) => {
             if (!highlightRect) return;
-
             const pointer = canvas.getPointer(e.e);
             const width = pointer.x - startX;
             const height = pointer.y - startY;
-
             highlightRect.set({
               width: Math.abs(width),
               height: Math.abs(height),
               left: width < 0 ? pointer.x : startX,
               top: height < 0 ? pointer.y : startY,
             });
-
             canvas.renderAll();
           };
 
@@ -314,7 +333,6 @@ const CanvasEditor = () => {
           canvas.on('mouse:move', onMouseMove);
           canvas.on('mouse:up', onMouseUp);
         } else if (activeTool === 'aihl') {
-          // Special Highlighter tool handler
           canvas.isDrawingMode = false;
           let startX, startY;
           let highlightRect = null;
@@ -323,7 +341,6 @@ const CanvasEditor = () => {
             const pointer = canvas.getPointer(e.e);
             startX = pointer.x;
             startY = pointer.y;
-
             highlightRect = new fabric.Rect({
               left: startX,
               top: startY,
@@ -335,24 +352,20 @@ const CanvasEditor = () => {
               selectable: false,
               evented: false,
             });
-
             canvas.add(highlightRect);
           };
 
           const onMouseMove = (e) => {
             if (!highlightRect) return;
-
             const pointer = canvas.getPointer(e.e);
             const width = pointer.x - startX;
             const height = pointer.y - startY;
-
             highlightRect.set({
               width: Math.abs(width),
               height: Math.abs(height),
               left: width < 0 ? pointer.x : startX,
               top: height < 0 ? pointer.y : startY,
             });
-
             canvas.renderAll();
           };
 
@@ -376,21 +389,16 @@ const CanvasEditor = () => {
   const captureHighlightedRegion = (highlightRect) => {
     const canvas = canvases[activeCanvasIndex];
     if (!canvas) return;
-
-    // Render the canvas and get full image data
     const fullDataURL = canvas.toDataURL({
       format: 'png',
       left: highlightRect.left,
       top: highlightRect.top,
       width: highlightRect.width,
       height: highlightRect.height,
-      multiplier: 1, // can increase this for better resolution
+      multiplier: 1,
     });
-
     const base64Image = fullDataURL.split(',')[1];
     console.log("Base64 image:", base64Image);
-
-    // Create a download link
     const link = document.createElement('a');
     link.href = fullDataURL;
     link.download = 'highlighted_region.png';
@@ -402,8 +410,6 @@ const CanvasEditor = () => {
   const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
     const canvas = canvases[activeCanvasIndex];
     if (!canvas || !rect) return;
-
-    // Find objects inside the highlight area
     const objectsInRegion = canvas.getObjects().filter((obj) => {
       const bounds = obj.getBoundingRect();
       return (
@@ -413,8 +419,6 @@ const CanvasEditor = () => {
         bounds.top < rect.top + rect.height
       );
     });
-
-    // Try bolding text or making drawings thicker
     objectsInRegion.forEach((obj) => {
       if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
         obj.set("fontWeight", "bold");
@@ -422,8 +426,6 @@ const CanvasEditor = () => {
         obj.set("strokeWidth", (obj.strokeWidth || 1) * 1.5);
       }
     });
-
-    // Static underline right below the highlight box
     const underline = new fabric.Line(
       [rect.left, rect.top + rect.height + 2, rect.left + rect.width, rect.top + rect.height + 2],
       {
@@ -433,12 +435,9 @@ const CanvasEditor = () => {
         evented: true,
       }
     );
-
     canvas.add(underline);
-    canvas.remove(rect); // remove the highlight box
+    canvas.remove(rect);
     canvas.renderAll();
-
-    // Confidence bar width (editable)
     const confidenceBarWidth = 100;
     const confidenceBar = new fabric.Rect({
       left: rect.left + rect.width + 10,
@@ -449,8 +448,6 @@ const CanvasEditor = () => {
       selectable: false,
       evented: false,
     });
-
-    // Confidence fill rectangle (green)
     const confidenceFill = new fabric.Rect({
       left: rect.left + rect.width + 10,
       top: rect.top + rect.height + 5,
@@ -460,8 +457,6 @@ const CanvasEditor = () => {
       selectable: false,
       evented: false,
     });
-
-    // Confidence percentage text
     const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
       left: rect.left + rect.width + confidenceBarWidth + 15,
       top: rect.top + rect.height + 5,
@@ -469,33 +464,26 @@ const CanvasEditor = () => {
       selectable: false,
       evented: false,
     });
-
     const img = await fabric.FabricImage.fromURL('/inkai.png');
     console.log(img);
     img.scaleToHeight(30);
     img.scaleToWidth(30);
     img.set({
-      left: rect.left + rect.width + 10, // Position next to underline
-      top: rect.top + rect.height,       // Position below the confidence bar
+      left: rect.left + rect.width + 10,
+      top: rect.top + rect.height,
       selectable: false,
       evented: true,
     });
-
     img.on('mousedown', (e) => {
       console.log('Image button was pressed');
-      underline.set({
-        stroke: 'red' // Change the underline color to red
-      });
+      underline.set({ stroke: 'red' });
       canvas.renderAll();
     });
     canvas.add(img);
     canvas.renderAll();
-
-    // Set up drag behavior for confidence bar (editable)
     confidenceBar.on('mousedown', (e) => {
       const startX = e.pointer.x;
       const startWidth = confidenceFill.width;
-
       const onMouseMove = (e) => {
         const deltaX = e.pointer.x - startX;
         const newWidth = Math.max(0, Math.min(confidenceBarWidth, startWidth + deltaX));
@@ -504,12 +492,10 @@ const CanvasEditor = () => {
         confidenceText.set({ text: `${Math.round(newConfidence * 100)}%` });
         canvas.renderAll();
       };
-
       const onMouseUp = () => {
         canvas.off('mouse:move', onMouseMove);
         canvas.off('mouse:up', onMouseUp);
       };
-
       canvas.on('mouse:move', onMouseMove);
       canvas.on('mouse:up', onMouseUp);
     });
@@ -523,7 +509,7 @@ const CanvasEditor = () => {
     setShowColorPicker(true);
   };
 
-  // Handlers for floating icon dragging
+  // Handlers for floating icon dragging with restrictions
   const handleIconMouseDown = (e) => {
     setIsDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
@@ -536,10 +522,17 @@ const CanvasEditor = () => {
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (isDragging) {
-        setFloatingIconPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
-        });
+        // Calculate the new position
+        let newX = e.clientX - dragOffset.x;
+        let newY = e.clientY - dragOffset.y;
+        // Compute the allowed minimum X:
+        // If the canvas is centered, the right edge is at:
+        // (window.innerWidth + A4_WIDTH) / 2
+        const allowedMinX = (window.innerWidth + A4_WIDTH) / 2;
+        if (newX < allowedMinX) {
+          newX = allowedMinX;
+        }
+        setFloatingIconPosition({ x: newX, y: newY });
       }
     };
     const handleMouseUp = () => {
@@ -555,10 +548,8 @@ const CanvasEditor = () => {
     };
   }, [isDragging, dragOffset]);
 
-  // Handler for icon click to toggle options
   const handleIconClick = (e) => {
     if (!isDragging) {
-      // If the panel is currently open, reset grid and textbox states
       setShowFloatingOptions((prev) => {
         if (prev) {
           setShowGrid(false);
@@ -610,7 +601,7 @@ const CanvasEditor = () => {
         </div>
       ))}
 
-      {/* Drawing Tools Box with PNG Image Buttons */}
+      {/* Drawing Tools Box */}
       <div
         style={{
           position: 'fixed',
@@ -631,7 +622,7 @@ const CanvasEditor = () => {
             textAlign: 'center',
           }}
         >
-          {/* Tool buttons (pen, marker, color pallet, etc.) */}
+          {/* Tool buttons */}
           <button
             onClick={() => setActiveTool('pen')}
             style={{
@@ -883,11 +874,11 @@ const CanvasEditor = () => {
         </div>
       )}
 
-      {/* Draggable Floating Icon */}
+      {/* Draggable Floating Icon (restricted to the right of the canvas) */}
       <div
         style={{
           position: 'fixed',
-          left: `${floatingIconPosition.x}px`,
+          left: `${(window.innerWidth + A4_WIDTH) / 2 + 20}px`,
           top: `${floatingIconPosition.y}px`,
           backgroundColor: '#98a1f5',
           color: '#fff',
@@ -915,14 +906,137 @@ const CanvasEditor = () => {
         />
       </div>
 
-      {/* Floating Options that appear when clicking the icon */}
+      {/* Fixed-position Pomodoro Rectangle with Timer and 6 inner rectangles */}
+      {showPomodoroRect && (
+        <div
+          style={{
+            position: 'fixed',
+            left: '10px', // Positioned to the left side
+            top: '200px',
+            width: '270px',
+            height: '600px',
+            backgroundColor: 'lightblue',
+            border: '2px solid black',
+            zIndex: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: '10px'
+          }}
+        >
+          {/* Timer display */}
+          <div style={{ fontSize: '48px', fontWeight: 'bold', textAlign: 'center' }}>
+            {formatTime(pomodoroTime)}
+          </div>
+
+          {/* Container for 6 inner rectangles */}
+          <div
+            style={{
+              flexGrow: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              marginTop: '10px',
+              marginBottom: '10px'
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              Text 1
+            </div>
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              Text 2
+            </div>
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              Text 3
+            </div>
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              Text 4
+            </div>
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              Text 5
+            </div>
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              Text 6
+            </div>
+          </div>
+
+          {/* Start button */}
+          <button
+            onClick={() => setIsTimerRunning(true)}
+            disabled={isTimerRunning || pomodoroTime === 0}
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px',
+              cursor: isTimerRunning ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Start
+          </button>
+        </div>
+      )}
+
+      {/* Floating Options */}
       {showFloatingOptions && (
         <div
           style={{
             position: 'fixed',
             left: `${floatingIconPosition.x}px`,
             top: `${floatingIconPosition.y + 70}px`,
-            transform: 'translate(-50%, 0)', // Center horizontally
+            transform: 'translate(-50%, 0)',
             backgroundColor: '#fff',
             border: '1px solid #ddd',
             borderRadius: '8px',
@@ -989,7 +1103,7 @@ const CanvasEditor = () => {
                 onClick={() => console.log('Add image to Square 1')}
               >
                 <img
-                  src=""
+                  src=""  // add image url
                   alt="MCQ Button"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
@@ -1008,7 +1122,7 @@ const CanvasEditor = () => {
                 onClick={() => console.log('Add image to Square 2')}
               >
                 <img
-                  src=""
+                  src=""  // add image url
                   alt="MCQ Button"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
@@ -1027,7 +1141,7 @@ const CanvasEditor = () => {
                 onClick={() => console.log('Add image to Square 3')}
               >
                 <img
-                  src=""
+                  src=""  // add image url
                   alt="MCQ Button"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
@@ -1046,7 +1160,7 @@ const CanvasEditor = () => {
                 onClick={() => console.log('Add image to Square 4')}
               >
                 <img
-                  src=""
+                  src=""  // add image url
                   alt="MCQ Button"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
@@ -1054,13 +1168,21 @@ const CanvasEditor = () => {
             </div>
           )}
 
-            <button onClick={handleMCQButtonClick}>
-              <img
-                src="/mcq_image.png"
-                alt="MCQ Button"
-                style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
-              />
-            </button>
+          <button onClick={handleMCQButtonClick} style={{ marginBottom: '10px' }}>
+            <img
+              src="/mcq_image.png"
+              alt="MCQ Button"
+              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+            />
+          </button>
+
+          <button onClick={handlePomodoroClick} style={{ marginBottom: '10px' }}>
+            <img
+              src="/pomodoro_mode_image.png"
+              alt="Pomodoro Button"
+              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+            />
+          </button>
         </div>
       )}
     </div>
