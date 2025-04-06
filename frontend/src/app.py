@@ -107,7 +107,7 @@ def getLoginDetails():
             "message": "Success: Logged in!",
             "user": {
                 "email": email,
-                "name": "Pratheek",  # You can pull this from DB if needed
+                "name": "Pratheek",  
                 "password": password
             }
         })
