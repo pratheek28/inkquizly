@@ -1,0 +1,40 @@
+.form_container {
+    background: rgb(255, 255, 255);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    width: 320px;
+  }
+  
+  .form_container h1 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .form_container input {
+    width: 90%;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    display: block;
+    margin: 0 auto 1rem auto;
+  }
+  
+  .form_container button {
+    width: 100%;
+    padding: 0.6rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .form_container button:hover {
+    background: #4954bb;
+  }
+  
+  

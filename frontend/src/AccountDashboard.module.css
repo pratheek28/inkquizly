@@ -1,0 +1,9 @@
+.pRow {
+    position: fixed;
+    top: 10%;
+    left: 45%;
+}
+
+.pRow p {
+    color: white;
+}
