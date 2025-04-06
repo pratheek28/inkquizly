@@ -38,7 +38,7 @@ def ocr_from_base64(b64_str):
 
 # returns response by taking 'subtitle' and generates a concise AI summary of that given 'subtitle'
 def summarize_user_written(b64_subtitle):
-    response = model.generate_content("Can you generate a response to this that max 20 lines and is super understandable to college students? " \
+    response = model.generate_content("Can you generate a response to this that max 20 lines and is super understandable to any students? " \
     "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
     "and be able also to learn the implications of this and its application: " + ocr_from_base64(b64_subtitle))
     return response
