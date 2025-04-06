@@ -841,6 +841,18 @@ export default CanvasEditor;
 
 // Below code with button hover glow affect
 
+// HTML
+
+<button class="glow-on-hover" type="button">Login</button>
+
+<button class="glow-on-hover" type="button">Logout </button>
+
+<button class="glow-on-hover" type="MCQ">MCQ </button>
+
+<button class="glow-on-hover" type="Diagram">Diagram </button>
+
+// CSS
+
 import React, { useRef, useState, useEffect } from 'react';
 import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
