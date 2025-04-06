@@ -40,7 +40,7 @@ def ocr_from_base64(b64_str):
 def summarize_user_written(b64_subtitle):
     response = model.generate_content("Can you generate a response to this that max 20 lines and is super understandable to college students? " \
     "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-    "and be able also to learn the implication of this and its application: " + ocr_from_base64(b64_subtitle))
+    "and be able also to learn the implications of this and its application: " + ocr_from_base64(b64_subtitle))
     return response
 
 # returns response by taking 'topic' and 'question' and answers the question WITHIN that topic ~ also allows saves chat history for follow-ups
