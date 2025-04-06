@@ -77,6 +77,7 @@ def summarize_AI_written(b64_subtitle, b64_phrase):
     response = model.generate_content(f"Can you generate a response to the following phrase that is max 3 sentences to define the following: {ocr_from_base64(b64_phrase)}, WITHIN this topic: {ocr_from_base64(b64_subtitle)}")
     return response
 
+# returns response from gemini that creates a scientifically proven study schedule that the student can use depending on the number of days before exam
 def AI_study_schedule(numDays, subtitle_confidence):
     # Initialize an empty string
     subtitles_str = ""
@@ -87,3 +88,4 @@ def AI_study_schedule(numDays, subtitle_confidence):
             subtitles_str += ", "
     response = model.generate_content("I want you to create a study plan based on scientific methods like pomodoro and other proven tecniques that are " \
     f"efficient. Also, you need to consider that the exam is in {numDays} days from now, and depending on the urgency, review the most critical topic in the topic: {subtitles_str}.")
+    return response
