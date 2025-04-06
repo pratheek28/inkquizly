@@ -85,5 +85,5 @@ def AI_study_schedule(numDays, subtitle_confidence):
         subtitles_str += f"{subtitle} -> {subtitle_confidence[subtitle]}"
         if i < len(keys) - 1:
             subtitles_str += ", "
-    response = model.generate_content("I want you to create a study plan based on scientific methods like pomodoro and other proven tecniques that are" \
+    response = model.generate_content("I want you to create a study plan based on scientific methods like pomodoro and other proven tecniques that are " \
     f"efficient. Also, you need to consider that the exam is in {numDays} days from now, and depending on the urgency, review the most critical topic in the topic: {subtitles_str}.")
