@@ -6,6 +6,7 @@ from PIL import Image
 from PIL import UnidentifiedImageError
 import google.generativeai as genai
 from googleapiclient.discovery import build
+import re
 
 # pre-processing 
 api_key = "AIzaSyAwjQCVdaB_8BZleDTnBybvLeMnJUMJbIk"
@@ -77,7 +78,7 @@ def summarize_AI_written(b64_subtitle, b64_phrase):
     response = model.generate_content(f"Can you generate a response to the following phrase that is max 3 sentences to define the following: {ocr_from_base64(b64_phrase)}, WITHIN this topic: {ocr_from_base64(b64_subtitle)}")
     return response
 
-# returns response from gemini that creates a scientifically proven study schedule that the student can use depending on the number of days before exam
+# returns response from gemini that creates a pomodoro study schedule that the student can use depending on the number of days before exam
 def AI_study_schedule(numDays, subtitle_confidence):
     # Initialize an empty string
     subtitles_str = ""
@@ -86,6 +87,39 @@ def AI_study_schedule(numDays, subtitle_confidence):
         subtitles_str += f"{subtitle} -> {subtitle_confidence[subtitle]}"
         if i < len(keys) - 1:
             subtitles_str += ", "
-    response = model.generate_content("I want you to create a study plan based on scientific methods like pomodoro and other proven tecniques that are " \
-    f"efficient. Also, you need to consider that the exam is in {numDays} days from now, and depending on the urgency, review the most critical topic in the topic: {subtitles_str}.")
-    return response
+    response = model.generate_content("I want you to create a study plan using pomodoro in the format: 'T1 is for first 25 minutes, T2 is the second 25 minutes, ... up to T4 ONLY'. " \
+    f"Also, you need to consider that the exam is in {numDays} days from now, and depending on the urgency, review the most critical topic in the following topic and confidence level pairs (0 to 1): {subtitles_str}. " \
+    "Don't say anything else except give me the schedule in the format I asked you and once only, just give what I ask and don't say what you understand or anything else.")
+
+    # use regex to find pattern in generated response
+    pattern = r'(T\d+):\s*(.+)'
+    matches = re.findall(pattern, response)
+
+    # Build the dictionary from the regex matches
+    schedule_dict = {key: value for key, value in matches}
+    return jsonify({schedule_dict})
+
+# returns response from gemini that creates a 5 question MCQ based on a specific subtitle and returns a parsable dictionary
+def AI_MCQ(subtitle):
+    response = model.generate_content(f"Create 5 multiple choice questions with 3 options each about {subtitle}. Please generate in the following format => Q1: (first question)\nA: (first choice for first question)\nB (second choice for first question)\nC (third choice for first question)\nCheck: (correct option A, B, or C)." \
+                                      "PLEASE DON'T SAY ANYTHING ELSE BUT JUST GIVE WHAT I ASK. Also, go to the next line for every single new line")
+    pattern = (
+        r"Q\d+:\s*(.+?)\n"   # Capture the question text (non-greedy)
+        r"A:\s*(.+?)\n"      # Capture option A
+        r"B:\s*(.+?)\n"      # Capture option B
+        r"C:\s*(.+?)\n"      # Capture option C
+        r"Check:\s*([ABC])"  # Capture the correct option (A, B, or C)
+    )
+    
+    matches = re.findall(pattern, response, re.DOTALL)
+
+    # Build a list of dictionaries, one for each question
+    mcq_list = []
+    for question, option_a, option_b, option_c, correct in matches:
+        mcq_list.append({
+            'Q': question.strip(),
+            'A': option_a.strip(),
+            'B': option_b.strip(),
+            'C': option_c.strip(),
+            'Check': correct.strip()
+        })
