@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from astrapy import DataAPIClient
+import os
 import uuid
 import time
 
@@ -14,10 +15,13 @@ CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:3000", "http://localh
 
 bcrypt = Bcrypt(app)
 
+ApiClient = os.environ['ApiClient']
+endpoint = os.environ['Endpoints']
 
-client = DataAPIClient("AstraCS:SJhgQhsNgggKxufCHncCCXoe:4afbec1c9ea56f024aa1ce249855ef1b7001817640de6832e2883308ced7d6d0") #FIX ME: USE ENV VAR ON VERCEL
+
+client = DataAPIClient(ApiClient) #FIX ME: USE ENV VAR ON VERCEL
 db = client.get_database_by_api_endpoint(
-  "https://d48eb3bc-cf69-4655-baca-a381b7ee3136-us-east-2.apps.astra.datastax.com" #ENV VAR
+  endpoint #ENV VAR
 )
 print("Connected!")
 
