@@ -157,48 +157,290 @@ const CanvasEditor = () => {
           });
         } else if (activeTool === 'subhl') {
           // Special Highlighter tool handler
+          canvas.isDrawingMode=false;
+                              let startX, startY;
+                  let highlightRect = null;
+          
+                  const onMouseDown = (e) => {
+                    const pointer = canvas.getPointer(e.e);
+                    startX = pointer.x;
+                    startY = pointer.y;
+          
+                    highlightRect = new fabric.Rect({
+                      left: startX,
+                      top: startY,
+                      width: 0,
+                      height: 0,
+                      fill: 'rgba(255, 255, 0, 0.3)',
+                      stroke: 'yellow',
+                      strokeWidth: 1,
+                      selectable: false,
+                      evented: false,
+                    });
+          
+                    canvas.add(highlightRect);
+                  };
+          
+                  const onMouseMove = (e) => {
+                    if (!highlightRect) return;
+          
+                    const pointer = canvas.getPointer(e.e);
+                    const width = pointer.x - startX;
+                    const height = pointer.y - startY;
+          
+                    highlightRect.set({
+                      width: Math.abs(width),
+                      height: Math.abs(height),
+                      left: width < 0 ? pointer.x : startX,
+                      top: height < 0 ? pointer.y : startY,
+                    });
+          
+                    canvas.renderAll();
+                  };
+          
+                  const onMouseUp = () => {
+                      captureHighlightedRegion(highlightRect);
+                      console.log("logged");
+                    highlightRect = null;
+                    canvas.off('mouse:down', onMouseDown);
+                  canvas.off('mouse:move', onMouseMove);
+                  canvas.off('mouse:up', onMouseUp);
+                  };
+          
+                  canvas.on('mouse:down', onMouseDown);
+                  canvas.on('mouse:move', onMouseMove);
+                  canvas.on('mouse:up', onMouseUp);
         }
+        else if (activeTool === 'aihl') {
+            // Special Highlighter tool handler
+            canvas.isDrawingMode=false;
+                                let startX, startY;
+                    let highlightRect = null;
+            
+                    const onMouseDown = (e) => {
+                      const pointer = canvas.getPointer(e.e);
+                      startX = pointer.x;
+                      startY = pointer.y;
+            
+                      highlightRect = new fabric.Rect({
+                        left: startX,
+                        top: startY,
+                        width: 0,
+                        height: 0,
+                        fill: 'rgba(255, 255, 0, 0.3)',
+                        stroke: 'yellow',
+                        strokeWidth: 1,
+                        selectable: false,
+                        evented: false,
+                      });
+            
+                      canvas.add(highlightRect);
+                    };
+            
+                    const onMouseMove = (e) => {
+                      if (!highlightRect) return;
+            
+                      const pointer = canvas.getPointer(e.e);
+                      const width = pointer.x - startX;
+                      const height = pointer.y - startY;
+            
+                      highlightRect.set({
+                        width: Math.abs(width),
+                        height: Math.abs(height),
+                        left: width < 0 ? pointer.x : startX,
+                        top: height < 0 ? pointer.y : startY,
+                      });
+            
+                      canvas.renderAll();
+                    };
+            
+                    const onMouseUp = () => {
+                        underlineHighlightedRegion(highlightRect);
+                        console.log("logged");
+                      highlightRect = null;
+                      canvas.off('mouse:down', onMouseDown);
+                    canvas.off('mouse:move', onMouseMove);
+                    canvas.off('mouse:up', onMouseUp);
+                    };
+            
+                    canvas.on('mouse:down', onMouseDown);
+                    canvas.on('mouse:move', onMouseMove);
+                    canvas.on('mouse:up', onMouseUp);
+          }
       }
     });
   }, [activeTool]);
 
-  const openColorPallet = () => {
-    setShowColorPicker(true);
+
+  const captureHighlightedRegion = (highlightRect) => {
+    const canvas = canvases[activeCanvasIndex];
+    if (!canvas) return;
+  
+    // Render the canvas and get full image data
+    const fullDataURL = canvas.toDataURL({
+      format: 'png',
+      left: highlightRect.left,
+      top: highlightRect.top,
+      width: highlightRect.width,
+      height: highlightRect.height,
+      multiplier: 1, // can increase this for better resolution
+    });
+
+    const base64Image = fullDataURL.split(',')[1];
+
+console.log("Base64 image:", base64Image);
+
+  
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = fullDataURL;
+    link.download = 'highlighted_region.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const captureHighlightedTextSnippet = (highlightRect) => {
-    const objectsInRegion = canvases[activeCanvasIndex].getObjects().filter((obj) => {
-      return obj instanceof fabric.Text || obj instanceof fabric.Textbox;
-    });
-    const objectsToCapture = objectsInRegion.filter((obj) => {
-      const objBoundingBox = obj.getBoundingRect();
-      return (
-        objBoundingBox.left + objBoundingBox.width > highlightRect.left &&
-        objBoundingBox.top + objBoundingBox.height > highlightRect.top &&
-        objBoundingBox.left < highlightRect.left + highlightRect.width &&
-        objBoundingBox.top < highlightRect.top + highlightRect.height
-      );
-    });
-    if (objectsToCapture.length > 0) {
-      const snippetCanvas = new fabric.Canvas(null, {
-        width: highlightRect.width,
-        height: highlightRect.height,
-        backgroundColor: null,
-      });
-      objectsToCapture.forEach((obj) => {
-        obj.set({
-          left: obj.left - highlightRect.left,
-          top: obj.top - highlightRect.top,
+
+const underlineHighlightedRegion = async (rect,confidence=0.5) => {
+        const canvas = canvases[activeCanvasIndex];
+        if (!canvas || !rect) return;
+      
+        // Find objects inside the highlight area
+        const objectsInRegion = canvas.getObjects().filter(obj => {
+          const bounds = obj.getBoundingRect();
+          return (
+            bounds.left + bounds.width > rect.left &&
+            bounds.top + bounds.height > rect.top &&
+            bounds.left < rect.left + rect.width &&
+            bounds.top < rect.top + rect.height
+          );
         });
-        snippetCanvas.add(obj);
-      });
-      snippetCanvas.renderAll();
-      const snippetDataUrl = snippetCanvas.toDataURL({ format: 'png' });
-      const link = document.createElement('a');
-      link.href = snippetDataUrl;
-      link.download = 'highlighted_text_snippet.png';
-      link.click();
-    }
+      
+        // Try bolding text or making drawings thicker
+        objectsInRegion.forEach(obj => {
+          if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
+            obj.set("fontWeight", "bold");
+          } else {
+            obj.set("strokeWidth", (obj.strokeWidth || 1) * 1.5);
+          }
+        });
+      
+        // Static underline right below the highlight box
+        const underline = new fabric.Line(
+          [rect.left, rect.top + rect.height + 2, rect.left + rect.width, rect.top + rect.height + 2],
+          {
+            stroke: 'black',
+            strokeWidth: 2,
+            selectable: true,
+            evented: true,
+          }
+        );
+      
+        canvas.add(underline);
+        canvas.remove(rect); // remove the highlight box
+        canvas.renderAll();
+
+  // Confidence bar width (editable)
+  const confidenceBarWidth = 100;
+  const confidenceBar = new fabric.Rect({
+    left: rect.left + rect.width + 10,
+    top: rect.top + rect.height + 5,
+    width: confidenceBarWidth,
+    height: 10,
+    fill: '#d3d3d3',
+    selectable: false,
+    evented: false,
+  });
+
+  // Confidence fill rectangle (green)
+  const confidenceFill = new fabric.Rect({
+    left: rect.left + rect.width + 10,
+    top: rect.top + rect.height + 5,
+    width: confidenceBarWidth * confidence,
+    height: 10,
+    fill: 'green',
+    selectable: false,
+    evented: false,
+  });
+
+  // Confidence percentage text
+  const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
+    left: rect.left + rect.width + confidenceBarWidth + 15,
+    top: rect.top + rect.height + 5,
+    fontSize: 12,
+    selectable: false,
+    evented: false,
+  });
+
+        const img = await fabric.FabricImage.fromURL('/inkai.png');
+        console.log(img)
+        img.scaleToHeight(30);
+        img.scaleToWidth(30);
+        img.set({
+            left: rect.left + rect.width + 10,  // Position next to underline
+            top: rect.top + rect.height,   // Position below the confidence bar
+            selectable: false,
+            evented: true,
+          });
+
+        img.on('mousedown', (e) => {
+            console.log('Image button was pressed');
+            // You can perform whatever action you need here
+            // Example: Change color of the underline or do something else
+            underline.set({
+              stroke: 'red'  // Change the underline color to red
+            });
+            canvas.renderAll();  // Re-render canvas to apply the changes
+          });
+          canvas.add(img);
+          canvas.renderAll();
+
+
+          // Set up drag behavior for confidence bar (editable)
+  confidenceBar.on('mousedown', (e) => {
+    const startX = e.pointer.x;
+    const startWidth = confidenceFill.width;
+
+    const onMouseMove = (e) => {
+      const deltaX = e.pointer.x - startX;
+      const newWidth = Math.max(0, Math.min(confidenceBarWidth, startWidth + deltaX));
+      confidenceFill.set({ width: newWidth });
+
+      // Update the confidence text
+      const newConfidence = newWidth / confidenceBarWidth;
+      confidenceText.set({ text: `${Math.round(newConfidence * 100)}%` });
+
+      canvas.renderAll(); // Re-render to update the canvas
+    };
+
+    const onMouseUp = () => {
+      canvas.off('mouse:move', onMouseMove);
+      canvas.off('mouse:up', onMouseUp);
+    };
+
+    // Add mouse move and mouse up events to drag the bar
+    canvas.on('mouse:move', onMouseMove);
+    canvas.on('mouse:up', onMouseUp);
+  });
+  canvas.add(confidenceBar);
+  canvas.add(confidenceFill);
+    canvas.add(confidenceText);
+    canvas.renderAll();
+          
+
+
+        
+
+      };
+
+
+
+
+
+
+
+  const openColorPallet = () => {
+    setShowColorPicker(true);
   };
 
   // Handlers for floating icon dragging
