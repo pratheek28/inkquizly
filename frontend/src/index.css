@@ -1,0 +1,14 @@
+body {
+  display: flex;
+  justify-content: center; /* horizontal centering */
+  align-items: center;     /* vertical centering */
+  height: 100vh;           /* full height of the viewport */
+  margin: 0;
+  background: linear-gradient(135deg, #09080b, #1a0430);
+  background-image: url("/Users/pratheeksunilkumar/inkquizly/frontend/public/images/bg.jpg");
+}
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
