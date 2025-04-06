@@ -701,6 +701,33 @@ const underlineHighlightedRegion = async (rect,confidence=0.5) => {
             />
           </button>
           <button
+            onClick={() => setActiveTool('aihl')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              transition: 'transform 0.2s',
+              transform: activeTool === 'aihl' ? 'scale(1.8)' : 'scale(1)',
+            }}
+            onMouseEnter={(e) => {
+              if (activeTool !== 'aihl') {
+                e.currentTarget.style.transform = 'scale(1.8)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTool !== 'aihl') {
+                e.currentTarget.style.transform = 'scale(1)';
+              }
+            }}
+          >
+            <img
+              src="/aihighlighter_image.png"
+              alt="AI Highlighter Tool"
+              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+            />
+          </button>
+          <button
             onClick={() => setActiveTool('subhl')}
             style={{
               background: 'none',
