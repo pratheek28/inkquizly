@@ -11,6 +11,9 @@ const CanvasEditor = () => {
   // New state for floating icon options
   const [showFloatingOptions, setShowFloatingOptions] = useState(false);
   const canvasRef = useRef([]); // Ref for the canvas element
+  const [showTextbox, setShowTextbox] = useState(false);
+  const [diagramInput, setDiagramInput] = useState('');
+  const [showGrid, setShowGrid] = useState(false);
 
   // State for floating icon (draggable)
   const [floatingIconPosition, setFloatingIconPosition] = useState({
@@ -53,6 +56,27 @@ const CanvasEditor = () => {
       });
     };
   }, []);
+
+  // Load saved value on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('diagramInput');
+    if (saved) setDiagramInput(saved);
+  }, []);
+
+  const handleDiagramClick = () => {
+    setShowTextbox(true);
+  };
+
+  const handleTextboxBlur = () => {
+    localStorage.setItem('diagramInput', diagramInput);
+    setShowTextbox(false);
+  };
+
+  const handleEnterKey = () => {
+    setShowTextbox(false);
+    setShowGrid(true);
+    // Optionally save the input value or perform other actions here.
+  };
 
   const handleBrushColorChange = (color) => {
     setBrushColor(color.hex);
@@ -456,9 +480,15 @@ const CanvasEditor = () => {
 
   // Handler for icon click to toggle options
   const handleIconClick = (e) => {
-    // Prevent toggle when dragging by checking if the event target is the icon
     if (!isDragging) {
-      setShowFloatingOptions((prev) => !prev);
+      // If the panel is currently open, reset grid and textbox states
+      setShowFloatingOptions((prev) => {
+        if (prev) {
+          setShowGrid(false);
+          setShowTextbox(false);
+        }
+        return !prev;
+      });
     }
   };
 
@@ -811,27 +841,143 @@ const CanvasEditor = () => {
       {/* Floating Options that appear when clicking the icon */}
       {showFloatingOptions && (
         <div
-        style={{
-          position: 'fixed',
-          left: `${floatingIconPosition.x}px`,
-          top: `${floatingIconPosition.y + 70}px`,
-          transform: 'translateX(-25%)',
-          backgroundColor: '#fff',
-          border: '1px solid #ddd',
-          borderRadius: '8px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-          zIndex: 25,
-          padding: '10px',
-        }}
+          style={{
+            position: 'fixed',
+            left: `${floatingIconPosition.x}px`,
+            top: `${floatingIconPosition.y + 70}px`,
+            transform: 'translate(-50%, 0)', // Center horizontally
+            backgroundColor: '#fff',
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+            zIndex: 25,
+            padding: '10px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
         >
-          <button onClick={() => console.log('Option 1 clicked')} style={{ marginRight: '10px' }}>
+          <button onClick={handleDiagramClick} style={{ marginBottom: '10px' }}>
             <img
               src="/diagram_image.png"
               alt="Diagram Button"
               style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
             />
           </button>
-          <button onClick={() => console.log('Option 2 clicked')}>
+
+          {showTextbox && (
+            <input
+              type="text"
+              value={diagramInput}
+              onChange={(e) => setDiagramInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleEnterKey();
+                }
+              }}
+              onBlur={handleTextboxBlur}
+              autoFocus
+              placeholder="Enter Something Specific..."
+              style={{
+                padding: '5px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                marginBottom: '10px',
+                width: '160px',
+              }}
+            />
+          )}
+
+          {showGrid && (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gridTemplateRows: 'repeat(2, 1fr)',
+                gap: '10px',
+                marginTop: '10px',
+              }}
+            >
+              <button
+                style={{
+                  border: '1px solid #ccc',
+                  width: '80px',
+                  height: '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => console.log('Add image to Square 1')}
+              >
+                <img
+                  src=""
+                  alt="MCQ Button"
+                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                />
+              </button>
+              <button
+                style={{
+                  border: '1px solid #ccc',
+                  width: '80px',
+                  height: '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => console.log('Add image to Square 2')}
+              >
+                <img
+                  src=""
+                  alt="MCQ Button"
+                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                />
+              </button>
+              <button
+                style={{
+                  border: '1px solid #ccc',
+                  width: '80px',
+                  height: '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => console.log('Add image to Square 3')}
+              >
+                <img
+                  src=""
+                  alt="MCQ Button"
+                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                />
+              </button>
+              <button
+                style={{
+                  border: '1px solid #ccc',
+                  width: '80px',
+                  height: '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => console.log('Add image to Square 4')}
+              >
+                <img
+                  src=""
+                  alt="MCQ Button"
+                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                />
+              </button>
+            </div>
+          )}
+
+          <button onClick={() => console.log('MCQ button clicked')}>
             <img
               src="/mcq_image.png"
               alt="MCQ Button"
