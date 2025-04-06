@@ -40,12 +40,12 @@ def ocr_from_base64(b64_str):
 def summarize_user_written(b64_subtitle):
     response = model.generate_content("Can you generate a response to this that max 20 lines and is super understandable to any students? " \
     "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-    "and be able also to learn the implications of this and its application: " + ocr_from_base64(b64_subtitle))
+    f"and be able also to learn the implications of this and its application: {ocr_from_base64(b64_subtitle)}")
     return response
 
 # returns response by taking 'topic' and 'question' and answers the question WITHIN that topic ~ also allows saves chat history for follow-ups
 def topic_specific_question(b64_topic, question):
-    chat_history.append("Can you generate an answer to this question within 20 lines: " + question + " KNOWING that the topic is: " + ocr_from_base64(b64_topic))
+    chat_history.append(f"Can you generate an answer to this question within 20 lines: {question}, KNOWING that the topic is: {ocr_from_base64(b64_topic)}")
     response = model.generate_content(chat_history)
     chat_history.append(response)
     return response
@@ -74,5 +74,5 @@ def get_top_image_URL(b64_subtitle, specific):
 
 # returns response by taking 'subtitle' and 'phrase' to generate a concise AI definition summary of a specific phrase from AI summary
 def summarize_AI_written(b64_subtitle, b64_phrase):
-    response = model.generate_content("Can you generate a response to the following phrase that is max 3 sentences to define the following: " + ocr_from_base64(b64_phrase) + ", WITHIN this topic: " + ocr_from_base64(b64_subtitle))
+    response = model.generate_content(f"Can you generate a response to the following phrase that is max 3 sentences to define the following: {ocr_from_base64(b64_phrase)}, WITHIN this topic: {ocr_from_base64(b64_subtitle)}")
     return response
