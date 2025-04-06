@@ -8,12 +8,15 @@ const CanvasEditor = () => {
   const [activeTool, setActiveTool] = useState('point'); // Track the active tool
   const [activeCanvasIndex, setActiveCanvasIndex] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
+    const [response, setResponse] = useState(null);
   // New state for floating icon options
   const [showFloatingOptions, setShowFloatingOptions] = useState(false);
   const canvasRef = useRef([]); // Ref for the canvas element
-  const [showTextbox, setShowTextbox] = useState(false);
-  const [diagramInput, setDiagramInput] = useState('');
-  const [showGrid, setShowGrid] = useState(false);
+    let confidenceLevels = []; // Make sure this is accessible in your scope
+      const [showTextbox, setShowTextbox] = useState(false);
+      const [diagramInput, setDiagramInput] = useState('');
+      const [showGrid, setShowGrid] = useState(false);
+
 
   // State for floating icon (draggable)
   const [floatingIconPosition, setFloatingIconPosition] = useState({
@@ -45,46 +48,40 @@ const CanvasEditor = () => {
         console.log(`Canvas ${i} clicked`);
       };
 
-      canvas.on('mouse:down', () => handleClick(i));
+      canvas.on('mouse:over', () => handleClick(i));
       newCanvases.push(canvas);
     }
     setCanvases(newCanvases);
     return () => {
       newCanvases.forEach((canvas) => {
         canvas.dispose();
-        canvas.off('mouse:down');
+        canvas.off('mouse:over');
       });
     };
   }, []);
 
-  // Load saved value on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('diagramInput');
-    if (saved) setDiagramInput(saved);
-  }, []);
 
-  const handleDiagramClick = () => {
-    setShowTextbox(true);
-  };
+    // Load saved value on mount
+    useEffect(() => {
+      const saved = localStorage.getItem('diagramInput');
+      if (saved) setDiagramInput(saved);
+    }, []);
+  
+    const handleDiagramClick = () => {
+      setShowTextbox(true);
+    };
+  
+    const handleTextboxBlur = () => {
+      localStorage.setItem('diagramInput', diagramInput);
+      setShowTextbox(false);
+    };
+  
+    const handleEnterKey = () => {
+      setShowTextbox(false);
+      setShowGrid(true);
+      // Optionally save the input value or perform other actions here.
+    };
 
-  const handleTextboxBlur = () => {
-    localStorage.setItem('diagramInput', diagramInput);
-    setShowTextbox(false);
-  };
-
-  const handleEnterKey = () => {
-    setShowTextbox(false);
-    setShowGrid(true);
-    // Optionally save the input value or perform other actions here.
-  };
-
-  const handleBrushColorChange = (color) => {
-    setBrushColor(color.hex);
-    if (canvases[activeCanvasIndex]) {
-      canvases[activeCanvasIndex].freeDrawingBrush.color = color.hex;
-    }
-    setShowColorPicker(false);
-  };
 
   const handleCanvasClick = (index) => {
     setActiveCanvasIndex(index);
@@ -106,26 +103,34 @@ const CanvasEditor = () => {
     canvases.forEach((canvas) => {
       if (canvas) {
         if (activeTool === 'pen') {
-          canvas.off('mouse:up');
+            canvas.off('mouse:down');
+            canvas.off('mouse:move');
+            canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 5;
         } else if (activeTool === 'marker') {
-          canvas.off('mouse:up');
+            canvas.off('mouse:down');
+            canvas.off('mouse:move');
+            canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 10;
         } else if (activeTool === 'highlighter') {
-          canvas.off('mouse:up');
+            canvas.off('mouse:down');
+            canvas.off('mouse:move');
+            canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           let bColor = hexToRgba(brushColor, 0.5);
           canvas.freeDrawingBrush.color = bColor;
           canvas.freeDrawingBrush.width = 15;
         } else if (activeTool === 'eraser') {
-          canvas.off('mouse:up');
+            canvas.off('mouse:down');
+            canvas.off('mouse:move');
+            canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = 'rgba(255, 169, 78, 0.5)';
@@ -164,9 +169,20 @@ const CanvasEditor = () => {
               canvas.renderAll();
             }
           });
-        } else if (activeTool === 'text') {
+        } else if (activeTool === 'point') {
+            canvas.off('mouse:down');
+              canvas.off('mouse:move');
+              canvas.off('mouse:up');
+            canvas.isDrawingMode = false;
+          }
+        
+        
+        
+        else if (activeTool === 'text') {
           canvas.isDrawingMode = false;
-          canvas.off('mouse:up');
+          canvas.off('mouse:down');
+                  canvas.off('mouse:move');
+                  canvas.off('mouse:up');
           canvas.on('mouse:up', (e) => {
             if (!e.target) {
               const pointer = canvas.getPointer(e.e);
@@ -177,6 +193,7 @@ const CanvasEditor = () => {
                 fontSize: 24,
               });
               canvas.add(text);
+              setActiveTool("point");
               canvas.setActiveObject(text);
               canvas.renderAll();
             }
@@ -200,8 +217,14 @@ const CanvasEditor = () => {
               fill: 'rgba(255, 255, 0, 0.3)',
               stroke: 'yellow',
               strokeWidth: 1,
-              selectable: false,
-              evented: false,
+              selectable: true,
+              evented: true,
+              hasControls: false, // no resize/rotate handles
+  lockMovementX: true, // disable horizontal drag
+  lockMovementY: true, // disable vertical drag
+  hoverCursor: 'pointer',
+
+
             });
 
             canvas.add(highlightRect);
@@ -280,7 +303,8 @@ const CanvasEditor = () => {
           };
 
           const onMouseUp = () => {
-            underlineHighlightedRegion(highlightRect);
+            const finalRect = highlightRect;
+            underlineHighlightedRegion(finalRect);
             console.log("logged");
             highlightRect = null;
             canvas.off('mouse:down', onMouseDown);
@@ -296,7 +320,147 @@ const CanvasEditor = () => {
     });
   }, [activeTool]);
 
-  const captureHighlightedRegion = (highlightRect) => {
+ // Define these at the top level, outside any function
+let isPopupOpen = false;
+let popupRect = null;
+let popupText = null;
+
+const captureHighlightedRegion = (highlightRect) => {
+  const canvas = canvases[activeCanvasIndex];
+  if (!canvas) return;
+
+  // Render the canvas and get full image data
+  const fullDataURL = canvas.toDataURL({
+    format: 'png',
+    left: highlightRect.left,
+    top: highlightRect.top,
+    width: highlightRect.width,
+    height: highlightRect.height,
+    multiplier: 1,
+  });
+
+  const base64Image = fullDataURL.split(',')[1];
+  console.log("Base64 image:", base64Image);
+
+  function createPopup(message) {
+    // Only create new ones if they don’t exist
+    if (!popupRect && !popupText) {
+      popupRect = new fabric.Rect({
+        left: highlightRect.left +5,
+        top: highlightRect.top - 105,
+        width: 200,
+        height: 100,
+        fill: 'rgba(0, 0, 0, 0.7)',
+        rx: 20,
+        ry: 20,
+        selectable: false,
+        evented: false,
+      });
+
+      popupText = new fabric.Textbox(message || "sample message", {
+        left: popupRect.left + 10,
+        top: popupRect.top + 10,
+        width: 200 - 10,
+        fontSize: 10,
+        fill: 'white',
+        editable: false,
+        selectable: false,
+        evented: false,
+      });
+
+      canvas.add(popupRect, popupText);
+      canvas.renderAll();
+    }
+  }
+
+  function openPopup(message) {
+    if (!isPopupOpen) {
+      createPopup(message);
+      isPopupOpen = true;
+    }
+  }
+
+  function closePopup() {
+    if (isPopupOpen && popupRect && popupText) {
+      canvas.remove(popupRect);
+      canvas.remove(popupText);
+      popupRect = null;
+      popupText = null;
+      isPopupOpen = false;
+      canvas.renderAll();
+    }
+  }
+
+  console.log("rect=",highlightRect);
+
+  let topics = "";
+
+  // Highlight bolding
+  const objectsInRegion = canvas.getObjects();
+
+  objectsInRegion.forEach(obj => {
+    if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
+      topics += obj.text; // Collect text from text objects
+    } else {
+    }
+  });
+
+
+
+  let data=base64Image;
+   // Handle form submission to backend
+   const handleSubmit = () => {
+    fetch('http://127.0.0.1:5000/getdefinition', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ topic: topics ,img:data}) // Send data as an object with topic
+    })
+    .then(response => response.json())
+    .then(data => {
+      setResponse(data.definition);
+      console.log("log is",data.definition);
+      console.log("response is",response);
+
+      // Display the text summary after submission
+      highlightRect.on('mousedown', () => {
+        console.log("rect is pressed");
+        if (!isPopupOpen) {
+          openPopup(data.definition);
+        } else {
+          closePopup();
+        }
+      });
+
+  canvas.renderAll();
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      setResponse("An Error occurred while submitting the form.");
+    });
+  };
+
+  handleSubmit(); // Submit the data to the backend
+
+
+
+
+
+
+  // Download the image
+  const link = document.createElement('a');
+  link.href = fullDataURL;
+  link.download = 'highlighted_region.png';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+  
+
+
+  const captureHighlightedRegio = (highlightRect) => {
     const canvas = canvases[activeCanvasIndex];
     if (!canvas) return;
 
@@ -313,6 +477,73 @@ const CanvasEditor = () => {
     const base64Image = fullDataURL.split(',')[1];
     console.log("Base64 image:", base64Image);
 
+    let isPopupOpen = false;
+let popupRect = null;
+let popupText = null;
+
+    function createPopup(message) {
+     // Create the background rectangle for the popup
+  const popupRect = new fabric.Rect({
+    left: highlightRect.left-5, // Position
+    top: highlightRect.top+10,
+    width: 400,
+    height: 200,
+    fill: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+    rx: 20, // Rounded corners
+    ry: 20, 
+    selectable: false, // Not selectable
+    evented: false, // Not interactive
+  });
+
+  // Create the text inside the popup
+  const popupText = new fabric.Textbox("sample message", {
+    left: popupRect.left + 20, // Padding from the left
+    top: popupRect.top + 20,   // Padding from the top
+    width: 400 - 40,    // Adjust the width for padding
+    fontSize: 20,
+    fill: 'white',
+    editable: false,  // Prevent the user from editing the text
+    selectable: false,  // Make the text not selectable
+    evented: false,  // Make it non-interactive
+  });
+
+  // Add the popup to the canvas
+  canvas.add(popupRect, popupText);
+  }
+
+// Function to open the popup
+function openPopup(message) {
+  if (!isPopupOpen) {
+    createPopup(message);
+    isPopupOpen = true;
+    canvas.renderAll();
+  }
+}
+
+// Function to close the popup
+function closePopup() {
+  if (isPopupOpen) {
+    canvas.remove(popupRect);
+    canvas.remove(popupText);
+    isPopupOpen = false;
+    canvas.renderAll();
+  }
+}
+
+highlightRect.on('mousedown', () => {
+  console.log("rect is pressed");
+  if (!isPopupOpen) {
+    openPopup();
+  } else {
+    closePopup();
+  }
+  isPopupOpen = !isPopupOpen;
+});
+
+
+
+
+
     // Create a download link
     const link = document.createElement('a');
     link.href = fullDataURL;
@@ -322,125 +553,174 @@ const CanvasEditor = () => {
     document.body.removeChild(link);
   };
 
-  const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
-    const canvas = canvases[activeCanvasIndex];
-    if (!canvas || !rect) return;
+const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
+  console.log("im here yup");
+  const canvas = canvases[activeCanvasIndex];
+  if (!canvas || !rect) return;
 
-    // Find objects inside the highlight area
-    const objectsInRegion = canvas.getObjects().filter((obj) => {
-      const bounds = obj.getBoundingRect();
-      return (
-        bounds.left + bounds.width > rect.left &&
-        bounds.top + bounds.height > rect.top &&
-        bounds.left < rect.left + rect.width &&
-        bounds.top < rect.top + rect.height
-      );
-    });
+  let topic = "";
 
-    // Try bolding text or making drawings thicker
-    objectsInRegion.forEach((obj) => {
-      if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
-        obj.set("fontWeight", "bold");
-      } else {
-        obj.set("strokeWidth", (obj.strokeWidth || 1) * 1.5);
-      }
-    });
-
-    // Static underline right below the highlight box
-    const underline = new fabric.Line(
-      [rect.left, rect.top + rect.height + 2, rect.left + rect.width, rect.top + rect.height + 2],
-      {
-        stroke: 'black',
-        strokeWidth: 2,
-        selectable: true,
-        evented: true,
-      }
+  // Highlight bolding
+  const objectsInRegion = canvas.getObjects().filter(obj => {
+    const bounds = obj.getBoundingRect();
+    return (
+      bounds.left + bounds.width > rect.left &&
+      bounds.top + bounds.height > rect.top &&
+      bounds.left < rect.left + rect.width &&
+      bounds.top < rect.top + rect.height
     );
+  });
 
-    canvas.add(underline);
-    canvas.remove(rect); // remove the highlight box
-    canvas.renderAll();
+  objectsInRegion.forEach(obj => {
+    if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
+      obj.set("fontWeight", "bold");
+      obj.setCoords(); // Force update of bounding box after setting font weight
+      topic += obj.text; // Collect text from text objects
+    } else {
+      obj.set("strokeWidth", (obj.strokeWidth || 1) * 1.5);
+    }
+  });
 
-    // Confidence bar width (editable)
-    const confidenceBarWidth = 100;
-    const confidenceBar = new fabric.Rect({
-      left: rect.left + rect.width + 10,
-      top: rect.top + rect.height + 5,
-      width: confidenceBarWidth,
-      height: 10,
-      fill: '#d3d3d3',
-      selectable: false,
-      evented: false,
-    });
-
-    // Confidence fill rectangle (green)
-    const confidenceFill = new fabric.Rect({
-      left: rect.left + rect.width + 10,
-      top: rect.top + rect.height + 5,
-      width: confidenceBarWidth * confidence,
-      height: 10,
-      fill: 'green',
-      selectable: false,
-      evented: false,
-    });
-
-    // Confidence percentage text
-    const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
-      left: rect.left + rect.width + confidenceBarWidth + 15,
-      top: rect.top + rect.height + 5,
-      fontSize: 12,
-      selectable: false,
-      evented: false,
-    });
-
-    const img = await fabric.FabricImage.fromURL('/inkai.png');
-    console.log(img);
-    img.scaleToHeight(30);
-    img.scaleToWidth(30);
-    img.set({
-      left: rect.left + rect.width + 10, // Position next to underline
-      top: rect.top + rect.height,       // Position below the confidence bar
-      selectable: false,
+  // Underline
+  const underline = new fabric.Line(
+    [rect.left, rect.top + rect.height + 2, rect.left + rect.width, rect.top + rect.height + 2],
+    {
+      stroke: 'black',
+      strokeWidth: 2,
+      selectable: true,
       evented: true,
+    }
+  );
+  canvas.add(underline);
+  canvas.remove(rect);
+
+  // Constants for slider
+  const sliderMaxWidth = 100;
+  const sliderHeight = 10;
+  const sliderLeft = rect.left + rect.width + 45;
+  const sliderTop = rect.top + rect.height - 5;
+
+  // Slider
+  const slider = new fabric.Rect({
+    left: sliderLeft,
+    top: sliderTop,
+    width: sliderMaxWidth * confidence,
+    height: sliderHeight,
+    fill: 'green',
+    hasBorders: false,
+    hasControls: true,
+    lockScalingY: true,
+    lockMovementY: true,
+    lockMovementX: true,
+    lockRotation: true,
+    originX: 'left',
+    originY: 'top',
+  });
+
+  // Only allow right-side scaling
+  slider.setControlsVisibility({
+    mt: false, mb: false, ml: false, mr: true,
+    tl: false, tr: false, bl: false, br: false,
+    mtr: false,
+  });
+
+  // Confidence % text
+  const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
+    left: sliderLeft + slider.width + 10,
+    top: sliderTop + slider.height / 2,
+    fontSize: 12,
+    originY: 'center',
+    selectable: false,
+    evented: false,
+  });
+
+  // Scaling behavior
+  slider.on('scaling', function () {
+    const scaledWidth = slider.width * slider.scaleX;
+
+    const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
+    slider.set({
+      scaleX: 1,
+      width: newWidth,
+      left: sliderLeft // lock left position
     });
 
-    img.on('mousedown', (e) => {
-      console.log('Image button was pressed');
-      underline.set({
-        stroke: 'red' // Change the underline color to red
+    const newConfidence = newWidth / sliderMaxWidth;
+    confidenceText.set({
+      text: `${Math.round(newConfidence * 100)}%`,
+      left: slider.left + newWidth + 10
+    });
+
+    // Store confidence for the current topic
+    const existing = confidenceLevels.find(entry => entry.topic === topic);
+    if (existing) {
+      existing.confidence = newConfidence;
+    } else {
+      confidenceLevels.push({ topic, confidence: newConfidence });
+    }
+
+    canvas.requestRenderAll();
+  });
+
+  // Image button (for triggering additional functionality)
+  const img = await fabric.Image.fromURL('/inkai.png');
+  img.scaleToHeight(30);
+  img.scaleToWidth(30);
+  img.set({
+    left: rect.left + rect.width + 10,
+    top: rect.top + rect.height - 15,
+    selectable: false,
+    evented: true,
+  });
+
+  img.on('mousedown', () => {
+    console.log('Image button was pressed with topic',topic);
+    // Send topic to Python code here for summary
+    let data = topic;
+
+    // Handle form submission to backend
+    const handleSubmit = () => {
+      fetch('http://127.0.0.1:5000/getsummarized', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ topic: data }) // Send data as an object with topic
+      })
+      .then(response => response.json())
+      .then(data => {
+        setResponse(data.summary);
+        console.log("log is",data.summary);
+        console.log("response is",response);
+
+        // Display the text summary after submission
+    const summ = new fabric.Textbox(data.summary, {
+      left: rect.left,
+      top: rect.top + rect.height + 10,
+      width: 600,
+      fontSize: 20,
+    });
+    canvas.add(summ);
+    canvas.renderAll();
+    underline.set({ stroke: 'red' });
+
+    canvas.renderAll();
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        setResponse("An Error occurred while submitting the form.");
       });
-      canvas.renderAll();
-    });
-    canvas.add(img);
-    canvas.renderAll();
+    };
 
-    // Set up drag behavior for confidence bar (editable)
-    confidenceBar.on('mousedown', (e) => {
-      const startX = e.pointer.x;
-      const startWidth = confidenceFill.width;
+    handleSubmit(); // Submit the data to the backend
 
-      const onMouseMove = (e) => {
-        const deltaX = e.pointer.x - startX;
-        const newWidth = Math.max(0, Math.min(confidenceBarWidth, startWidth + deltaX));
-        confidenceFill.set({ width: newWidth });
-        const newConfidence = newWidth / confidenceBarWidth;
-        confidenceText.set({ text: `${Math.round(newConfidence * 100)}%` });
-        canvas.renderAll();
-      };
+  });
 
-      const onMouseUp = () => {
-        canvas.off('mouse:move', onMouseMove);
-        canvas.off('mouse:up', onMouseUp);
-      };
+  canvas.add(slider, confidenceText, img);
+  canvas.renderAll();
 
-      canvas.on('mouse:move', onMouseMove);
-      canvas.on('mouse:up', onMouseUp);
-    });
-    canvas.add(confidenceBar);
-    canvas.add(confidenceFill);
-    canvas.add(confidenceText);
-    canvas.renderAll();
-  };
+  console.log("Confidences:", confidenceLevels);
+};
 
   const openColorPallet = () => {
     setShowColorPicker(true);
@@ -491,6 +771,9 @@ const CanvasEditor = () => {
       });
     }
   };
+
+
+
 
   return (
     <div
@@ -991,3 +1274,6 @@ const CanvasEditor = () => {
 };
 
 export default CanvasEditor;
+
+
+
