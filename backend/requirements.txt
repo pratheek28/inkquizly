@@ -1,0 +1,9 @@
+Flask
+flask-cors
+flask-bcrypt
+astrapy
+numpy
+easyocr
+Pillow
+google-api-python-client
+google-generativeai
