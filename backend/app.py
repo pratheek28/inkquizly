@@ -31,7 +31,7 @@ API_KEY = os.environ.get("API_KEY")
 
 client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
 db = client.get_database_by_api_endpoint(
-  API_KEY#ENV VAR
+  API_KEY #ENV VAR
 )
 print("Connected!")
 
@@ -156,12 +156,15 @@ def after_request(response):
 
 # pre-processing 
 # api_key = "AIzaSyBJw3b2gdm1iaRUScBMnA5bHCPE209lM2U"
-current_cx = "92852ef3945e14340"
+CX_VAR = os.environ.get("CX_VAR")
+current_cx = CX_VAR
 # genai.configure(api_key=api_key)
 # model = genai.GenerativeModel("gemini-2.0-flash")
 # chat_history = []  # stores the chat history (session-based)
 
-client = genai.Client(api_key="AIzaSyBJw3b2gdm1iaRUScBMnA5bHCPE209lM2U")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+
+client = genai.Client(api_key=GOOGLE_API_KEY)
 print("Connected!")
 
 # response = client.models.generate_content(
@@ -242,9 +245,10 @@ def get_top_image_URL():
     # Combine the inputs to form the search query
     #query = topic.get('data', '')  # Access the 'data' field from the JSON (ensure the key is 'data')
     query={data['topic']}
-    
+
+    IMAGE_SEARCH = os.environ.get("IMAGE_SEARCH")
     # Build the Custom Search service
-    service = build("customsearch", "v1", developerKey="AIzaSyB5_jfew3BcG1PadSIVYdkKOHoWXJuNags")
+    service = build("customsearch", "v1", developerKey=IMAGE_SEARCH)
     
     # Execute the search request with searchType set to "image" and num set to 4
     result = service.cse().list(
@@ -324,9 +328,9 @@ def AI_study_schedule():
 def CanvasSave():
     res=request.get_json()
 
-    client = DataAPIClient("AstraCS:SJhgQhsNgggKxufCHncCCXoe:4afbec1c9ea56f024aa1ce249855ef1b7001817640de6832e2883308ced7d6d0") #FIX ME: USE ENV VAR ON VERCEL
+    client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
     db = client.get_database_by_api_endpoint(
-    "https://d48eb3bc-cf69-4655-baca-a381b7ee3136-us-east-2.apps.astra.datastax.com" #ENV VAR
+    API_KEY #ENV VAR
     )
     print("Connected!")
     table=db.get_table("notes")
