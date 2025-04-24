@@ -19,7 +19,7 @@ import os
 app = Flask(__name__)
 from flask_cors import CORS
 
-CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:3000", "http://localhost:3000"]}})
+CORS(app, resources={r"/*": {"origins": ["https://www.inkquizly.tech"]}})
 
 
 bcrypt = Bcrypt(app)
