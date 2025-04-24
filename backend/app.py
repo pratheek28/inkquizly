@@ -163,7 +163,9 @@ current_cx = CX_VAR
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 
-client = genai.Client(api_key=GOOGLE_API_KEY)
+genai.configure(api_key=GOOGLE_API_KEY)
+client = genai.GenerativeModel("gemini-2.0-flash")
+# client = genai.Client(api_key=GOOGLE_API_KEY)
 print("Connected!")
 
 # response = client.models.generate_content(
