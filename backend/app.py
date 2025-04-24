@@ -13,7 +13,6 @@ from PIL import Image
 from PIL import UnidentifiedImageError
 import google.generativeai as genai
 from googleapiclient.discovery import build
-from google import genai
 import re
 import os
 
