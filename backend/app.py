@@ -15,7 +15,7 @@ import google.generativeai as genai
 from googleapiclient.discovery import build
 from google import genai
 import re
-
+import os
 
 app = Flask(__name__)
 from flask_cors import CORS
@@ -26,9 +26,12 @@ CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:3000", "http://localh
 bcrypt = Bcrypt(app)
 
 
-client = DataAPIClient("AstraCS:SJhgQhsNgggKxufCHncCCXoe:4afbec1c9ea56f024aa1ce249855ef1b7001817640de6832e2883308ced7d6d0") #FIX ME: USE ENV VAR ON VERCEL
+DATA_API_CLIENT = os.environ.get("DATA_API_KEY")
+API_KEY = os.environ.get("API_KEY")
+
+client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
 db = client.get_database_by_api_endpoint(
-  "https://d48eb3bc-cf69-4655-baca-a381b7ee3136-us-east-2.apps.astra.datastax.com" #ENV VAR
+  API_KEY#ENV VAR
 )
 print("Connected!")
 
