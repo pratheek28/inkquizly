@@ -1,7 +1,7 @@
 const isLocalhost = Boolean(
     window.location.hostname === 'localhost' ||
       window.location.hostname === '[::1]' ||
-      window.location.hostname === '127.0.0.1'
+      window.location.hostname === 'https://inkquizly.onrender.com'
   );
   
   export function register(config) {
