@@ -127,7 +127,7 @@ const CanvasEditor = () => {
 
     const handleSubmit = () => {
       console.log("here saving");
-      fetch('http://127.0.0.1:5000/save', {
+      fetch('https://inkquizly.onrender.com/save', {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -177,7 +177,7 @@ const CanvasEditor = () => {
 
       // Handle form submission to backend
       const handleSubmit = () => {
-        fetch('http://127.0.0.1:5000/getimages', {
+        fetch('https://inkquizly.onrender.com/getimages', {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -256,7 +256,7 @@ const CanvasEditor = () => {
 
     const handleSubmit = () => {
       console.log("here");
-      fetch('http://127.0.0.1:5000/getschedule', {
+      fetch('https://inkquizly.onrender.com/getschedule', {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -617,7 +617,7 @@ const captureHighlightedRegion = (highlightRect) => {
   let data=base64Image;
    // Handle form submission to backend
    const handleSubmit = () => {
-    fetch('http://127.0.0.1:5000/getdefinition', {
+    fetch('https://inkquizly.onrender.com/getdefinition', {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -911,7 +911,7 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
 
     // Handle form submission to backend
     const handleSubmit = () => {
-      fetch('http://127.0.0.1:5000/getsummarized', {
+      fetch('https://inkquizly.onrender.com/getsummarized', {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
