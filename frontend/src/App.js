@@ -13,8 +13,8 @@ function App() {
   return (
     <div>
       <Router>
-        <div>
-          <NavigationBar onInstallClick={handleInstallClick} />
+      <div>
+        <PWAInstallPrompt />
         </div>
         <Routes>
           <Route path="/" element={<LandingPage />} />
