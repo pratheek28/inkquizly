@@ -34,8 +34,6 @@ function NavigationBar() {
           <button onClick={handleClickLogIn}>Log In</button>
           <button onClick={handleClickAccountDash}>Account Dashboard</button>
 
-          {/* Install button */}
-          <button onClick={onInstallClick}>Install PWA</button>
         </div>
       </header>
     </div>
