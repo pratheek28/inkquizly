@@ -12,7 +12,7 @@ self.addEventListener('install', (event) => {
   self.addEventListener('push', (event) => {
     const options = {
       body: event.data ? event.data.text() : 'No body content',
-      icon: './logo192.png',
+      icon: './miniLogo.png',
       badge: './badge.png',
     };
   
