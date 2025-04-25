@@ -25,7 +25,7 @@ self.addEventListener('install', (event) => {
     event.notification.close();
     // Handle notification click actions here
     event.waitUntil(
-      clients.openWindow('https://yourwebsite.com') // Open your app or a specific URL
+      clients.openWindow('https://www.inkquizly.tech') // Open your app or a specific URL
     );
   });
   self.__WB_MANIFEST;
