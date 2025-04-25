@@ -146,7 +146,11 @@ def getNote():
 @app.after_request
 def after_request(response):
     origin = request.headers.get("Origin")
-    if origin in ["http://127.0.0.1:3000", "http://localhost:3000"]:
+    allowed_origins = [
+        "https://www.inkquizly.tech",
+        "https://inkquizly.tech"
+    ]
+    if origin in allowed_origins:
         response.headers["Access-Control-Allow-Origin"] = origin
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
