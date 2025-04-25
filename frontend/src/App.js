@@ -8,6 +8,8 @@ import SignUp from "./SignUp";
 import AccountDashboard from "./AccountDashboard";
 import CanvasEditor from './Canvas';
 import PWAInstallPrompt from "./pwa";
+import iOSInstallPopup from "./iOSInstallPopup";
+
 
 function App() {
   return (
