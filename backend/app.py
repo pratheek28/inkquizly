@@ -19,7 +19,8 @@ import os
 app = Flask(__name__)
 from flask_cors import CORS
 
-CORS(app, resources={r"/*": {"origins": ["https://inkquizly.tech", "https://www.inkquizly.tech"]}})
+CORS(app, resources={r"/*": {"origins": ["*"]}})
+#"https://inkquizly.tech", "https://www.inkquizly.tech"
 
 
 bcrypt = Bcrypt(app)
@@ -146,10 +147,7 @@ def getNote():
 @app.after_request
 def after_request(response):
     origin = request.headers.get("Origin")
-    allowed_origins = [
-        "https://www.inkquizly.tech",
-        "https://inkquizly.tech"
-    ]
+    allowed_origins = ["*"]
     if origin in allowed_origins:
         response.headers["Access-Control-Allow-Origin"] = origin
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
