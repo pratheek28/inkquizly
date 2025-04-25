@@ -3,12 +3,12 @@
   "name": "Notes Revolutionized",
   "icons": [
     {
-      "src": "frontend/miniLogo.png",
+      "src": "/miniLogo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "frontend/miniLogo.png",
+      "src": "/miniLogo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
