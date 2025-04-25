@@ -17,7 +17,6 @@ function App() {
             <div>
                 <PWAInstallPrompt />
             </div>
-            <NavigationBar onInstallClick={() => pwaRef.current.handleInstallClick()} />
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/Login" element={<Login />} />
@@ -25,6 +24,7 @@ function App() {
                 <Route path="/AccountDashboard" element={<AccountDashboard />} />
                 <Route path="/CanvasEditor" element={<CanvasEditor />} />
             </Routes>
+            <NavigationBar onInstallClick={() => pwaRef.current.handleInstallClick()} />
         </Router>
         </div>
     </div>
