@@ -7,10 +7,10 @@ function LandingPage() {
     return (
         <div>
             <NavigationBar />
-            <div className={styles.pRow}>
-            </div>
             <div>
                 <PWAInstallPrompt />
+            </div>
+            <div className={styles.pRow}>
             </div>
         </div>
         
