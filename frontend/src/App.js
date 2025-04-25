@@ -11,9 +11,9 @@ import PWAInstallPrompt from "./pwa";
 
 function App() {
   return (
-    <div>
-        <PWAInstallPrompt />
-    </div>
+    // <div>
+    //     <PWAInstallPrompt />
+    // </div>
     <div>
       <Router>
         <Routes>
