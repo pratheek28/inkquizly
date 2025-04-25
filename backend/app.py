@@ -26,14 +26,19 @@ CORS(app, resources={r"/*": {"origins": ["*"]}})
 bcrypt = Bcrypt(app)
 
 
-DATA_API_CLIENT = os.environ.get("DATA_API_KEY")
-API_KEY = os.environ.get("API_KEY")
+ASTRA_TOKEN = os.environ.get("ASTRA_TOKEN")
 
-client = DataAPIClient(f"{DATA_API_CLIENT}") #FIX ME: USE ENV VAR ON VERCEL
+# client = DataAPIClient(f"{DATA_API_CLIENT}") #FIX ME: USE ENV VAR ON VERCEL
+# db = client.get_database_by_api_endpoint(
+#   f"{API_KEY}" #ENV VAR
+# )
+
+client = DataAPIClient(ASTRA_TOKEN)
 db = client.get_database_by_api_endpoint(
-  f"{API_KEY}" #ENV VAR
+  "https://d48eb3bc-cf69-4655-baca-a381b7ee3136-us-east-2.apps.astra.datastax.com"
 )
-print("Connected!")
+
+
 
 table = db.get_table("users")
 
