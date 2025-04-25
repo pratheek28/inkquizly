@@ -33,6 +33,8 @@ function NavigationBar() {
           <button onClick={handleClickSignUp}>Sign Up</button>
           <button onClick={handleClickLogIn}>Log In</button>
           <button onClick={handleClickAccountDash}>Account Dashboard</button>
+          {/* Install App button */}
+          <button onClick={onInstallClick}>Install App</button>
         </div>
       </header>
     </div>
