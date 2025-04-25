@@ -51,7 +51,7 @@ const PWAInstallPrompt = () => {
     animation: 'slideIn 0.3s ease-in-out'
   }}>
     <p style={{ margin: '0 0 10px', fontSize: '16px', fontWeight: 'bold' }}>
-      ✨ Install Inkquizly!
+      🖋️ Install Inkquizly!
     </p>
     <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#555' }}>
       Get the full app experience—lightning fast and always available!
@@ -62,7 +62,7 @@ const PWAInstallPrompt = () => {
         style={{
           padding: '8px 12px',
           background: '#000',
-          color: '#fff',
+          color: '#06042b',
           border: 'none',
           borderRadius: '6px',
           cursor: 'pointer'
@@ -75,7 +75,7 @@ const PWAInstallPrompt = () => {
         style={{
           padding: '8px 12px',
           background: '#eee',
-          color: '#333',
+          color: '#fff',
           border: 'none',
           borderRadius: '6px',
           cursor: 'pointer'
