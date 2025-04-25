@@ -11,10 +11,10 @@ import PWAInstallPrompt from "./pwa";
 
 function App() {
   return (
-    // <div>
-    //     <PWAInstallPrompt />
-    // </div>
     <div>
+        <div>
+        <PWAInstallPrompt />
+        </div>
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
