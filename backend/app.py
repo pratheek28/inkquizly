@@ -29,9 +29,9 @@ bcrypt = Bcrypt(app)
 DATA_API_CLIENT = os.environ.get("DATA_API_KEY")
 API_KEY = os.environ.get("API_KEY")
 
-client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
+client = DataAPIClient(f"{DATA_API_CLIENT}") #FIX ME: USE ENV VAR ON VERCEL
 db = client.get_database_by_api_endpoint(
-  API_KEY #ENV VAR
+  f"{API_KEY}" #ENV VAR
 )
 print("Connected!")
 
