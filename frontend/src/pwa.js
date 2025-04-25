@@ -35,13 +35,58 @@ const PWAInstallPrompt = () => {
 
   return (
     <>
-      {showPopup && (
-        <div className="install-popup">
-          <p>Install this app for a better experience!</p>
-          <button onClick={handleInstallClick}>Get App!</button>
-          <button onClick={() => setShowPopup(false)}>Close</button>
-        </div>
-      )}
+{showPopup && (
+  <div style={{
+    position: 'fixed',
+    bottom: '20px',
+    right: '20px',
+    background: '#ffffff',
+    border: '1px solid #ccc',
+    borderRadius: '12px',
+    padding: '16px 20px',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)',
+    zIndex: 1000,
+    maxWidth: '300px',
+    fontFamily: 'sans-serif',
+    animation: 'slideIn 0.3s ease-in-out'
+  }}>
+    <p style={{ margin: '0 0 10px', fontSize: '16px', fontWeight: 'bold' }}>
+      ✨ Install Inkquizly!
+    </p>
+    <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#555' }}>
+      Get the full app experience—lightning fast and always available!
+    </p>
+    <div style={{ display: 'flex', gap: '10px' }}>
+      <button
+        onClick={handleInstallClick}
+        style={{
+          padding: '8px 12px',
+          background: '#000',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer'
+        }}
+      >
+        Install
+      </button>
+      <button
+        onClick={() => setShowPopup(false)}
+        style={{
+          padding: '8px 12px',
+          background: '#eee',
+          color: '#333',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer'
+        }}
+      >
+        Dismiss
+      </button>
+    </div>
+  </div>
+)}
+
     </>
   );
 };
