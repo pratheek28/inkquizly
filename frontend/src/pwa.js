@@ -40,7 +40,7 @@ const PWAInstallPrompt = () => {
     position: 'fixed',
     bottom: '20px',
     right: '20px',
-    background: '#ffffff',
+    background: '#06042b',
     border: '1px solid #ccc',
     borderRadius: '12px',
     padding: '16px 20px',
@@ -50,19 +50,19 @@ const PWAInstallPrompt = () => {
     fontFamily: 'sans-serif',
     animation: 'slideIn 0.3s ease-in-out'
   }}>
-    <p style={{ margin: '0 0 10px', fontSize: '16px', fontWeight: 'bold' }}>
+    <p style={{ margin: '0 0 10px', fontSize: '16px', fontWeight: 'bold', color: '#b8b6b6'}}>
       🖋️ Install Inkquizly!
     </p>
-    <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#555' }}>
-      Get the full app experience—lightning fast and always available!
+    <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#d1c0c0' }}>
+      Get the full app experience—seamless and instantly available!
     </p>
     <div style={{ display: 'flex', gap: '10px' }}>
       <button
         onClick={handleInstallClick}
         style={{
           padding: '8px 12px',
-          background: '#000',
-          color: '#06042b',
+          background: '#4b7ee3',
+          color: '#0b1b3b',
           border: 'none',
           borderRadius: '6px',
           cursor: 'pointer'
@@ -75,7 +75,7 @@ const PWAInstallPrompt = () => {
         style={{
           padding: '8px 12px',
           background: '#eee',
-          color: '#fff',
+          color: '#4e5054',
           border: 'none',
           borderRadius: '6px',
           cursor: 'pointer'

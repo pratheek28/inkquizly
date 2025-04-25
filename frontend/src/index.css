@@ -1,14 +1,17 @@
 body {
+
   display: flex;
-  justify-content: center; /* horizontal centering */
-  align-items: center;     /* vertical centering */
-  height: 100vh;           /* full height of the viewport */
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   margin: 0;
-  background-attachment: fixed;
-  background: linear-gradient(135deg, #09080b, #1a0430);
-  background-image: url("/public/images/bg.jpg");
-  background-size: cover;
+
+  background-image: url("/public/images/bg.jpg"); /* ✅ correct path for public/ in React */
+
   background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

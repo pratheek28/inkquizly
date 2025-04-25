@@ -1,3 +1,6 @@
+/* Access-Control-Allow-Origin */
+/* global TimestampTrigger */
+
 import React, { useRef, useState, useEffect } from 'react';
 import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
@@ -5,20 +8,23 @@ import { SketchPicker } from 'react-color';
 const CanvasEditor = () => {
   const [canvases, setCanvases] = useState([]); // Single canvas
   const [brushColor, setBrushColor] = useState('#000000'); // Default to black marker
-  const [activeTool, setActiveTool] = useState('point'); // Track the active tool
+  const [activeTool, setActiveTool] = useState(''); // Track the active tool
   const [activeCanvasIndex, setActiveCanvasIndex] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
     const [response, setResponse] = useState(null);
+    
   // New state for floating icon options
   const [showFloatingOptions, setShowFloatingOptions] = useState(false);
     const [showPomodoroRect, setShowPomodoroRect] = useState(false); // New state for Pomodoro rectangle
   const canvasRef = useRef([]); // Ref for the canvas element
-    let confidenceLevels = []; // Make sure this is accessible in your scope
+    //let confidenceLevels = []; // Make sure this is accessible in your scope
+    const [confidenceLevels, setConfidenceLevels] = useState([]);
       const [showTextbox, setShowTextbox] = useState(false);
       const [diagramInput, setDiagramInput] = useState('');
       const [showGrid, setShowGrid] = useState(false);
-      const [pomodoroTime, setPomodoroTime] = useState(1500); // 25 minutes in seconds
+      const [pomodoroTime, setPomodoroTime] = useState(2); // 25 minutes in seconds
       const [isTimerRunning, setIsTimerRunning] = useState(false);
+      const [searchimg,setsearch]=useState(false);
 
       const [first, setfirst] = useState(''); //setting for study plan
       const [second, setsecond] = useState('');
@@ -50,25 +56,264 @@ const CanvasEditor = () => {
 
   useEffect(() => {
     const newCanvases = [];
-    for (let i = 0; i < numPages; i++) {
-      const canvas = new fabric.Canvas(canvasRef.current[i], {
-        width: A4_WIDTH,
-        height: A4_HEIGHT,
-        backgroundColor: null,
-      });
-      canvas.isDrawingMode = true;
-      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-      canvas.freeDrawingBrush.color = brushColor;
-      canvas.freeDrawingBrush.width = 5;
 
-      const handleClick = () => {
-        setActiveCanvasIndex(i);
-        console.log(`Canvas ${i} clicked`);
-      };
+    if(true){
 
-      canvas.on('mouse:over', () => handleClick(i));
-      newCanvases.push(canvas);
+
+      // for (let i = 0; i < numPages; i++) {
+      //   const canvas = new fabric.Canvas(canvasRef.current[i], {
+      //     width: A4_WIDTH,
+      //     height: A4_HEIGHT,
+      //     backgroundColor: null,
+      //   });
+      //   canvas.isDrawingMode = true;
+      //   canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+      //   canvas.freeDrawingBrush.color = brushColor;
+      //   canvas.freeDrawingBrush.width = 5;
+  
+      //   const handleClick = () => {
+      //     setActiveCanvasIndex(i);
+      //     console.log(`Canvas ${i} clicked`);
+      //   };
+  
+      //   canvas.on('mouse:over', () => handleClick(i));
+      //   newCanvases.push(canvas);
+    
+
+
+
+
+      for (let i = 0; i < numPages; i++) {
+        const canvasElement = canvasRef.current[i];
+      
+        // Check if the canvas element is valid and exists
+        if (!canvasElement) {
+          console.error(`Canvas element at index ${i} is not available!`);
+          continue;
+        }
+      
+        const canvas = new fabric.Canvas(canvasElement, {
+          width: A4_WIDTH,
+          height: A4_HEIGHT,
+          backgroundColor: null,  // Set background color to white
+        });
+      
+        let jsonString = '{"version":"6.6.2","objects":[{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Thermodynamics","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":78.9054,"top":41.6211,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":69.7246,"top":74.4332,"width":189.0661,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-94.53304303155736,"x2":94.53304303155736,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":61.2433,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Oscillations","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":132.5347,"top":299.7531,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":120.627,"top":331.6562,"width":145.4355,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-72.71772540889029,"x2":72.71772540889029,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":22.2107,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Waves","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":96.1758,"top":465.3776,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":88.813,"top":498.1896,"width":95.442,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-47.72100729958425,"x2":47.72100729958425,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0}]}';
+
+
+        console.log("is canvas valid?! ", canvas);
+      
+        // Load JSON content first and then add your custom objects
+        canvas.clear();
+        canvas.loadFromJSON(JSON.parse(jsonString))
+          .then(() => {
+            console.log("Callback triggered!"); // this will definitely run after all deserialization is complete
+            canvas.renderAll();
+        
+            const objects = canvas.getObjects();
+            console.log("Objects loaded:", objects.length);
+        
+            objects.forEach((obj) => {
+              console.log("object:", obj);
+              if (obj.fill?.replace(/\s/g, '') === "rgb(23,225,23)") {
+                console.log("object found");
+                obj.set({
+                  hasBorders: false,
+                  hasControls: true,
+                  lockScalingY: true,
+                  lockMovementY: true,
+                  lockMovementX: true,
+                  lockRotation: true,
+                  originX: 'left',
+                  originY: 'top',
+                });
+                obj.setControlsVisibility({
+                  mt: false, mb: false, ml: false, mr: true,
+                  tl: false, tr: false, bl: false, br: false,
+                  mtr: false,
+                });
+                let maxleft=obj.left;
+
+                const topicindex = topicsindexes.current;
+                topicsindexes.current++; // persists across re-renders
+
+                const scaledWidth = obj.width * obj.scaleX;
+                  const newWidth = Math.min(100, Math.max(1, scaledWidth));
+
+                const newConfidence = newWidth / 100;
+
+                  setConfidenceLevels(prev => {
+                    const updated = [...prev];
+                    updated[topicindex] = newConfidence;
+                    return updated;
+                  });
+
+
+                obj.on('scaling', function () {
+                  const scaledWidth = obj.width * obj.scaleX;
+                  const newWidth = Math.min(100, Math.max(1, scaledWidth));
+                  
+                  obj.set({
+                    scaleX: 1,
+                    width: newWidth,
+                    left: maxleft// lock left position
+                  });
+                
+                  const newConfidence = newWidth / 100;
+
+                  setConfidenceLevels(prev => {
+                    const updated = [...prev];
+                    updated[topicindex] = newConfidence;
+                    return updated;
+                  });
+
+                
+                  // // Store confidence for the current topic
+                  // const existing = confidenceLevels.find(entry => entry.topic === topic);
+                  // if (existing) {
+                  //   existing.confidence = newConfidence;
+                  // } else {
+                  //   confidenceLevels.push({ topic, confidence: newConfidence });
+                  // }
+                
+                  canvas.requestRenderAll();
+                });
+              }
+              if(obj.fill?.replace(/\s/g, '') === 'transparent' && obj.stroke === 'gray') {
+                obj.set({
+                  selectable: false,
+                evented: false,
+                });
+                canvas.requestRenderAll();
+              }
+            });
+
+          canvas.renderAll();
+
+          console.log("Canvas loaded yes!");
+        });
+
+        
+      
+        // Debug logging to confirm canvas rendering
+        canvas.renderAll();
+        console.log("Canvasref=", canvasRef.current[i]);
+      
+        
+      
+        // Handle canvas click event
+        const handleClick = () => {
+          setActiveCanvasIndex(i);
+          console.log(`Canvas ${i} clicked`);
+        };
+      
+        // Set up mouseover event
+        canvas.on('mouse:over', handleClick);
+      
+        newCanvases.push(canvas);
+      }
+      
+
+
+      
+
+      // const handleSubmit = () => {
+      //   console.log("here");
+      //   fetch('http://127.0.0.1:5000/load', {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json"
+      //     },
+      //     body: JSON.stringify({ unique:uid})
+      //   })
+      //   .then(response => response.json())
+      //   .then(data => {
+      //     setResponse(data.definition);
+      //     console.log("log is",data.definition);
+      //     console.log("response is",response);
+
+      //     for (let i = 0; i < numPages; i++) {
+      //       const canvas = new fabric.Canvas(canvasRef.current[i], {
+      //         width: A4_WIDTH,
+      //         height: A4_HEIGHT,
+      //         backgroundColor: 'white',  // Set background color to white
+      //       });
+
+      //       //var canvas = new fabric.Canvas();
+
+      //       let jsonString='{"version":"6.6.2","objects":[{"type":"Path","version":"6.6.2","originX":"left","originY":"top","left":248.201,"top":168.1871,"width":295.4208,"height":75.445,"fill":null,"stroke":"#000000","strokeWidth":5,"strokeDashArray":null,"strokeLineCap":"round","strokeDashOffset":0,"strokeLineJoin":"round","strokeUniform":false,"strokeMiterLimit":10,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"path":[["M",250.7009770182928,246.1320860043442],["Q",250.7009770182928,246.1270860043442,250.7009770182928,245.67262834676455],["Q",250.7009770182928,245.2181706891849,250.7009770182928,242.0369670861274],["Q",250.7009770182928,238.85576348306986,250.7009770182928,232.49335627695478],["Q",250.7009770182928,226.13094907083973,250.7009770182928,217.9507112344061],["Q",250.7009770182928,209.77047339797247,250.7009770182928,200.22686258879986],["Q",250.7009770182928,190.68325177962726,250.7009770182928,184.3208445735122],["Q",250.7009770182928,177.95843736739712,250.7009770182928,175.6861490794989],["Q",250.7009770182928,173.41386079160068,251.15546280209833,172.0504878188617],["Q",251.60994858590388,170.68711484612277,252.9734059373206,170.68711484612277],["Q",254.3368632887373,170.68711484612277,257.0637779915707,170.68711484612277],["Q",259.7906926944041,170.68711484612277,263.8810647486541,172.95940313402102],["Q",267.97143680290424,175.23169142191927,273.425266208571,180.68518331287504],["Q",278.87909561423777,186.1386752038308,282.9694676684878,192.0466247523662],["Q",287.05983972273793,197.9545743009016,290.2412402093769,203.86252384943703],["Q",293.42264069601583,209.77047339797247,296.1495553988492,214.3150499737689],["Q",298.87647010168257,218.85962654956538,300.2399274530993,221.13191483746363],["Q",301.603384804516,223.40420312536185,302.5123563721271,224.31311844052115],["Q",303.4213279397382,225.22203375568046,304.33029950734937,225.6764914132601],["Q",305.2392710749605,226.13094907083973,307.5116999939884,225.6764914132601],["Q",309.78412891301616,225.22203375568046,314.3289867510718,221.58637249504326],["Q",318.87384458912743,217.95071123440607,323.87318821098864,212.49721934345033],["Q",328.87253183284986,207.04372745249458,332.96290388709997,202.49915087669808],["Q",337.05327594135,197.9545743009016,340.2346764279889,194.31891304026442],["Q",343.41607691462787,190.68325177962726,344.7795342660446,188.86542114930867],["Q",346.1429916174613,187.0475905189901,347.0519631850724,187.0475905189901],["Q",347.96093475268356,187.0475905189901,348.41542053648914,187.95650583414937],["Q",348.86990632029466,188.86542114930867,350.23336367171134,191.59216709478656],["Q",351.59682102312803,194.31891304026445,352.9602783745447,197.9545743009016],["Q",354.3237357259614,201.59023556153878,357.0506504287948,206.5892697949149],["Q",359.7775651316282,211.58830402829102,363.8679371858783,216.58733826166716],["Q",367.95830924012836,221.5863724950433,376.1390533486285,226.13094907083973],["Q",384.31979745712863,230.6755256466362,399.77231410651785,233.4022715921141],["Q",415.2248307559071,236.12901753759198,480.67078362390833,227.039864385999],["L",546.1217364919096,217.94571123440608]]},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Hellode","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":166.1666,"top":336.1097,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":150.6231,"top":372.5574,"width":119.0753,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-59.53763767852891,"x2":59.53763767852891,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":315.6984,"top":366.5574,"width":50,"height":10,"fill":"green","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":12,"fontWeight":"normal","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"50%","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","type":"Text","version":"6.6.2","originX":"left","originY":"center","left":375.6984,"top":371.5574,"width":21.9961,"height":13.56,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"cropX":0,"cropY":0,"type":"Image","version":"6.6.2","originX":"left","originY":"top","left":280.6984,"top":356.5574,"width":975,"height":971,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":0,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":0.0308,"scaleY":0.0308,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"src":"http://localhost:3000/inkai.png","crossOrigin":null,"filters":[]}]}'
+
+      //       canvas.loadFromJSON(JSON.parse(jsonString), () => {
+      //         canvas.renderAll();
+      //         console.log("Canvas loaded!");
+      //       });
+          
+      //       // Canvas data as a string
+      //       //let canvas_data = '{"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green"}],"background":"rgba(0, 0, 0, 0)"}';
+          
+      //       // Parse the string into a JavaScript object
+      //       //const canvasDataObject = JSON.parse(canvas_data);
+          
+      //       // Load the canvas data and render the objects
+      //       // canvas.loadFromJSON(canvasDataObject, () => {
+      //       //   canvas.renderAll(); // Ensure the canvas is redrawn
+      //       // });
+          
+      //       // Handle canvas click event
+      //       const handleClick = () => {
+      //         setActiveCanvasIndex(i);
+      //         console.log(`Canvas ${i} clicked`);
+      //       };
+          
+      //       // Set up mouseover event
+      //       canvas.on('mouse:over', handleClick);
+          
+      //       newCanvases.push(canvas);
+      //     }
+          
+  
+
+      //   })
+      //   .catch(error => {
+      //     console.error("Error:", error);
+      //     setResponse("An Error occurred while submitting the form.");
+      //   });
+      // };
+    
+      // handleSubmit(); // Submit the data to the backend
+
+
+
     }
+    else{
+      for (let i = 0; i < numPages; i++) {
+        const canvas = new fabric.Canvas(canvasRef.current[i], {
+          width: A4_WIDTH,
+          height: A4_HEIGHT,
+          backgroundColor: null,
+        });
+        canvas.isDrawingMode = true;
+        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+        canvas.freeDrawingBrush.color = brushColor;
+        canvas.freeDrawingBrush.width = 5;
+  
+        const handleClick = () => {
+          setActiveCanvasIndex(i);
+          console.log(`Canvas ${i} clicked`);
+        };
+  
+        canvas.on('mouse:over', () => handleClick(i));
+        newCanvases.push(canvas);
+      }
+
+    }
+
+
+
+
+
+
+
     setCanvases(newCanvases);
     return () => {
       newCanvases.forEach((canvas) => {
@@ -79,13 +324,61 @@ const CanvasEditor = () => {
   }, []);
 
 
+  const [notetitle, setnotetitle] = useState("Notebook 1");
+
+
+  useEffect(() => {
+    // const averageConfidence = confidenceLevels.reduce((sum, val) => sum + val, 0) / confidenceLevels.length;
+    const averageConfidence = parseFloat(
+      ((confidenceLevels.reduce((sum, val) => sum + val, 0) / confidenceLevels.length) * 100).toFixed(2)
+    );
+    setnotetitle("Confidence: " + averageConfidence+"%");
+    console.log("set conf=",averageConfidence);
+    console.log("array is:",confidenceLevels);
+  }, [confidenceLevels]);
+  
+
+
+
     // Load saved value on mount
     useEffect(() => {
       const saved = localStorage.getItem('diagramInput');
       if (saved) setDiagramInput(saved);
     }, []);
 
-
+    async function notifyAt() {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('Please allow notifications!');
+        return;
+      }
+    
+      const registration = await navigator.serviceWorker.ready;
+      if (!registration) {
+        alert('Service worker not registered!');
+        return;
+      }
+    
+      const delayInSeconds = 5;
+      const timestamp = Date.now() + delayInSeconds * 1000;
+    
+      registration.showNotification("Take a Break!", {
+        body: "Your 25 minute study session is over",
+        icon: './logo192.png',
+        showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+      });
+    }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => {
+            console.log('Service Worker registered with scope:', reg.scope);
+          })
+          .catch(err => {
+            console.error('Service Worker registration failed:', err);
+          });
+      });
+    }
 
 
     
@@ -114,6 +407,37 @@ const CanvasEditor = () => {
 
     const saveCanvases = () => {
 
+      canvases.forEach((canvas) => {
+        const objectsToRemove = [];
+
+  canvas.getObjects().forEach((obj) => {
+    if (obj.type === 'image' && obj.getSrc) {
+      const src = obj.getSrc();
+
+      // Check for local-only sources
+      const isLocalImage =
+        src.startsWith('data:') ||
+        src.startsWith('blob:') ||
+        src.includes('localhost') ||
+        src.includes('inkquizly.onrender.com');
+
+      if (isLocalImage) {
+        objectsToRemove.push(obj);
+      }
+    }
+    if(obj.customType==='confidence'){
+      objectsToRemove.push(obj);
+    }
+  });
+
+  // Remove all the matched local images
+  objectsToRemove.forEach((obj) => canvas.remove(obj));
+
+  // Optional: force render update
+  canvas.renderAll();
+      });
+      
+
       const indices = canvases.map((canvas, index) => index);
       const datas=canvases.map((canvas,index)=>JSON.stringify(canvas.toJSON()));
 
@@ -121,7 +445,7 @@ const CanvasEditor = () => {
       const canvasesData = canvases.map((canvas, index) => ({
         note: noteID,
         indx: index,
-        data: JSON.stringify(canvas.toJSON()),
+        data: JSON.stringify(canvas.toJSON()).replace(/'/g, '`').replace(/[\x00-\x1F\x7F]/g, '').replace(/\\\"(.*?)\\\"/g, (_, inner) => `\`${inner}\``).replace(/\\n/g, '\\\\n'),
         use:user,
     }));
 
@@ -153,11 +477,164 @@ const CanvasEditor = () => {
     
 
     canvasesData.forEach((canvasData) => {
-      console.log(canvasData);
+      console.log(canvasData.data);
+      console.log("nexttt");
+
   });
     console.log(canvasesData);
 
     };
+
+
+      const handleMCQButtonClick = () => {
+        const canvas = canvases[activeCanvasIndex];
+        if (canvas) {
+          const mcqrect=new fabric.Rect({
+            left: 100,
+            top: 100,
+            width: 500,
+            height: 300,
+            fill: 'blue',
+            stroke: 'black',
+            strokeWidth: 2,
+            selectable: false,
+          });
+          canvas.add(mcqrect);
+
+          const qtxt=new fabric.Textbox('Q.',{
+            left: mcqrect.left + 10,
+            top: mcqrect.top + 10,
+            width: mcqrect.width - 20,
+            fontSize: 16,
+            fill: 'black',
+            editable: true,
+            backgroundColor: 'transparent',
+          });
+          canvas.add(qtxt);
+
+          const ch1=new fabric.Rect({
+              left: mcqrect.left+20,
+              top: mcqrect.top + 50,
+              width: 460,
+              height: 40,
+              fill: 'grey',
+              stroke: 'black',
+              strokeWidth: 2,
+              selectable: true,
+          });
+          canvas.add(ch1);
+
+          const ch1text = new fabric.Textbox('A.',{
+            left: ch1.left + 10,
+            top: ch1.top + 10,
+            width: ch1.width - 20,
+            fontSize: 16,
+            fill: 'black',
+            editable: true,
+            backgroundColor: 'transparent',
+          });
+          canvas.add(ch1text);
+
+          const ch2=new fabric.Rect({
+            left: mcqrect.left+20,
+            top: mcqrect.top + 100,
+            width: 460,
+            height: 40,
+            fill: 'grey',
+            stroke: 'black',
+            strokeWidth: 2,
+            selectable: true,
+        });
+        canvas.add(ch2);
+        const ch2text = new fabric.Textbox('B.',{
+          left: ch2.left + 10,
+          top: ch2.top + 10,
+          width: ch2.width - 20,
+          fontSize: 16,
+          fill: 'black',
+          editable: true,
+          backgroundColor: 'transparent',
+        });
+        canvas.add(ch2text);
+
+        const ch3=new fabric.Rect({
+          left: mcqrect.left+20,
+          top: mcqrect.top + 150,
+          width: 460,
+          height: 40,
+          fill: 'grey',
+          stroke: 'black',
+          strokeWidth: 2,
+          selectable: true,
+      });
+      canvas.add(ch3);
+      const ch3text = new fabric.Textbox('C.',{
+        left: ch3.left + 10,
+        top: ch3.top + 10,
+        width: ch3.width - 20,
+        fontSize: 16,
+        fill: 'black',
+        editable: true,
+        backgroundColor: 'transparent',
+      });
+      canvas.add(ch3text);
+      canvas.renderAll();
+
+
+      const next=new fabric.Rect({
+        left: mcqrect.left+420,
+        top: mcqrect.top+ 210,
+        width: 50,
+        height: 20,
+        fill: 'grey',
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: true,
+    });
+    canvas.add(next);
+
+    const prev=new fabric.Rect({
+      left: mcqrect.left+20,
+      top: mcqrect.top+ 210,
+      width: 50,
+      height: 20,
+      fill: 'grey',
+      stroke: 'black',
+      strokeWidth: 2,
+      selectable: true,
+  });
+  canvas.add(prev);
+
+  // const handleSubmit = () => {
+  //   fetch('http://127.0.0.1:5000/getmcq', {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json"
+  //     },
+  //     body: JSON.stringify({ topic: data }) // Send data as an object with topic
+  //   })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     setResponse(data.summary);
+  //     console.log("log is",data.item1);
+  //     console.log("response is",data.item2);
+
+  //   })
+  //   .catch(error => {
+  //     console.error("Error:", error);
+  //     setResponse("An Error occurred while submitting the form.");
+  //   });
+  // };
+
+  // handleSubmit(); // Submit the data to the backend
+
+
+        } else {
+          console.log("No active canvas available to add rectangles.");
+        }
+      };
+
+      
     
 
     
@@ -208,7 +685,7 @@ const CanvasEditor = () => {
   
       handleSubmit(); // Submit the data to the backend
       
-    }, [diagramInput]);
+    }, [searchimg]);
   
     const handleDiagramClick = () => {
       setShowTextbox(true);
@@ -225,7 +702,6 @@ const CanvasEditor = () => {
       // Optionally save the input value or perform other actions here.
     };
 
-
  // Add this useEffect for the countdown timer:
   useEffect(() => {
     let timerId;
@@ -235,6 +711,35 @@ const CanvasEditor = () => {
           if (prevTime <= 1) {
             clearInterval(timerId);
             setIsTimerRunning(false);
+
+            // 🌟 Notify and reset
+            Notification.requestPermission().then(permission => {
+              console.log("requesting notif");
+              if (permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                  registration.showNotification("Take a Break! ⏰", {
+                    body: "Your 25-minute study session is over. Time to relax!",
+                    icon: './inkai-removebg-preview.png',
+                    actions: [
+                      {
+                        action: 'snooze',
+                        title: 'Take a 5 min break',
+                        icon: './inkai-removebg-preview.png',
+                      },
+                    ],
+                  });
+                });
+              } else {
+                alert("Please enable notifications to get Pomodoro alerts.");
+              }
+            });
+            
+
+            setTimeout(() => {
+              setPomodoroTime(1500);
+            }, 100);
+
+
             return 0;
           }
           return prevTime - 1;
@@ -244,6 +749,30 @@ const CanvasEditor = () => {
     return () => clearInterval(timerId);
   }, [isTimerRunning]);
 
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+            //     console.log("Notification snoozed for 5 minutes");
+        if (event.data && event.data.type === 'snooze') {
+          const delay = event.data.delay || 300000; // 5 mins default
+  
+          setTimeout(() => {
+            navigator.serviceWorker.getRegistration().then((registration) => {
+              if (registration) {
+                registration.showNotification("Snooze Over! ⏰", {
+                  body: "Your break is over, time to get back to work!",
+                  icon: './inkai-removebg-preview.png',
+                });
+              }
+            });
+          }, delay);
+        }
+      });
+    }
+  }, []);
+
+
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -251,39 +780,39 @@ const CanvasEditor = () => {
   };
 
   const handlePomodoroClick = () => {
-    const canvas = canvases[activeCanvasIndex];
+    // const canvas = canvases[activeCanvasIndex];
 
 
-    const handleSubmit = () => {
-      console.log("here");
-      fetch('https://inkquizly.onrender.com/getschedule', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ days: numDays ,confidence: conf})
-      })
-      .then(response => response.json())
-      .then(data => {
-        setResponse(data.definition);
-        console.log("log is",data.definition);
-        console.log("response is",response);
+    // const handleSubmit = () => {
+    //   console.log("here");
+    //   fetch('http://127.0.0.1:5000/getschedule', {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json"
+    //     },
+    //     body: JSON.stringify({ days: numDays ,confidence: conf})
+    //   })
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     setResponse(data.definition);
+    //     console.log("log is",data.definition);
+    //     console.log("response is",response);
 
-        setfirst(data.one);
-        setsecond(data.two);
-        setthird(data.three);
-        setfourth(data.four);
+    //     setfirst(data.one);
+    //     setsecond(data.two);
+    //     setthird(data.three);
+    //     setfourth(data.four);
   
   
-    canvas.renderAll();
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        setResponse("An Error occurred while submitting the form.");
-      });
-    };
+    // canvas.renderAll();
+    //   })
+    //   .catch(error => {
+    //     console.error("Error:", error);
+    //     setResponse("An Error occurred while submitting the form.");
+    //   });
+    // };
   
-    handleSubmit(); // Submit the data to the backend
+    // handleSubmit(); // Submit the data to the backend
 
     setShowPomodoroRect(true);
   };
@@ -386,10 +915,10 @@ const CanvasEditor = () => {
         
         
         else if (activeTool === 'text') {
-          canvas.isDrawingMode = false;
           canvas.off('mouse:down');
-                  canvas.off('mouse:move');
-                  canvas.off('mouse:up');
+            canvas.off('mouse:move');
+            canvas.off('mouse:up');
+          canvas.isDrawingMode = false;
           canvas.on('mouse:up', (e) => {
             if (!e.target) {
               const pointer = canvas.getPointer(e.e);
@@ -410,15 +939,24 @@ const CanvasEditor = () => {
           canvas.isDrawingMode = false;
           let startX, startY;
           let highlightRect = null;
+          console.log("prevstartx=",startX);
 
-          const onMouseDown = (e) => {
+          const onMouseDownsub = (e) => {
+            if (highlightRect) {
+              // Reset the previous highlightRect before creating a new one
+              console.log("there exists highlightrect so deleting");
+              canvas.remove(highlightRect);  // Remove the old rectangle
+              highlightRect = null;  // Reset the variable
+            }
             const pointer = canvas.getPointer(e.e);
             startX = pointer.x;
+            console.log("startx=",startX);
             startY = pointer.y;
+            console.log("starty=",startY);
 
             highlightRect = new fabric.Rect({
-              left: startX,
-              top: startY,
+              left: pointer.x,
+              top: pointer.y,
               width: 0,
               height: 0,
               fill: 'rgba(255, 255, 0, 0.3)',
@@ -433,49 +971,80 @@ const CanvasEditor = () => {
 
 
             });
+            console.log("Capture region sent initial:", highlightRect.left, highlightRect.top, highlightRect.width, highlightRect.height);
 
             canvas.add(highlightRect);
           };
 
-          const onMouseMove = (e) => {
+          const onMouseMovesub = (e) => {
             if (!highlightRect) return;
-
+          
             const pointer = canvas.getPointer(e.e);
-            const width = pointer.x - startX;
-            const height = pointer.y - startY;
-
+            let width = pointer.x - startX;
+            let height = pointer.y - startY;
+          
+            console.log("width:", width);
+            console.log("height:", height);
+            console.log("pointer:", pointer.x, pointer.y);
+            console.log("startx:", startX, startY);
+          
+            // Update the rectangle's dimensions and position based on pointer movement
             highlightRect.set({
-              width: Math.abs(width),
-              height: Math.abs(height),
-              left: width < 0 ? pointer.x : startX,
-              top: height < 0 ? pointer.y : startY,
+              width: Math.abs(width),  // Always use positive width
+              height: Math.abs(height), // Always use positive height
+              left: (width < 0) ? pointer.x : startX,  // If width is negative, adjust left
+              top: (height < 0) ? pointer.y : startY, // If height is negative, adjust top
+              selectable: true,
+              evented: true,
             });
-
+            canvas.renderAll();
+          
+            console.log("Capture region sent:", highlightRect.left, highlightRect.top, highlightRect.width, highlightRect.height);
+            console.log("highlight:", highlightRect);
+          
+            // Final render to update the canvas with the latest changes
             canvas.renderAll();
           };
+          
+          const onMouseUpsub = () => {
+            if (!highlightRect) return;
+          
+            // Ensure the latest properties are up-to-date before capturing
+            const rect = highlightRect.getBoundingRect(true);
+            console.log("Capture region sent rn:", highlightRect.left, highlightRect.top, highlightRect.width, highlightRect.height);
+            console.log("Capture region sent rn after:", rect.left, rect.top, rect.width, rect.height);
 
-          const onMouseUp = () => {
+            console.log("highlight:", highlightRect);
+          
+            // Capture the highlighted region
             captureHighlightedRegion(highlightRect);
-            console.log("logged");
+            console.log("sub logged");
+          
+            // Reset and clean up
             highlightRect = null;
-            canvas.off('mouse:down', onMouseDown);
-            canvas.off('mouse:move', onMouseMove);
-            canvas.off('mouse:up', onMouseUp);
+            canvas.off('mouse:down', onMouseDownsub);
+            canvas.off('mouse:move', onMouseMovesub);
+            canvas.off('mouse:up', onMouseUpsub);
           };
+          
 
-          canvas.on('mouse:down', onMouseDown);
-          canvas.on('mouse:move', onMouseMove);
-          canvas.on('mouse:up', onMouseUp);
+          canvas.on('mouse:down', onMouseDownsub);
+          canvas.on('mouse:move', onMouseMovesub);
+          canvas.on('mouse:up', onMouseUpsub);
         } else if (activeTool === 'aihl') {
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
           let startX, startY;
           let highlightRect = null;
+          console.log("prevstartx=",startX);
 
           const onMouseDown = (e) => {
             const pointer = canvas.getPointer(e.e);
             startX = pointer.x;
+            console.log("startx=",startX);
             startY = pointer.y;
+            console.log("starty=",startY);
+
 
             highlightRect = new fabric.Rect({
               left: startX,
@@ -512,13 +1081,12 @@ const CanvasEditor = () => {
           const onMouseUp = () => {
             const finalRect = highlightRect;
             underlineHighlightedRegion(finalRect);
-            console.log("logged");
+            console.log("logged higlight");
             highlightRect = null;
             canvas.off('mouse:down', onMouseDown);
             canvas.off('mouse:move', onMouseMove);
             canvas.off('mouse:up', onMouseUp);
           };
-
           canvas.on('mouse:down', onMouseDown);
           canvas.on('mouse:move', onMouseMove);
           canvas.on('mouse:up', onMouseUp);
@@ -537,12 +1105,18 @@ const captureHighlightedRegion = (highlightRect) => {
   if (!canvas) return;
 
   // Render the canvas and get full image data
+  canvas.renderAll();
+
+  const rect = highlightRect.getBoundingRect(true);
+
+  console.log("Capture region in funct:", rect.left, rect.top, rect.width, rect.height);
+
   const fullDataURL = canvas.toDataURL({
     format: 'png',
-    left: highlightRect.left,
-    top: highlightRect.top,
-    width: highlightRect.width,
-    height: highlightRect.height,
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
     multiplier: 1,
   });
 
@@ -553,8 +1127,8 @@ const captureHighlightedRegion = (highlightRect) => {
     // Only create new ones if they don’t exist
     if (!popupRect && !popupText) {
       popupRect = new fabric.Rect({
-        left: highlightRect.left +5,
-        top: highlightRect.top - 105,
+        left: rect.left +5,
+        top: rect.top - 105,
         width: 200,
         height: 100,
         fill: 'rgba(0, 0, 0, 0.7)',
@@ -655,7 +1229,7 @@ const captureHighlightedRegion = (highlightRect) => {
 
 
 
-  // Download the image
+  // //Download the image
   // const link = document.createElement('a');
   // link.href = fullDataURL;
   // link.download = 'highlighted_region.png';
@@ -751,13 +1325,13 @@ highlightRect.on('mousedown', () => {
 
 
 
-    // Create a download link
-    const link = document.createElement('a');
-    link.href = fullDataURL;
-    link.download = 'highlighted_region.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // // Create a download link
+    // const link = document.createElement('a');
+    // link.href = fullDataURL;
+    // link.download = 'highlighted_region.png';
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
   };
 
   const openImage = async (url) => {
@@ -766,6 +1340,14 @@ highlightRect.on('mousedown', () => {
       // Wait until the image is loaded and create an image object
       const img = await fabric.FabricImage.fromURL(url);
   
+      const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    // Calculate the scaling factor to fit the image in the canvas
+    const scaleX = (canvasWidth*0.8) / img.width;
+    const scaleY = (canvasHeight*0.8) / img.height;
+    const scale = Math.min(scaleX, scaleY); // Choose the smaller scale to fit the image inside
+
       // Optionally, set position or scale the image
       img.set({
         left: 100, // Adjust as needed
@@ -773,7 +1355,11 @@ highlightRect.on('mousedown', () => {
         angle: 0,  // Optionally, you can set an initial angle
         selectable:true,
         evented:true,
+        scaleX: scale,
+      scaleY: scale,
       });
+
+      
   
       // Add the image to the canvas and render it
       canvas.add(img);
@@ -783,6 +1369,8 @@ highlightRect.on('mousedown', () => {
       console.error('Error loading image:', error);
     }
   };
+
+  const topicsindexes = useRef(0);
 
 const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
   console.log("im here yup");
@@ -802,11 +1390,16 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
     );
   });
 
+  const topicindex = topicsindexes.current;
+topicsindexes.current++; // persists across re-renders
+
   objectsInRegion.forEach(obj => {
     if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
       obj.set("fontWeight", "bold");
       obj.setCoords(); // Force update of bounding box after setting font weight
       topic += obj.text; // Collect text from text objects
+      // topicindex=topicsindexes;
+      // topicsindexes++;
     } else {
       obj.set("strokeWidth", (obj.strokeWidth || 1) * 1.5);
     }
@@ -831,13 +1424,29 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
   const sliderLeft = rect.left + rect.width + 45;
   const sliderTop = rect.top + rect.height - 5;
 
+  const sliderBorder = new fabric.Rect({
+    left: sliderLeft,
+    top: sliderTop,
+    width: sliderMaxWidth,
+    height: sliderHeight,
+    fill: 'transparent',
+    stroke: 'gray',
+    strokeWidth: 1,
+    selectable: false,
+    evented: false,
+    originX: 'left',
+    originY: 'top',
+  });
+  canvas.add(sliderBorder);
+
+
   // Slider
   const slider = new fabric.Rect({
     left: sliderLeft,
     top: sliderTop,
     width: sliderMaxWidth * confidence,
     height: sliderHeight,
-    fill: 'green',
+    fill: 'rgb(23, 225, 23)',
     hasBorders: false,
     hasControls: true,
     lockScalingY: true,
@@ -855,41 +1464,77 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
     mtr: false,
   });
 
-  // Confidence % text
-  const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
-    left: sliderLeft + slider.width + 10,
-    top: sliderTop + slider.height / 2,
-    fontSize: 12,
-    originY: 'center',
-    selectable: false,
-    evented: false,
-  });
+  const scaledWidth = slider.width * slider.scaleX;
+                  const newWidth = Math.min(100, Math.max(1, scaledWidth));
+
+                const newConfidence = newWidth / 100;
+
+                  setConfidenceLevels(prev => {
+                    const updated = [...prev];
+                    updated[topicindex] = newConfidence;
+                    return updated;
+                  });
+
+  // // Confidence % text
+  // const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
+  //   left: sliderLeft + slider.width + 10,
+  //   top: sliderTop + slider.height / 2,
+  //   fontSize: 12,
+  //   originY: 'center',
+  //   selectable: false,
+  //   evented: false,
+  //   customType: 'confidence',
+  // });
 
   // Scaling behavior
+  // slider.on('scaling', function () {
+  //   const scaledWidth = slider.width * slider.scaleX;
+
+  //   const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
+  //   slider.set({
+  //     scaleX: 1,
+  //     width: newWidth,
+  //     left: sliderLeft // lock left position
+  //   });
+
+  //   const newConfidence = newWidth / sliderMaxWidth;
+  //   confidenceText.set({
+  //     text: `${Math.round(newConfidence * 100)}%`,
+  //     left: slider.left + newWidth + 10
+  //   });
+
+  //   // Store confidence for the current topic
+  //   const existing = confidenceLevels.find(entry => entry.topic === topic);
+  //   if (existing) {
+  //     existing.confidence = newConfidence;
+  //   } else {
+  //     confidenceLevels.push({ topic, confidence: newConfidence });
+  //   }
+
+  //   canvas.requestRenderAll();
+  // });
+
   slider.on('scaling', function () {
     const scaledWidth = slider.width * slider.scaleX;
-
     const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
+    
     slider.set({
       scaleX: 1,
       width: newWidth,
       left: sliderLeft // lock left position
     });
-
+  
     const newConfidence = newWidth / sliderMaxWidth;
-    confidenceText.set({
-      text: `${Math.round(newConfidence * 100)}%`,
-      left: slider.left + newWidth + 10
+  
+
+    //confidenceLevels[topicindex] = newConfidence;
+    setConfidenceLevels(prev => {
+      const updated = [...prev];
+      updated[topicindex] = newConfidence;
+      console.log("index=",topicindex);
+      return updated;
     });
-
-    // Store confidence for the current topic
-    const existing = confidenceLevels.find(entry => entry.topic === topic);
-    if (existing) {
-      existing.confidence = newConfidence;
-    } else {
-      confidenceLevels.push({ topic, confidence: newConfidence });
-    }
-
+  
     canvas.requestRenderAll();
   });
 
@@ -930,10 +1575,11 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
       top: rect.top + rect.height + 10,
       width: 600,
       fontSize: 20,
+      selectable:false,
     });
     canvas.add(summ);
     canvas.renderAll();
-    underline.set({ stroke: 'red' });
+    underline.set({ stroke:'rgb(40, 2, 143)' });
 
     canvas.renderAll();
       })
@@ -947,7 +1593,7 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
 
   });
 
-  canvas.add(slider, confidenceText, img);
+  canvas.add(slider, img);
   canvas.renderAll();
 
   console.log("Confidences:", confidenceLevels);
@@ -1015,9 +1661,8 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
 
 
   return (
-    <div 
+    <div
       style={{
-        marginTop: '100px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -1027,7 +1672,7 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
         padding: '50px',
       }}
     >
-      <h2>Canvas</h2>
+      <h2>{noteID}</h2>
       {Array.from({ length: numPages }, (_, index) => (
         <div
           key={index}
@@ -1041,10 +1686,11 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
             maxWidth: '794px',
             border: '1px solid #ddd',
             backgroundColor: '#fff',
-            transform: `scale(${1.1})`,
+            //transform: `scale(${1.1})`,
+            // canvas.setZoom(1.1); // Use this to zoom in
             transformOrigin: 'center center',
             position: 'relative',
-            marginBottom: '100px',
+            marginBottom: '5px',
           }}
         >
           <canvas
@@ -1078,6 +1724,9 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
           }}
         >
           {/* Tool buttons (pen, marker, color pallet, etc.) */}
+          <div style={{ marginBottom: '8px', fontSize: '16px', fontWeight: 'bold' }}>
+  {notetitle}
+</div>
           <button
             onClick={() => setActiveTool('pen')}
             style={{
@@ -1294,6 +1943,33 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
               style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
             />
           </button>
+          <button
+            onClick={() => setActiveTool('point')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              transition: 'transform 0.2s',
+              transform: activeTool === 'point' ? 'scale(1.8)' : 'scale(1)',
+            }}
+            onMouseEnter={(e) => {
+              if (activeTool !== 'point') {
+                e.currentTarget.style.transform = 'scale(1.8)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTool !== 'point') {
+                e.currentTarget.style.transform = 'scale(1)';
+              }
+            }}
+          >
+            <img
+              src="https://cdn3.iconfinder.com/data/icons/hand-gesture/512/cursor_press_button_index_finger_pointer_point_click_touch_gesture-512.png"
+              alt="Pointer Tool"
+              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+            />
+          </button>
         </div>
       </div>
 
@@ -1333,7 +2009,8 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
       <div
         style={{
           position: 'fixed',
-          left: `${floatingIconPosition.x}px`,
+          //left: `${floatingIconPosition.x}px`,
+          left: `${Math.max(floatingIconPosition.x, (window.innerWidth / 2)-430)}px`, // Ensure it stays in the right half
           top: `${floatingIconPosition.y}px`,
           backgroundColor: '#98a1f5',
           color: '#fff',
@@ -1364,20 +2041,25 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
 {/* Fixed-position Pomodoro Rectangle with Timer and 6 inner rectangles */}
 {showPomodoroRect && (
         <div
-          style={{
-            position: 'fixed',
-            left: '10px', // Positioned to the left side
-            top: '200px',
-            width: '270px',
-            height: '600px',
-            backgroundColor: 'lightblue',
-            border: '2px solid black',
-            zIndex: 20,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            padding: '10px'
-          }}
+        style={{
+          position: 'fixed',
+          left: '10px',
+          top: '90px',
+          width: '270px',
+          height: '600px',
+          backgroundColor: 'rgb(4, 8, 75)',
+          border: '2px solid black',
+          borderRadius: '20px',           // <-- Curved edges
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)', // <-- Soft shadow
+          zIndex: 20,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '10px',
+          color: 'white',                 // <-- Better contrast text
+          fontFamily: 'Arial, sans-serif', // <-- Cleaner font
+          transition: 'all 0.3s ease'     // <-- Smooth visual feel
+        }}
         >
           {/* Timer display */}
           <div style={{ fontSize: '48px', fontWeight: 'bold', textAlign: 'center' }}>
@@ -1408,28 +2090,48 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
             Start
           </button>
             {/* Session 1 */}
-  <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-    Study Session 1
-  </div>
-  <div style={boxStyle}>{first}</div>
+            <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
+        Study Session 1
+      </div>
+      <textarea
+        style={boxStyle}
+        value={first}
+        onChange={(e) => setfirst(e.target.value)} // Update state on typing
+        placeholder="Type goals for your 1st 25 min study session..."
+      />
 
   {/* Session 2 */}
   <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-    Study Session 2
-  </div>
-  <div style={boxStyle}>{second}</div>
+        Study Session 2
+      </div>
+      <textarea
+        style={boxStyle}
+        value={second}
+        onChange={(e) => setsecond(e.target.value)} // Update state on typing
+        placeholder="Type goals for your 2nd 25 min study session..."
+      />
 
   {/* Session 3 */}
   <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-    Study Session 3
-  </div>
-  <div style={boxStyle}>{third}</div>
+        Study Session 3
+      </div>
+      <textarea
+        style={boxStyle}
+        value={third}
+        onChange={(e) => setthird(e.target.value)} // Update state on typing
+        placeholder="Type goals for your 3rd 25 min study session..."
+      />
 
   {/* Session 4 */}
   <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-    Study Session 4
-  </div>
-  <div style={boxStyle}>{fourth}</div>
+        Study Session 4
+      </div>
+      <textarea
+        style={boxStyle}
+        value={fourth}
+        onChange={(e) => setfourth(e.target.value)} // Update state on typing
+        placeholder="Type goals for your last 25 min study session..."
+      />
           </div>
         </div>
       )}
@@ -1442,7 +2144,8 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
         <div
           style={{
             position: 'fixed',
-            left: `${floatingIconPosition.x}px`,
+            //left: `${floatingIconPosition.x}px`,
+            left: `${Math.max(floatingIconPosition.x, (window.innerWidth / 2)-400)}px`, // Ensure it stays in the right half
             top: `${floatingIconPosition.y + 70}px`,
             transform: 'translate(-50%, 0)', // Center horizontally
             backgroundColor: '#fff',
@@ -1472,6 +2175,12 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleEnterKey();
+                  if(searchimg==true){
+                    setsearch(false);
+                  }
+                  else{
+                    setsearch(true);
+                  }
                 }
               }}
               onBlur={handleTextboxBlur}
@@ -1512,7 +2221,7 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
               >
                 <img
                   src={img1}
-                  alt="MCQ Button"
+                  alt="Image 1"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
               </button>
@@ -1531,7 +2240,7 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
               >
                 <img
                   src={img2}
-                  alt="MCQ Button"
+                  alt="Image 2"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
               </button>
@@ -1550,7 +2259,7 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
               >
                 <img
                   src={img3}
-                  alt="MCQ Button"
+                  alt="Image 3"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
               </button>
@@ -1569,20 +2278,20 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
               >
                 <img
                   src={img4}
-                  alt="MCQ Button"
+                  alt="Image 4"
                   style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
                 />
               </button>
             </div>
           )}
 
-          <button onClick={() => console.log("for future implement of mcq")}>
+          {/* <button onClick={ handleMCQButtonClick}>
             <img
               src="/mcq_image.png"
               alt="MCQ Button"
               style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
             />
-          </button>
+          </button> */}
 
           <button onClick={handlePomodoroClick} style={{ marginBottom: '10px' }}>
             <img
@@ -1599,3 +2308,6 @@ const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
 };
 
 export default CanvasEditor;
+
+
+

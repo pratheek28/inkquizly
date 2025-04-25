@@ -11,8 +11,9 @@ import numpy as np
 import easyocr
 from PIL import Image
 from PIL import UnidentifiedImageError
-import google.generativeai as genai
+#import google.generativeai as genai
 from googleapiclient.discovery import build
+from google import genai
 import re
 import os
 
@@ -170,8 +171,12 @@ current_cx = CX_VAR
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 
-genai.configure(api_key=GOOGLE_API_KEY)
-client = genai.GenerativeModel("gemini-2.0-flash")
+#genai.configure(api_key=GOOGLE_API_KEY)
+client = genai.Client(api_key=GOOGLE_API_KEY) #IMPORTANT FIX
+#client = genai.GenerativeModel("gemini-2.0-flash")
+#client = genai.Client()
+
+
 # client = genai.Client(api_key=GOOGLE_API_KEY)
 print("Connected!")
 
@@ -228,7 +233,7 @@ def summarize_AI_written():
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=f"Can you generate a response to the following phrase that is max 2 sentences to define the following: {ocr_from_base64(data['img'])}, WITHIN this topic: {data['topic']}"
+    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
     )
     
     # Return the AI-generated summary as a JSON response

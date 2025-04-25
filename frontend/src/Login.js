@@ -24,8 +24,11 @@ function Login() {
         }
     };
 
+    const [loading, setLoading] = useState(false);
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        setLoading(true);
         fetch('https://inkquizly.onrender.com/getLoginDetails', {
             method: "POST",
             headers: {
@@ -43,6 +46,9 @@ function Login() {
         .catch(error => {
             console.error("Error:", error);
             setResponse("An Error occurred while submitting the form.");
+        })
+        .finally(() => {
+            setLoading(false);
         });
     };
  
@@ -73,7 +79,9 @@ function Login() {
                 </div>
 
                 <div>
-                    <button type="submit">Log In!</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Incredible things take time, please wait..." : "Login"}
+                </button>
                 </div>
                 {response && <p style= {{ marginTop: "1rem", color: response.includes("Error") ? "red" : "green"}}>{response}</p>}
             </form>

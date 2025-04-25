@@ -5,6 +5,6 @@ astrapy
 numpy
 easyocr
 Pillow
-google-generativeai
 google-api-python-client
 gunicorn
+google
