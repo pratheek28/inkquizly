@@ -1,63 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const PWAInstallPrompt = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showPrompt, setShowPrompt] = useState(false);
 
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event) => {
-      event.preventDefault(); // Prevent default browser install prompt
-      setDeferredPrompt(event); // Save event for later use
-      setShowPopup(true); // Show popup when install is available
-    };
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault(); // Prevent automatic prompt
+      setDeferredPrompt(event);
+      setShowPrompt(true); // Show your custom UI
+    };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Register service worker on load
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/service-worker.js')
-          .then((registration) => {
-            console.log('Service Worker registered with scope:', registration.scope);
-          })
-          .catch((error) => {
-            console.log('Service Worker registration failed:', error);
-          });
-      });
-    }
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        } else {
+          console.log('User dismissed the A2HS prompt');
+        }
+        setDeferredPrompt(null);
+        setShowPrompt(false);
+      });
+    }
+  };
 
-  const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt(); // Show native install prompt
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the PWA install');
-        } else {
-          console.log('User dismissed the PWA install');
-        }
-        setDeferredPrompt(null);
-        setShowPopup(false);
-      });
-    }
-  };
-
-  return (
-    <>
-      {showPopup && (
-        <div className="install-popup">
-          <p>Install this app for a better experience!</p>
-          <button onClick={handleInstallClick}>Install</button>
-          <button onClick={() => setShowPopup(false)}>Close</button>
-        </div>
-      )}
-    </>
-  );
+  return (
+    showPrompt && (
+      <div className="fixed bottom-5 right-5 bg-white border rounded-xl shadow-lg p-4 z-50">
+        <p className="text-gray-800 font-semibold mb-2">
+          Install InkQuizly on your home screen?
+        </p>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={handleInstallClick}
+            className="bg-black text-white px-3 py-1 rounded hover:bg-gray-800"
+          >
+            Install
+          </button>
+          <button
+            onClick={() => setShowPrompt(false)}
+            className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    )
+  );
 };
 
 export default PWAInstallPrompt;
