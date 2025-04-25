@@ -24,7 +24,7 @@ function App() {
                 <Route path="/AccountDashboard" element={<AccountDashboard />} />
                 <Route path="/CanvasEditor" element={<CanvasEditor />} />
             </Routes>
-            <NavigationBar onInstallClick={() => pwaRef.current.handleInstallClick()} />
+            // <NavigationBar onInstallClick={() => pwaRef.current.handleInstallClick()} />
         </Router>
         </div>
     </div>
