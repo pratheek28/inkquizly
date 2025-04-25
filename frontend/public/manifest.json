@@ -8,7 +8,7 @@
       "type": "image/png"
     },
     {
-      "src": "frontend/public/miniLogo.png",
+      "src": "frontend/miniLogo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
