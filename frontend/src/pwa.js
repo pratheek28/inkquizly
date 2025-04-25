@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+// PWAInstallPrompt.js
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 
-const PWAInstallPrompt = () => {
+const PWAInstallPrompt = forwardRef((props, ref) => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event) => {
-      event.preventDefault(); // Prevent automatic prompt
+      event.preventDefault(); // Prevent the default browser install prompt
       setDeferredPrompt(event);
-      setShowPrompt(true); // Show your custom UI
+      setShowPrompt(true); // Show your custom install prompt
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -33,29 +34,12 @@ const PWAInstallPrompt = () => {
     }
   };
 
-  return (
-    showPrompt && (
-      <div className="fixed bottom-5 right-5 bg-white border rounded-xl shadow-lg p-4 z-50">
-        <p className="text-gray-800 font-semibold mb-2">
-          Install InkQuizly on your home screen?
-        </p>
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={handleInstallClick}
-            className="bg-black text-white px-3 py-1 rounded hover:bg-gray-800"
-          >
-            Install
-          </button>
-          <button
-            onClick={() => setShowPrompt(false)}
-            className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
-          >
-            Dismiss
-          </button>
-        </div>
-      </div>
-    )
-  );
-};
+  // Expose the handleInstallClick function to parent component
+  useImperativeHandle(ref, () => ({
+    handleInstallClick,
+  }));
+
+  return null; // You may choose to render something here for the user prompt
+});
 
 export default PWAInstallPrompt;
