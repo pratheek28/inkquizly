@@ -4,8 +4,11 @@ body {
   align-items: center;     /* vertical centering */
   height: 100vh;           /* full height of the viewport */
   margin: 0;
+  background-attachment: fixed;
   background: linear-gradient(135deg, #09080b, #1a0430);
   background-image: url("/public/images/bg.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
