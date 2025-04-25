@@ -7,4 +7,4 @@ easyocr
 Pillow
 google-api-python-client
 gunicorn
-google
+google-genai

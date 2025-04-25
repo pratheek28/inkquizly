@@ -1666,10 +1666,12 @@ topicsindexes.current++; // persists across re-renders
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
         minHeight: '100vh',
-        backgroundColor: '#f5f5f5',
+        color:'#fff',
         padding: '50px',
+        justifyContent: 'flex-start', /* Change this to align content from the top */
+        marginTop: '10900px',  /* Add this to push the content down */
+
       }}
     >
       <h2>{noteID}</h2>
