@@ -38,7 +38,7 @@ const PWAInstallPrompt = () => {
       {showPopup && (
         <div className="install-popup">
           <p>Install this app for a better experience!</p>
-          <button onClick={handleInstallClick}>Install</button>
+          <button onClick={handleInstallClick}>Install App!</button>
           <button onClick={() => setShowPopup(false)}>Close</button>
         </div>
       )}
