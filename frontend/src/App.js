@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+// App.js
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import LandingPage from "./LandingPage";
 import NavigationBar from "./NavigationBar";
 import Login from "./Login";
@@ -10,10 +11,9 @@ import PWAInstallPrompt from "./pwa";
 
 function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const pwaRef = useRef();
 
+  // Handle the beforeinstallprompt event for deferred installation
   useEffect(() => {
-    // Handle the beforeinstallprompt event for deferred installation
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault(); // Prevent default prompt
       setDeferredPrompt(event); // Save event for later
@@ -40,7 +40,7 @@ function App() {
     <div>
       <Router>
         <div>
-          <PWAInstallPrompt handleInstallClick={handleInstallClick} />
+          <NavigationBar onInstallClick={handleInstallClick} />
         </div>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -49,8 +49,6 @@ function App() {
           <Route path="/AccountDashboard" element={<AccountDashboard />} />
           <Route path="/CanvasEditor" element={<CanvasEditor />} />
         </Routes>
-        {/* Removed NavigationBar reference with pwaRef */}
-        <NavigationBar />
       </Router>
     </div>
   );
