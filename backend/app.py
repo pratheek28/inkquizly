@@ -475,7 +475,7 @@ def CanvasSave():
     except Exception as e:
         # Return an error message if something goes wrong
         print(f"Error occurred: {str(e)}")
-        return jsonify({"message": "Error occurred during save operation"}), 500
+        return jsonify({"message": "So an Error occurred during save operation", "error": str(e)}), 500
 
 
 @app.route("/load", methods=['POST'])
@@ -504,7 +504,7 @@ def CanvasLoad():
 
     except Exception as e:
         print(f"Error occurred: {str(e)}")
-        return jsonify({"message": "Error occurred during load operation"}), 500
+        return jsonify({"message": "So an Error occurred during load operation", "error": str(e)}), 500
 
 
 
