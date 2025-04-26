@@ -80,7 +80,7 @@ def getSignUpDetails():
                 "id": id,
                 "name": (firstName + " " + lastName),
                 "email": email,
-                "password": encrypted_password
+                "password": encrypted_password,
             }
             table.insert_one(user_data)
             response = {
@@ -124,9 +124,10 @@ def getLoginDetails():
             return jsonify({
             "message": "Success: Logged in!",
             "user": {
-                "name": "Test",
-                "password": "Test2",
-                "email": "Test3"
+                "name": existingUser[0]["name"],
+                "password": existingUser[0]["password"],
+                "email": existingUser[0]["email"],
+                "id":existingUser[0]["id"],
             }
         })
         else:
@@ -142,12 +143,71 @@ def getLoginDetails():
     
 
 
+# @app.route("/getNote", methods=['POST', 'OPTIONS'])
+# def getNote():
+#     if request.method == "OPTIONS":
+#         return jsonify({}), 204
+#     data = request.get_json()
+#     #FROM DATA GET NOTE DATA FROM DATABASE AND RETURN IT WITH JSNOFINY
+
 @app.route("/getNote", methods=['POST', 'OPTIONS'])
 def getNote():
     if request.method == "OPTIONS":
         return jsonify({}), 204
-    data = request.get_json()
-    #FROM DATA GET NOTE DATA FROM DATABASE AND RETURN IT WITH JSNOFINY
+    
+    try:
+        # Get the JSON data from the request body
+        data = request.get_json()
+
+        # Assuming 'UID' is passed in the request data
+        user_uid = data.get('user')  # Get the UID from the request data
+
+        if not user_uid:
+            return jsonify({"message": "UID not provided"}), 400
+
+        # Connect to the database
+        client = DataAPIClient(DATA_API_CLIENT) #IMPORTANT MANY
+        db = client.get_database_by_api_endpoint(API_KEY)
+        table = db.get_table("notes")
+
+        # Fetch records based on UID
+        notes_data = table.find({"uid": user_uid})
+
+        # # Create a set to store unique note names
+        # unique_note_names = set()
+
+        # # Iterate through the records and add each unique 'note' to the set
+        # for note in notes_data:
+        #     note_name = note.get("note")  # Extract the note name
+        #     if note_name:  # Ensure that there is a note_name value
+        #         unique_note_names.add(note_name)  # Add it to the set (duplicates are automatically ignored)
+
+                # Create dictionaries to store unique note names and corresponding confidence values
+        note_confidence_dict = {}
+
+        # Iterate through the records and add each unique 'note' to the dictionary
+        for note in notes_data:
+            note_name = note.get("note")  # Extract the note name
+            confidence = note.get("confidence")  # Extract the confidence value
+
+            if note_name:  # Ensure that there is a note_name value
+                # If the note is not already in the dictionary, add it
+                if note_name not in note_confidence_dict:
+                    note_confidence_dict[note_name] = confidence
+
+        # Extract the unique note names and corresponding confidence values
+        unique_note_names = list(note_confidence_dict.keys())
+        unique_confidences = list(note_confidence_dict.values())
+
+        # Convert the set to a list and return as JSON
+        # return jsonify({"note_names": list(unique_note_names)}), 200
+        return jsonify({"note_names": unique_note_names, "confidences": unique_confidences}), 200
+
+
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+        return jsonify({"message": "Error occurred while fetching notes"}), 500
+
 
 
 @app.after_request
@@ -172,7 +232,12 @@ current_cx = CX_VAR
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 
 #genai.configure(api_key=GOOGLE_API_KEY)
+
 client = genai.Client(api_key=GOOGLE_API_KEY) #IMPORTANT FIX
+
+#client = genai.Client(api_key="AIzaSyBJw3b2gdm1iaRUScBMnA5bHCPE209lM2U")
+
+
 #client = genai.GenerativeModel("gemini-2.0-flash")
 #client = genai.Client()
 
@@ -337,27 +402,110 @@ def AI_study_schedule():
 
 
 
+# @app.route("/save", methods=['POST'])
+# def CanvasSave():
+#     res=request.get_json()
+
+#     #client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
+#     client = DataAPIClient("AstraCS:SJhgQhsNgggKxufCHncCCXoe:4afbec1c9ea56f024aa1ce249855ef1b7001817640de6832e2883308ced7d6d0")
+#     db = client.get_database_by_api_endpoint(
+#     #API_KEY #ENV VAR #Important 2 things
+#     "https://d48eb3bc-cf69-4655-baca-a381b7ee3136-us-east-2.apps.astra.datastax.com"
+#     )
+#     print("Connected!")
+#     table=db.get_table("notes")
+
+
+#     for index, values in zip(res['index'], res['dat']):
+#         canvas_data={
+#             "id":uuid.uuid4(),
+#             "data":values,
+#             "indx":index,
+#             "note":res['note'],
+#             "uid":uuid.uuid4(),
+#         }
+#         table.insert_one(canvas_data)
+
+#     return jsonify({"message": "SUCCESS"})  # ✅ Add this
+
+
 @app.route("/save", methods=['POST'])
 def CanvasSave():
-    res=request.get_json()
+    try:
+        # Get the JSON data from the request body
+        res = request.get_json()
 
-    client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
-    db = client.get_database_by_api_endpoint(
-    API_KEY #ENV VAR
-    )
-    print("Connected!")
-    table=db.get_table("notes")
+        # Connect to the database
+        client = DataAPIClient(DATA_API_CLIENT)
+        db = client.get_database_by_api_endpoint(API_KEY)
+        print("Connected!") #Important change 4 times
+        table = db.get_table("notes")
+
+        note_name = res['note']  # The note name used for checking
+        key=res['user']
+        print("key is:",key)
+        conf=res['conf']
+
+        # Step 1: Process each index individually
+        for index, values in zip(res['index'], res['dat']):
+            # Query for the record by 'note' and 'indx' (only fetch the matching record)
+            existing_note = table.find_one({"note": note_name, "indx": index})
+
+            if existing_note:
+                # Step 2: If the note exists, update it with the new data
+                update_query = {"$set": {"data": values,"confidence":conf}}
+                table.update_one({"id": existing_note['id']}, update_query)
+                print(f"Updated existing note with ID: {existing_note['id']}, page index: {index}")
+            else:
+                # Step 3: If the note doesn't exist, insert a new record
+                canvas_data = {
+                    "id": str(uuid.uuid4()),  # Generate a new UUID for the new note
+                    "data": values,
+                    "indx": index,
+                    "note": note_name,
+                    "uid": key,  # Generate a UID for the new note
+                    "confidence":conf,
+                }
+                table.insert_one(canvas_data)
+                print(f"Inserted new note with name: {note_name}, page index: {index}")
+
+        # Return a success message
+        return jsonify({"message": "SUCCESS"}), 200
+
+    except Exception as e:
+        # Return an error message if something goes wrong
+        print(f"Error occurred: {str(e)}")
+        return jsonify({"message": "Error occurred during save operation"}), 500
 
 
-    for index, values in zip(res['index'], res['dat']):
-        canvas_data={
-            "id":uuid.uuid4(),
-            "data":values,
-            "indx":index,
-            "note":res['note'],
-            "uid":uuid.uuid4(),
-        }
-        table.insert_one(canvas_data)
+@app.route("/load", methods=['POST'])
+def CanvasLoad():
+    try:
+        # Get the JSON data from the request body
+        res = request.get_json()
+        note_name = res['note']  # The note name to load
+
+        # Connect to the database
+        client = DataAPIClient(DATA_API_CLIENT)
+        db = client.get_database_by_api_endpoint(API_KEY)
+        print("Connected!")
+        table = db.get_table("notes")
+
+        # Find all rows with the given note name
+        matching_rows = table.find({"note": note_name})
+
+        # Sort rows by the index field
+        sorted_rows = sorted(matching_rows, key=lambda row: row['indx'])
+
+        # Collect only the 'data' fields into a list
+        ordered_data = [row['data'] for row in sorted_rows]
+
+        return jsonify({"message": "SUCCESS", "data": ordered_data}), 200
+
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+        return jsonify({"message": "Error occurred during load operation"}), 500
+
 
 
 

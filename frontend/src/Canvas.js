@@ -4,6 +4,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const CanvasEditor = () => {
   const [canvases, setCanvases] = useState([]); // Single canvas
@@ -11,28 +12,36 @@ const CanvasEditor = () => {
   const [activeTool, setActiveTool] = useState(''); // Track the active tool
   const [activeCanvasIndex, setActiveCanvasIndex] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-    const [response, setResponse] = useState(null);
-    
+  const [response, setResponse] = useState(null);
+
   // New state for floating icon options
   const [showFloatingOptions, setShowFloatingOptions] = useState(false);
-    const [showPomodoroRect, setShowPomodoroRect] = useState(false); // New state for Pomodoro rectangle
+  const [showPomodoroRect, setShowPomodoroRect] = useState(false); // New state for Pomodoro rectangle
   const canvasRef = useRef([]); // Ref for the canvas element
-    //let confidenceLevels = []; // Make sure this is accessible in your scope
-    const [confidenceLevels, setConfidenceLevels] = useState([]);
-      const [showTextbox, setShowTextbox] = useState(false);
-      const [diagramInput, setDiagramInput] = useState('');
-      const [showGrid, setShowGrid] = useState(false);
-      const [pomodoroTime, setPomodoroTime] = useState(2); // 25 minutes in seconds
-      const [isTimerRunning, setIsTimerRunning] = useState(false);
-      const [searchimg,setsearch]=useState(false);
+  //let confidenceLevels = []; // Make sure this is accessible in your scope
+  const [confidenceLevels, setConfidenceLevels] = useState([]);
+  const [showTextbox, setShowTextbox] = useState(false);
+  const [diagramInput, setDiagramInput] = useState('');
+  const [showGrid, setShowGrid] = useState(false);
+  const [pomodoroTime, setPomodoroTime] = useState(2); // 25 minutes in seconds
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [searchimg, setsearch] = useState(false);
 
-      const [first, setfirst] = useState(''); //setting for study plan
-      const [second, setsecond] = useState('');
-      const [third, setthird] = useState('');
-      const [fourth, setfourth] = useState('');
+  const [first, setfirst] = useState(''); //setting for study plan
+  const [second, setsecond] = useState('');
+  const [third, setthird] = useState('');
+  const [fourth, setfourth] = useState('');
 
-  const noteID= "note-1"
-  const user="1"
+  const location = useLocation();
+  const [isNew, setIsNew] = useState(location.state?.isNew);
+
+
+  //const noteID= "note-1"
+  const noteID = location.state?.noteID; // Get the notebook name from state
+  const key = location.state?.key; // Get the notebook name from state
+  console.log('noteID=', noteID);
+
+  const user = '1';
 
   // State for floating icon (draggable)
   const [floatingIconPosition, setFloatingIconPosition] = useState({
@@ -46,19 +55,183 @@ const CanvasEditor = () => {
   const A4_HEIGHT = 1123;
   const numPages = 10;
 
-  const numDays=2;
-  const conf={
-    "Bubble Sort": 0.85,
-    "Binary Search Trees": 0.90,
-    "B Trees": 0.78,
-    "Dijkstra's Method": 0.34,
-  };
+  //setIsNew(location.state?.isNew);
 
   useEffect(() => {
     const newCanvases = [];
 
-    if(true){
+    if (true) {
+      const handleSubmitload = () => {
+        console.log('here loading');
+        fetch('https://inkquizly.onrender.com/load', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ note: noteID }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            data.data.forEach((canvasData, index) => {
+              console.log(`Canvas index ${index}:`, canvasData);
 
+              // Example: parse if needed
+              const parsed = JSON.parse(canvasData);
+              console.log('Parsed canvas:', parsed);
+              const canvasElement = canvasRef.current[index];
+
+        // Check if the canvas element is valid and exists
+        if (!canvasElement) {
+          console.error(`Canvas element at index ${index} is not available!`);
+        }
+        if (canvasElement?.fabric) {
+          canvasElement.fabric.dispose();
+        }
+
+        const canvas = new fabric.Canvas(canvasElement, {
+          width: A4_WIDTH,
+          height: A4_HEIGHT,
+          backgroundColor: null, // Set background color to white
+        });
+
+
+        let jsonString = canvasData;
+        console.log('is canvas valid?! ', canvas);
+
+        // Load JSON content first and then add your custom objects
+        canvas.clear();
+        canvas.loadFromJSON(JSON.parse(jsonString)).then(() => {
+          console.log('Callback triggered!'); // this will definitely run after all deserialization is complete
+          canvas.renderAll();
+
+          const objects = canvas.getObjects();
+          console.log('Objects loaded:', objects.length);
+
+          canvas.isDrawingMode = true;
+        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+        canvas.freeDrawingBrush.color = brushColor;
+        canvas.freeDrawingBrush.width = 5;
+
+        const handleClick = () => {
+          setActiveCanvasIndex(index);
+          console.log(`Canvas ${index} clicked`);
+        };
+
+        canvas.on('mouse:over', () => handleClick(index));
+
+          objects.forEach((obj) => {
+            console.log('object:', obj);
+            if (obj.fill?.replace(/\s/g, '') === 'rgb(23,225,23)') {
+              console.log('object found');
+              obj.set({
+                hasBorders: false,
+                hasControls: true,
+                lockScalingY: true,
+                lockMovementY: true,
+                lockMovementX: true,
+                lockRotation: true,
+                originX: 'left',
+                originY: 'top',
+              });
+              obj.setControlsVisibility({
+                mt: false,
+                mb: false,
+                ml: false,
+                mr: true,
+                tl: false,
+                tr: false,
+                bl: false,
+                br: false,
+                mtr: false,
+              });
+              let maxleft = obj.left;
+
+              const topicindex = topicsindexes.current;
+              topicsindexes.current++; // persists across re-renders
+
+              const scaledWidth = obj.width * obj.scaleX;
+              const newWidth = Math.min(100, Math.max(1, scaledWidth));
+
+              const newConfidence = newWidth / 100;
+
+              setConfidenceLevels((prev) => {
+                const updated = [...prev];
+                updated[topicindex] = newConfidence;
+                return updated;
+              });
+
+              obj.on('scaling', function () {
+                const scaledWidth = obj.width * obj.scaleX;
+                const newWidth = Math.min(100, Math.max(1, scaledWidth));
+
+                obj.set({
+                  scaleX: 1,
+                  width: newWidth,
+                  left: maxleft, // lock left position
+                });
+
+                const newConfidence = newWidth / 100;
+
+                setConfidenceLevels((prev) => {
+                  const updated = [...prev];
+                  updated[topicindex] = newConfidence;
+                  return updated;
+                });
+
+                // // Store confidence for the current topic
+                // const existing = confidenceLevels.find(entry => entry.topic === topic);
+                // if (existing) {
+                //   existing.confidence = newConfidence;
+                // } else {
+                //   confidenceLevels.push({ topic, confidence: newConfidence });
+                // }
+
+                canvas.requestRenderAll();
+              });
+            }
+            if (
+              obj.fill?.replace(/\s/g, '') === 'transparent' &&
+              obj.stroke === 'gray'
+            ) {
+              obj.set({
+                selectable: false,
+                evented: false,
+              });
+              canvas.requestRenderAll();
+            }
+          });
+
+          canvas.renderAll();
+
+          console.log('Canvas loaded yes!');
+        });
+
+        // Debug logging to confirm canvas rendering
+        canvas.renderAll();
+        console.log('Canvasref=', canvasRef.current[index]);
+
+        // Handle canvas click event
+        const handleClick = () => {
+          setActiveCanvasIndex(index);
+          console.log(`Canvas ${index} clicked`);
+        };
+
+        // Set up mouseover event
+        canvas.on('mouse:over', handleClick);
+
+        newCanvases.push(canvas);
+
+
+            });
+            setCanvases(newCanvases);
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            setResponse('An Error occurred while submitting the form.');
+          });
+      };
+
+      handleSubmitload(); // Submit the data to the backend
 
       // for (let i = 0; i < numPages; i++) {
       //   const canvas = new fabric.Canvas(canvasRef.current[i], {
@@ -70,152 +243,146 @@ const CanvasEditor = () => {
       //   canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
       //   canvas.freeDrawingBrush.color = brushColor;
       //   canvas.freeDrawingBrush.width = 5;
-  
+
       //   const handleClick = () => {
       //     setActiveCanvasIndex(i);
       //     console.log(`Canvas ${i} clicked`);
       //   };
-  
+
       //   canvas.on('mouse:over', () => handleClick(i));
       //   newCanvases.push(canvas);
-    
 
+      for (let i = 0; i < numPages; i++) { //HEREEEE
+        // const canvasElement = canvasRef.current[i];
 
+        // // Check if the canvas element is valid and exists
+        // if (!canvasElement) {
+        //   console.error(`Canvas element at index ${i} is not available!`);
+        //   continue;
+        // }
 
+        // const canvas = new fabric.Canvas(canvasElement, {
+        //   width: A4_WIDTH,
+        //   height: A4_HEIGHT,
+        //   backgroundColor: null, // Set background color to white
+        // });
 
-      for (let i = 0; i < numPages; i++) {
-        const canvasElement = canvasRef.current[i];
-      
-        // Check if the canvas element is valid and exists
-        if (!canvasElement) {
-          console.error(`Canvas element at index ${i} is not available!`);
-          continue;
-        }
-      
-        const canvas = new fabric.Canvas(canvasElement, {
-          width: A4_WIDTH,
-          height: A4_HEIGHT,
-          backgroundColor: null,  // Set background color to white
-        });
-      
-        let jsonString = '{"version":"6.6.2","objects":[{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Thermodynamics","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":78.9054,"top":41.6211,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":69.7246,"top":74.4332,"width":189.0661,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-94.53304303155736,"x2":94.53304303155736,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":61.2433,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Oscillations","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":132.5347,"top":299.7531,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":120.627,"top":331.6562,"width":145.4355,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-72.71772540889029,"x2":72.71772540889029,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":22.2107,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Waves","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":96.1758,"top":465.3776,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":88.813,"top":498.1896,"width":95.442,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-47.72100729958425,"x2":47.72100729958425,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0}]}';
+        // let jsonString =
+        //   '{"version":"6.6.2","objects":[{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Thermodynamics","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":78.9054,"top":41.6211,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":69.7246,"top":74.4332,"width":189.0661,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-94.53304303155736,"x2":94.53304303155736,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":61.2433,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Oscillations","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":132.5347,"top":299.7531,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":120.627,"top":331.6562,"width":145.4355,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-72.71772540889029,"x2":72.71772540889029,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":22.2107,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Waves","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":96.1758,"top":465.3776,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":88.813,"top":498.1896,"width":95.442,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-47.72100729958425,"x2":47.72100729958425,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0}]}';
 
+        // console.log('is canvas valid?! ', canvas);
 
-        console.log("is canvas valid?! ", canvas);
-      
-        // Load JSON content first and then add your custom objects
-        canvas.clear();
-        canvas.loadFromJSON(JSON.parse(jsonString))
-          .then(() => {
-            console.log("Callback triggered!"); // this will definitely run after all deserialization is complete
-            canvas.renderAll();
-        
-            const objects = canvas.getObjects();
-            console.log("Objects loaded:", objects.length);
-        
-            objects.forEach((obj) => {
-              console.log("object:", obj);
-              if (obj.fill?.replace(/\s/g, '') === "rgb(23,225,23)") {
-                console.log("object found");
-                obj.set({
-                  hasBorders: false,
-                  hasControls: true,
-                  lockScalingY: true,
-                  lockMovementY: true,
-                  lockMovementX: true,
-                  lockRotation: true,
-                  originX: 'left',
-                  originY: 'top',
-                });
-                obj.setControlsVisibility({
-                  mt: false, mb: false, ml: false, mr: true,
-                  tl: false, tr: false, bl: false, br: false,
-                  mtr: false,
-                });
-                let maxleft=obj.left;
+        // // Load JSON content first and then add your custom objects
+        // canvas.clear();
+        // canvas.loadFromJSON(JSON.parse(jsonString)).then(() => {
+        //   console.log('Callback triggered!'); // this will definitely run after all deserialization is complete
+        //   canvas.renderAll();
 
-                const topicindex = topicsindexes.current;
-                topicsindexes.current++; // persists across re-renders
+        //   const objects = canvas.getObjects();
+        //   console.log('Objects loaded:', objects.length);
 
-                const scaledWidth = obj.width * obj.scaleX;
-                  const newWidth = Math.min(100, Math.max(1, scaledWidth));
+        //   objects.forEach((obj) => {
+        //     console.log('object:', obj);
+        //     if (obj.fill?.replace(/\s/g, '') === 'rgb(23,225,23)') {
+        //       console.log('object found');
+        //       obj.set({
+        //         hasBorders: false,
+        //         hasControls: true,
+        //         lockScalingY: true,
+        //         lockMovementY: true,
+        //         lockMovementX: true,
+        //         lockRotation: true,
+        //         originX: 'left',
+        //         originY: 'top',
+        //       });
+        //       obj.setControlsVisibility({
+        //         mt: false,
+        //         mb: false,
+        //         ml: false,
+        //         mr: true,
+        //         tl: false,
+        //         tr: false,
+        //         bl: false,
+        //         br: false,
+        //         mtr: false,
+        //       });
+        //       let maxleft = obj.left;
 
-                const newConfidence = newWidth / 100;
+        //       const topicindex = topicsindexes.current;
+        //       topicsindexes.current++; // persists across re-renders
 
-                  setConfidenceLevels(prev => {
-                    const updated = [...prev];
-                    updated[topicindex] = newConfidence;
-                    return updated;
-                  });
+        //       const scaledWidth = obj.width * obj.scaleX;
+        //       const newWidth = Math.min(100, Math.max(1, scaledWidth));
 
+        //       const newConfidence = newWidth / 100;
 
-                obj.on('scaling', function () {
-                  const scaledWidth = obj.width * obj.scaleX;
-                  const newWidth = Math.min(100, Math.max(1, scaledWidth));
-                  
-                  obj.set({
-                    scaleX: 1,
-                    width: newWidth,
-                    left: maxleft// lock left position
-                  });
-                
-                  const newConfidence = newWidth / 100;
+        //       setConfidenceLevels((prev) => {
+        //         const updated = [...prev];
+        //         updated[topicindex] = newConfidence;
+        //         return updated;
+        //       });
 
-                  setConfidenceLevels(prev => {
-                    const updated = [...prev];
-                    updated[topicindex] = newConfidence;
-                    return updated;
-                  });
+        //       obj.on('scaling', function () {
+        //         const scaledWidth = obj.width * obj.scaleX;
+        //         const newWidth = Math.min(100, Math.max(1, scaledWidth));
 
-                
-                  // // Store confidence for the current topic
-                  // const existing = confidenceLevels.find(entry => entry.topic === topic);
-                  // if (existing) {
-                  //   existing.confidence = newConfidence;
-                  // } else {
-                  //   confidenceLevels.push({ topic, confidence: newConfidence });
-                  // }
-                
-                  canvas.requestRenderAll();
-                });
-              }
-              if(obj.fill?.replace(/\s/g, '') === 'transparent' && obj.stroke === 'gray') {
-                obj.set({
-                  selectable: false,
-                evented: false,
-                });
-                canvas.requestRenderAll();
-              }
-            });
+        //         obj.set({
+        //           scaleX: 1,
+        //           width: newWidth,
+        //           left: maxleft, // lock left position
+        //         });
 
-          canvas.renderAll();
+        //         const newConfidence = newWidth / 100;
 
-          console.log("Canvas loaded yes!");
-        });
+        //         setConfidenceLevels((prev) => {
+        //           const updated = [...prev];
+        //           updated[topicindex] = newConfidence;
+        //           return updated;
+        //         });
 
-        
-      
-        // Debug logging to confirm canvas rendering
-        canvas.renderAll();
-        console.log("Canvasref=", canvasRef.current[i]);
-      
-        
-      
-        // Handle canvas click event
-        const handleClick = () => {
-          setActiveCanvasIndex(i);
-          console.log(`Canvas ${i} clicked`);
-        };
-      
-        // Set up mouseover event
-        canvas.on('mouse:over', handleClick);
-      
-        newCanvases.push(canvas);
+        //         // // Store confidence for the current topic
+        //         // const existing = confidenceLevels.find(entry => entry.topic === topic);
+        //         // if (existing) {
+        //         //   existing.confidence = newConfidence;
+        //         // } else {
+        //         //   confidenceLevels.push({ topic, confidence: newConfidence });
+        //         // }
+
+        //         canvas.requestRenderAll();
+        //       });
+        //     }
+        //     if (
+        //       obj.fill?.replace(/\s/g, '') === 'transparent' &&
+        //       obj.stroke === 'gray'
+        //     ) {
+        //       obj.set({
+        //         selectable: false,
+        //         evented: false,
+        //       });
+        //       canvas.requestRenderAll();
+        //     }
+        //   });
+
+        //   canvas.renderAll();
+
+        //   console.log('Canvas loaded yes!');
+        // });
+
+        // // Debug logging to confirm canvas rendering
+        // canvas.renderAll();
+        // console.log('Canvasref=', canvasRef.current[i]);
+
+        // // Handle canvas click event
+        // const handleClick = () => {
+        //   setActiveCanvasIndex(i);
+        //   console.log(`Canvas ${i} clicked`);
+        // };
+
+        // // Set up mouseover event
+        // canvas.on('mouse:over', handleClick);
+
+        // newCanvases.push(canvas);
       }
-      
-
-
-      
 
       // const handleSubmit = () => {
       //   console.log("here");
@@ -247,31 +414,29 @@ const CanvasEditor = () => {
       //         canvas.renderAll();
       //         console.log("Canvas loaded!");
       //       });
-          
+
       //       // Canvas data as a string
       //       //let canvas_data = '{"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green"}],"background":"rgba(0, 0, 0, 0)"}';
-          
+
       //       // Parse the string into a JavaScript object
       //       //const canvasDataObject = JSON.parse(canvas_data);
-          
+
       //       // Load the canvas data and render the objects
       //       // canvas.loadFromJSON(canvasDataObject, () => {
       //       //   canvas.renderAll(); // Ensure the canvas is redrawn
       //       // });
-          
+
       //       // Handle canvas click event
       //       const handleClick = () => {
       //         setActiveCanvasIndex(i);
       //         console.log(`Canvas ${i} clicked`);
       //       };
-          
+
       //       // Set up mouseover event
       //       canvas.on('mouse:over', handleClick);
-          
+
       //       newCanvases.push(canvas);
       //     }
-          
-  
 
       //   })
       //   .catch(error => {
@@ -279,13 +444,9 @@ const CanvasEditor = () => {
       //     setResponse("An Error occurred while submitting the form.");
       //   });
       // };
-    
+
       // handleSubmit(); // Submit the data to the backend
-
-
-
-    }
-    else{
+    } else {
       for (let i = 0; i < numPages; i++) {
         const canvas = new fabric.Canvas(canvasRef.current[i], {
           width: A4_WIDTH,
@@ -296,23 +457,17 @@ const CanvasEditor = () => {
         canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
         canvas.freeDrawingBrush.color = brushColor;
         canvas.freeDrawingBrush.width = 5;
-  
+
         const handleClick = () => {
           setActiveCanvasIndex(i);
           console.log(`Canvas ${i} clicked`);
         };
-  
+
         canvas.on('mouse:over', () => handleClick(i));
         newCanvases.push(canvas);
       }
-
+      setIsNew(false);
     }
-
-
-
-
-
-
 
     setCanvases(newCanvases);
     return () => {
@@ -323,252 +478,254 @@ const CanvasEditor = () => {
     };
   }, []);
 
-
-  const [notetitle, setnotetitle] = useState("Notebook 1");
-
+  const [notetitle, setnotetitle] = useState('Notebook 1');
 
   useEffect(() => {
     // const averageConfidence = confidenceLevels.reduce((sum, val) => sum + val, 0) / confidenceLevels.length;
     const averageConfidence = parseFloat(
-      ((confidenceLevels.reduce((sum, val) => sum + val, 0) / confidenceLevels.length) * 100).toFixed(2)
+      (
+        (confidenceLevels.reduce((sum, val) => sum + val, 0) /
+          confidenceLevels.length) *
+        100
+      ).toFixed(2)
     );
-    setnotetitle("Confidence: " + averageConfidence+"%");
-    console.log("set conf=",averageConfidence);
-    console.log("array is:",confidenceLevels);
+    setnotetitle('📊: ' + averageConfidence + '%');
+    console.log('set conf=', averageConfidence);
+    console.log('array is:', confidenceLevels);
   }, [confidenceLevels]);
-  
 
-
-
-    // Load saved value on mount
-    useEffect(() => {
-      const saved = localStorage.getItem('diagramInput');
-      if (saved) setDiagramInput(saved);
-    }, []);
-
-    async function notifyAt() {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('Please allow notifications!');
-        return;
-      }
-    
-      const registration = await navigator.serviceWorker.ready;
-      if (!registration) {
-        alert('Service worker not registered!');
-        return;
-      }
-    
-      const delayInSeconds = 5;
-      const timestamp = Date.now() + delayInSeconds * 1000;
-    
-      registration.showNotification("Take a Break!", {
-        body: "Your 25 minute study session is over",
-        icon: './logo192.png',
-        showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
-      });
-    }
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => {
-            console.log('Service Worker registered with scope:', reg.scope);
-          })
-          .catch(err => {
-            console.error('Service Worker registration failed:', err);
-          });
-      });
+  async function notifyAt() {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert('Please allow notifications!');
+      return;
     }
 
-
-    
-
-
-    useEffect(() => {
-      const handleBeforeUnload = (event) => {
-        // Optionally prevent the unload and show a confirmation dialog
-        // Standard for most browsers to trigger the confirmation dialog.
-    
-        // Use a timeout to allow IndexedDB save process to run asynchronously
-        event.preventDefault();
-          event.returnValue = '';
-          saveCanvases()
-          event.preventDefault();
-          event.returnValue = '';
-    
-      };
-    
-      window.addEventListener('beforeunload', handleBeforeUnload);
-    
-      return () => {
-        window.removeEventListener('beforeunload', handleBeforeUnload);
-      };
-    }, [canvases]);
-
-    const saveCanvases = () => {
-
-      canvases.forEach((canvas) => {
-        const objectsToRemove = [];
-
-  canvas.getObjects().forEach((obj) => {
-    if (obj.type === 'image' && obj.getSrc) {
-      const src = obj.getSrc();
-
-      // Check for local-only sources
-      const isLocalImage =
-        src.startsWith('data:') ||
-        src.startsWith('blob:') ||
-        src.includes('localhost') ||
-        src.includes('inkquizly.onrender.com');
-
-      if (isLocalImage) {
-        objectsToRemove.push(obj);
-      }
+    const registration = await navigator.serviceWorker.ready;
+    if (!registration) {
+      alert('Service worker not registered!');
+      return;
     }
-    if(obj.customType==='confidence'){
-      objectsToRemove.push(obj);
-    }
-  });
 
-  // Remove all the matched local images
-  objectsToRemove.forEach((obj) => canvas.remove(obj));
+    const delayInSeconds = 5;
+    const timestamp = Date.now() + delayInSeconds * 1000;
 
-  // Optional: force render update
-  canvas.renderAll();
-      });
-      
+    registration.showNotification('Take a Break!', {
+      body: 'Your 25 minute study session is over',
+      icon: './logo192.png',
+      showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+    });
+  }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((reg) => {
+          console.log('Service Worker registered with scope:', reg.scope);
+        })
+        .catch((err) => {
+          console.error('Service Worker registration failed:', err);
+        });
+    });
+  }
 
-      const indices = canvases.map((canvas, index) => index);
-      const datas=canvases.map((canvas,index)=>JSON.stringify(canvas.toJSON()));
-
-
-      const canvasesData = canvases.map((canvas, index) => ({
-        note: noteID,
-        indx: index,
-        data: JSON.stringify(canvas.toJSON()).replace(/'/g, '`').replace(/[\x00-\x1F\x7F]/g, '').replace(/\\\"(.*?)\\\"/g, (_, inner) => `\`${inner}\``).replace(/\\n/g, '\\\\n'),
-        use:user,
-    }));
-
-    const handleSubmit = () => {
-      console.log("here saving");
-      fetch('https://inkquizly.onrender.com/save', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({note:noteID,index:indices,dat:datas,use:user})
-      })
-      .then(response => response.json())
-      .then(data => {
-        setResponse(data.definition);
-        console.log("log is",data.definition);
-        console.log("response is",response);
-
-
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        setResponse("An Error occurred while submitting the form.");
-      });
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = ''; // Some browsers need this to trigger the confirmation
+      saveCanvases(); // Save canvases before refresh/close
     };
   
-    handleSubmit(); // Submit the data to the backend
+    const handlePopState = (event) => {
+      event.preventDefault();
+      event.returnValue = ''; // Some browsers need this to trigger the confirmation
+      saveCanvases(); // Save canvases when navigating back/forward
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+  
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [canvases]);
+  
 
-    
+  const saveCanvases = () => {
+    canvases.forEach((canvas) => {
+      const objectsToRemove = [];
+
+      canvas.getObjects().forEach((obj) => {
+        if (obj.type === 'image' && obj.getSrc) {
+          const src = obj.getSrc();
+
+          // Check for local-only sources
+          const isLocalImage =
+            src.startsWith('data:') ||
+            src.startsWith('blob:') ||
+            src.includes('localhost') ||
+            src.includes('inkquizly.onrender.com');
+
+          if (isLocalImage) {
+            objectsToRemove.push(obj);
+          }
+        }
+        if (obj.customType === 'confidence') {
+          objectsToRemove.push(obj);
+        }
+      });
+
+      // Remove all the matched local images
+      objectsToRemove.forEach((obj) => canvas.remove(obj));
+
+      // Optional: force render update
+      canvas.renderAll();
+    });
+
+    const indices = canvases.map((canvas, index) => index);
+    const datas = canvases.map((canvas) =>
+      JSON.stringify(canvas.toJSON())
+        // .replace(/'/g, '`')
+        // .replace(/[\x00-\x1F\x7F]/g, '')
+        // .replace(/\\"(.*?)\\"/g, (_, inner) => `\`${inner}\``)
+        // .replace(/\\n/g, '\\\\n')
+    );
+
+    console.log("HELLOOOOdatasin:",datas);
+
+    const canvasesData = canvases.map((canvas, index) => ({
+      note: noteID,
+      indx: index,
+      data: JSON.stringify(canvas.toJSON())
+        .replace(/'/g, '`')
+        .replace(/[\x00-\x1F\x7F]/g, '')
+        .replace(/\\\"(.*?)\\\"/g, (_, inner) => `\`${inner}\``)
+        .replace(/\\n/g, '\\\\n'),
+      use: user,
+    }));
+    console.log("noteitle:",notetitle);
+
+    const handleSubmit = () => {
+      console.log('here saving');
+      fetch('https://inkquizly.onrender.com/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          note: noteID,
+          index: indices,
+          dat: datas,
+          user: key, //IMPORTANT
+          //user: "5f3fbb27-e377-4344-a805-b9ebd0a93311",
+          conf:notetitle,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setResponse(data.definition);
+          console.log('log is', data.definition);
+          console.log('response is', response);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          setResponse('An Error occurred while submitting the form.');
+        });
+    };
+
+    handleSubmit(); // Submit the data to the backend
 
     canvasesData.forEach((canvasData) => {
       console.log(canvasData.data);
-      console.log("nexttt");
-
-  });
+      console.log('nexttt');
+    });
     console.log(canvasesData);
+  };
 
-    };
+  const handleMCQButtonClick = () => {
+    const canvas = canvases[activeCanvasIndex];
+    if (canvas) {
+      const mcqrect = new fabric.Rect({
+        left: 100,
+        top: 100,
+        width: 500,
+        height: 300,
+        fill: 'blue',
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: false,
+      });
+      canvas.add(mcqrect);
 
+      const qtxt = new fabric.Textbox('Q.', {
+        left: mcqrect.left + 10,
+        top: mcqrect.top + 10,
+        width: mcqrect.width - 20,
+        fontSize: 16,
+        fill: 'black',
+        editable: true,
+        backgroundColor: 'transparent',
+      });
+      canvas.add(qtxt);
 
-      const handleMCQButtonClick = () => {
-        const canvas = canvases[activeCanvasIndex];
-        if (canvas) {
-          const mcqrect=new fabric.Rect({
-            left: 100,
-            top: 100,
-            width: 500,
-            height: 300,
-            fill: 'blue',
-            stroke: 'black',
-            strokeWidth: 2,
-            selectable: false,
-          });
-          canvas.add(mcqrect);
+      const ch1 = new fabric.Rect({
+        left: mcqrect.left + 20,
+        top: mcqrect.top + 50,
+        width: 460,
+        height: 40,
+        fill: 'grey',
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: true,
+      });
+      canvas.add(ch1);
 
-          const qtxt=new fabric.Textbox('Q.',{
-            left: mcqrect.left + 10,
-            top: mcqrect.top + 10,
-            width: mcqrect.width - 20,
-            fontSize: 16,
-            fill: 'black',
-            editable: true,
-            backgroundColor: 'transparent',
-          });
-          canvas.add(qtxt);
+      const ch1text = new fabric.Textbox('A.', {
+        left: ch1.left + 10,
+        top: ch1.top + 10,
+        width: ch1.width - 20,
+        fontSize: 16,
+        fill: 'black',
+        editable: true,
+        backgroundColor: 'transparent',
+      });
+      canvas.add(ch1text);
 
-          const ch1=new fabric.Rect({
-              left: mcqrect.left+20,
-              top: mcqrect.top + 50,
-              width: 460,
-              height: 40,
-              fill: 'grey',
-              stroke: 'black',
-              strokeWidth: 2,
-              selectable: true,
-          });
-          canvas.add(ch1);
+      const ch2 = new fabric.Rect({
+        left: mcqrect.left + 20,
+        top: mcqrect.top + 100,
+        width: 460,
+        height: 40,
+        fill: 'grey',
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: true,
+      });
+      canvas.add(ch2);
+      const ch2text = new fabric.Textbox('B.', {
+        left: ch2.left + 10,
+        top: ch2.top + 10,
+        width: ch2.width - 20,
+        fontSize: 16,
+        fill: 'black',
+        editable: true,
+        backgroundColor: 'transparent',
+      });
+      canvas.add(ch2text);
 
-          const ch1text = new fabric.Textbox('A.',{
-            left: ch1.left + 10,
-            top: ch1.top + 10,
-            width: ch1.width - 20,
-            fontSize: 16,
-            fill: 'black',
-            editable: true,
-            backgroundColor: 'transparent',
-          });
-          canvas.add(ch1text);
-
-          const ch2=new fabric.Rect({
-            left: mcqrect.left+20,
-            top: mcqrect.top + 100,
-            width: 460,
-            height: 40,
-            fill: 'grey',
-            stroke: 'black',
-            strokeWidth: 2,
-            selectable: true,
-        });
-        canvas.add(ch2);
-        const ch2text = new fabric.Textbox('B.',{
-          left: ch2.left + 10,
-          top: ch2.top + 10,
-          width: ch2.width - 20,
-          fontSize: 16,
-          fill: 'black',
-          editable: true,
-          backgroundColor: 'transparent',
-        });
-        canvas.add(ch2text);
-
-        const ch3=new fabric.Rect({
-          left: mcqrect.left+20,
-          top: mcqrect.top + 150,
-          width: 460,
-          height: 40,
-          fill: 'grey',
-          stroke: 'black',
-          strokeWidth: 2,
-          selectable: true,
+      const ch3 = new fabric.Rect({
+        left: mcqrect.left + 20,
+        top: mcqrect.top + 150,
+        width: 460,
+        height: 40,
+        fill: 'grey',
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: true,
       });
       canvas.add(ch3);
-      const ch3text = new fabric.Textbox('C.',{
+      const ch3text = new fabric.Textbox('C.', {
         left: ch3.left + 10,
         top: ch3.top + 10,
         width: ch3.width - 20,
@@ -580,145 +737,133 @@ const CanvasEditor = () => {
       canvas.add(ch3text);
       canvas.renderAll();
 
-
-      const next=new fabric.Rect({
-        left: mcqrect.left+420,
-        top: mcqrect.top+ 210,
+      const next = new fabric.Rect({
+        left: mcqrect.left + 420,
+        top: mcqrect.top + 210,
         width: 50,
         height: 20,
         fill: 'grey',
         stroke: 'black',
         strokeWidth: 2,
         selectable: true,
-    });
-    canvas.add(next);
+      });
+      canvas.add(next);
 
-    const prev=new fabric.Rect({
-      left: mcqrect.left+20,
-      top: mcqrect.top+ 210,
-      width: 50,
-      height: 20,
-      fill: 'grey',
-      stroke: 'black',
-      strokeWidth: 2,
-      selectable: true,
-  });
-  canvas.add(prev);
+      const prev = new fabric.Rect({
+        left: mcqrect.left + 20,
+        top: mcqrect.top + 210,
+        width: 50,
+        height: 20,
+        fill: 'grey',
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: true,
+      });
+      canvas.add(prev);
 
-  // const handleSubmit = () => {
-  //   fetch('http://127.0.0.1:5000/getmcq', {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json"
-  //     },
-  //     body: JSON.stringify({ topic: data }) // Send data as an object with topic
-  //   })
-  //   .then(response => response.json())
-  //   .then(data => {
-  //     setResponse(data.summary);
-  //     console.log("log is",data.item1);
-  //     console.log("response is",data.item2);
+      // const handleSubmit = () => {
+      //   fetch('http://127.0.0.1:5000/getmcq', {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json"
+      //     },
+      //     body: JSON.stringify({ topic: data }) // Send data as an object with topic
+      //   })
+      //   .then(response => response.json())
+      //   .then(data => {
+      //     setResponse(data.summary);
+      //     console.log("log is",data.item1);
+      //     console.log("response is",data.item2);
 
-  //   })
-  //   .catch(error => {
-  //     console.error("Error:", error);
-  //     setResponse("An Error occurred while submitting the form.");
-  //   });
-  // };
+      //   })
+      //   .catch(error => {
+      //     console.error("Error:", error);
+      //     setResponse("An Error occurred while submitting the form.");
+      //   });
+      // };
 
-  // handleSubmit(); // Submit the data to the backend
+      // handleSubmit(); // Submit the data to the backend
+    } else {
+      console.log('No active canvas available to add rectangles.');
+    }
+  };
 
+  //let img1='';
+  const [img1, setimg1] = useState('');
+  const [img2, setimg2] = useState('');
+  const [img3, setimg3] = useState('');
+  const [img4, setimg4] = useState('');
+  // Load image lookup on change
+  useEffect(() => {
+    let data = diagramInput;
+    console.log('diagram data:', data);
 
-        } else {
-          console.log("No active canvas available to add rectangles.");
-        }
-      };
-
-      
-    
-
-    
-
-
-
-
-    //let img1='';
-    const [img1, setimg1] = useState("");
-    const [img2, setimg2] = useState("");
-    const [img3, setimg3] = useState("");
-    const [img4, setimg4] = useState("");
-     // Load image lookup on change
-     useEffect(() => {
-      let data = diagramInput;
-      console.log("diagram data:",data);
-
-      // Handle form submission to backend
-      const handleSubmit = () => {
-        fetch('https://inkquizly.onrender.com/getimages', {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ topic: data }) // Send data as an object with topic
-        })
-        .then(response => response.json())
-        .then(data => {
+    // Handle form submission to backend
+    const handleSubmit = () => {
+      fetch('https://inkquizly.onrender.com/getimages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic: data }), // Send data as an object with topic
+      })
+        .then((response) => response.json())
+        .then((data) => {
           setResponse(data.summary);
-          console.log("log is",data.item1);
-          console.log("response is",data.item2);
-  
+          console.log('log is', data.item1);
+          console.log('response is', data.item2);
+
           // Display the text summary after submission
           setimg1(data.item1);
           setimg2(data.item2);
           setimg3(data.item3);
           setimg4(data.item4);
-          console.log("img1:",img1);
-          console.log("img2:",img2);
-          console.log("img3:",img3);
-          console.log("img4:",img4);
+          console.log('img1:', img1);
+          console.log('img2:', img2);
+          console.log('img3:', img3);
+          console.log('img4:', img4);
         })
-        .catch(error => {
-          console.error("Error:", error);
-          setResponse("An Error occurred while submitting the form.");
+        .catch((error) => {
+          console.error('Error:', error);
+          setResponse('An Error occurred while submitting the form.');
         });
-      };
-  
-      handleSubmit(); // Submit the data to the backend
-      
-    }, [searchimg]);
-  
-    const handleDiagramClick = () => {
-      setShowTextbox(true);
-    };
-  
-    const handleTextboxBlur = () => {
-      localStorage.setItem('diagramInput', diagramInput);
-      setShowTextbox(false);
-    };
-  
-    const handleEnterKey = () => {
-      setShowTextbox(false);
-      setShowGrid(true);
-      // Optionally save the input value or perform other actions here.
     };
 
- // Add this useEffect for the countdown timer:
+    handleSubmit(); // Submit the data to the backend
+  }, [searchimg]);
+
+  const handleDiagramClick = () => {
+    setShowTextbox(true);
+  };
+
+  const handleTextboxBlur = () => {
+    localStorage.setItem('diagramInput', diagramInput);
+    setShowTextbox(false);
+  };
+
+  const handleEnterKey = () => {
+    setShowTextbox(false);
+    setShowGrid(true);
+    // Optionally save the input value or perform other actions here.
+  };
+
+  // Add this useEffect for the countdown timer:
   useEffect(() => {
     let timerId;
     if (isTimerRunning) {
       timerId = setInterval(() => {
-        setPomodoroTime(prevTime => {
+        setPomodoroTime((prevTime) => {
           if (prevTime <= 1) {
             clearInterval(timerId);
             setIsTimerRunning(false);
 
             // 🌟 Notify and reset
-            Notification.requestPermission().then(permission => {
-              console.log("requesting notif");
+            Notification.requestPermission().then((permission) => {
+              console.log('requesting notif');
               if (permission === 'granted') {
-                navigator.serviceWorker.ready.then(registration => {
-                  registration.showNotification("Take a Break! ⏰", {
-                    body: "Your 25-minute study session is over. Time to relax!",
+                navigator.serviceWorker.ready.then((registration) => {
+                  registration.showNotification('Take a Break! ⏰', {
+                    body: 'Your 25-minute study session is over. Time to relax!',
                     icon: './inkai-removebg-preview.png',
                     actions: [
                       {
@@ -730,15 +875,13 @@ const CanvasEditor = () => {
                   });
                 });
               } else {
-                alert("Please enable notifications to get Pomodoro alerts.");
+                alert('Please enable notifications to get Pomodoro alerts.');
               }
             });
-            
 
             setTimeout(() => {
               setPomodoroTime(1500);
             }, 100);
-
 
             return 0;
           }
@@ -752,15 +895,15 @@ const CanvasEditor = () => {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
-            //     console.log("Notification snoozed for 5 minutes");
+        //     console.log("Notification snoozed for 5 minutes");
         if (event.data && event.data.type === 'snooze') {
           const delay = event.data.delay || 300000; // 5 mins default
-  
+
           setTimeout(() => {
             navigator.serviceWorker.getRegistration().then((registration) => {
               if (registration) {
-                registration.showNotification("Snooze Over! ⏰", {
-                  body: "Your break is over, time to get back to work!",
+                registration.showNotification('Snooze Over! ⏰', {
+                  body: 'Your break is over, time to get back to work!',
                   icon: './inkai-removebg-preview.png',
                 });
               }
@@ -771,17 +914,16 @@ const CanvasEditor = () => {
     }
   }, []);
 
-
-
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${minutes < 10 ? '0' + minutes : minutes}:${secs < 10 ? '0' + secs : secs}`;
+    return `${minutes < 10 ? '0' + minutes : minutes}:${
+      secs < 10 ? '0' + secs : secs
+    }`;
   };
 
   const handlePomodoroClick = () => {
     // const canvas = canvases[activeCanvasIndex];
-
 
     // const handleSubmit = () => {
     //   console.log("here");
@@ -802,8 +944,7 @@ const CanvasEditor = () => {
     //     setsecond(data.two);
     //     setthird(data.three);
     //     setfourth(data.four);
-  
-  
+
     // canvas.renderAll();
     //   })
     //   .catch(error => {
@@ -811,13 +952,11 @@ const CanvasEditor = () => {
     //     setResponse("An Error occurred while submitting the form.");
     //   });
     // };
-  
+
     // handleSubmit(); // Submit the data to the backend
 
     setShowPomodoroRect(true);
   };
-
-
 
   const handleCanvasClick = (index) => {
     setActiveCanvasIndex(index);
@@ -827,7 +966,10 @@ const CanvasEditor = () => {
   function hexToRgba(hex, alpha) {
     hex = hex.replace('#', '');
     if (hex.length === 3) {
-      hex = hex.split('').map((c) => c + c).join('');
+      hex = hex
+        .split('')
+        .map((c) => c + c)
+        .join('');
     }
     const r = parseInt(hex.slice(0, 2), 16);
     const g = parseInt(hex.slice(2, 4), 16);
@@ -839,34 +981,34 @@ const CanvasEditor = () => {
     canvases.forEach((canvas) => {
       if (canvas) {
         if (activeTool === 'pen') {
-            canvas.off('mouse:down');
-            canvas.off('mouse:move');
-            canvas.off('mouse:up');
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 5;
         } else if (activeTool === 'marker') {
-            canvas.off('mouse:down');
-            canvas.off('mouse:move');
-            canvas.off('mouse:up');
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 10;
         } else if (activeTool === 'highlighter') {
-            canvas.off('mouse:down');
-            canvas.off('mouse:move');
-            canvas.off('mouse:up');
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           let bColor = hexToRgba(brushColor, 0.5);
           canvas.freeDrawingBrush.color = bColor;
           canvas.freeDrawingBrush.width = 15;
         } else if (activeTool === 'eraser') {
-            canvas.off('mouse:down');
-            canvas.off('mouse:move');
-            canvas.off('mouse:up');
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = 'rgba(255, 169, 78, 0.5)';
@@ -906,18 +1048,14 @@ const CanvasEditor = () => {
             }
           });
         } else if (activeTool === 'point') {
-            canvas.off('mouse:down');
-              canvas.off('mouse:move');
-              canvas.off('mouse:up');
-            canvas.isDrawingMode = false;
-          }
-        
-        
-        
-        else if (activeTool === 'text') {
           canvas.off('mouse:down');
-            canvas.off('mouse:move');
-            canvas.off('mouse:up');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
+          canvas.isDrawingMode = false;
+        } else if (activeTool === 'text') {
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = false;
           canvas.on('mouse:up', (e) => {
             if (!e.target) {
@@ -929,7 +1067,7 @@ const CanvasEditor = () => {
                 fontSize: 24,
               });
               canvas.add(text);
-              setActiveTool("point");
+              setActiveTool('point');
               canvas.setActiveObject(text);
               canvas.renderAll();
             }
@@ -939,20 +1077,20 @@ const CanvasEditor = () => {
           canvas.isDrawingMode = false;
           let startX, startY;
           let highlightRect = null;
-          console.log("prevstartx=",startX);
+          console.log('prevstartx=', startX);
 
           const onMouseDownsub = (e) => {
             if (highlightRect) {
               // Reset the previous highlightRect before creating a new one
-              console.log("there exists highlightrect so deleting");
-              canvas.remove(highlightRect);  // Remove the old rectangle
-              highlightRect = null;  // Reset the variable
+              console.log('there exists highlightrect so deleting');
+              canvas.remove(highlightRect); // Remove the old rectangle
+              highlightRect = null; // Reset the variable
             }
             const pointer = canvas.getPointer(e.e);
             startX = pointer.x;
-            console.log("startx=",startX);
+            console.log('startx=', startX);
             startY = pointer.y;
-            console.log("starty=",startY);
+            console.log('starty=', startY);
 
             highlightRect = new fabric.Rect({
               left: pointer.x,
@@ -965,68 +1103,89 @@ const CanvasEditor = () => {
               selectable: true,
               evented: true,
               hasControls: false, // no resize/rotate handles
-  lockMovementX: true, // disable horizontal drag
-  lockMovementY: true, // disable vertical drag
-  hoverCursor: 'pointer',
-
-
+              lockMovementX: true, // disable horizontal drag
+              lockMovementY: true, // disable vertical drag
+              hoverCursor: 'pointer',
             });
-            console.log("Capture region sent initial:", highlightRect.left, highlightRect.top, highlightRect.width, highlightRect.height);
+            console.log(
+              'Capture region sent initial:',
+              highlightRect.left,
+              highlightRect.top,
+              highlightRect.width,
+              highlightRect.height
+            );
 
             canvas.add(highlightRect);
           };
 
           const onMouseMovesub = (e) => {
             if (!highlightRect) return;
-          
+
             const pointer = canvas.getPointer(e.e);
             let width = pointer.x - startX;
             let height = pointer.y - startY;
-          
-            console.log("width:", width);
-            console.log("height:", height);
-            console.log("pointer:", pointer.x, pointer.y);
-            console.log("startx:", startX, startY);
-          
+
+            console.log('width:', width);
+            console.log('height:', height);
+            console.log('pointer:', pointer.x, pointer.y);
+            console.log('startx:', startX, startY);
+
             // Update the rectangle's dimensions and position based on pointer movement
             highlightRect.set({
-              width: Math.abs(width),  // Always use positive width
+              width: Math.abs(width), // Always use positive width
               height: Math.abs(height), // Always use positive height
-              left: (width < 0) ? pointer.x : startX,  // If width is negative, adjust left
-              top: (height < 0) ? pointer.y : startY, // If height is negative, adjust top
+              left: width < 0 ? pointer.x : startX, // If width is negative, adjust left
+              top: height < 0 ? pointer.y : startY, // If height is negative, adjust top
               selectable: true,
               evented: true,
             });
             canvas.renderAll();
-          
-            console.log("Capture region sent:", highlightRect.left, highlightRect.top, highlightRect.width, highlightRect.height);
-            console.log("highlight:", highlightRect);
-          
+
+            console.log(
+              'Capture region sent:',
+              highlightRect.left,
+              highlightRect.top,
+              highlightRect.width,
+              highlightRect.height
+            );
+            console.log('highlight:', highlightRect);
+
             // Final render to update the canvas with the latest changes
             canvas.renderAll();
           };
-          
+
           const onMouseUpsub = () => {
             if (!highlightRect) return;
-          
+
             // Ensure the latest properties are up-to-date before capturing
             const rect = highlightRect.getBoundingRect(true);
-            console.log("Capture region sent rn:", highlightRect.left, highlightRect.top, highlightRect.width, highlightRect.height);
-            console.log("Capture region sent rn after:", rect.left, rect.top, rect.width, rect.height);
+            console.log(
+              'Capture region sent rn:',
+              highlightRect.left,
+              highlightRect.top,
+              highlightRect.width,
+              highlightRect.height
+            );
+            console.log(
+              'Capture region sent rn after:',
+              rect.left,
+              rect.top,
+              rect.width,
+              rect.height
+            );
 
-            console.log("highlight:", highlightRect);
-          
+            console.log('highlight:', highlightRect);
+
             // Capture the highlighted region
             captureHighlightedRegion(highlightRect);
-            console.log("sub logged");
-          
+            console.log('sub logged');
+
             // Reset and clean up
             highlightRect = null;
             canvas.off('mouse:down', onMouseDownsub);
             canvas.off('mouse:move', onMouseMovesub);
             canvas.off('mouse:up', onMouseUpsub);
           };
-          
 
           canvas.on('mouse:down', onMouseDownsub);
           canvas.on('mouse:move', onMouseMovesub);
@@ -1036,15 +1195,14 @@ const CanvasEditor = () => {
           canvas.isDrawingMode = false;
           let startX, startY;
           let highlightRect = null;
-          console.log("prevstartx=",startX);
+          console.log('prevstartx=', startX);
 
           const onMouseDown = (e) => {
             const pointer = canvas.getPointer(e.e);
             startX = pointer.x;
-            console.log("startx=",startX);
+            console.log('startx=', startX);
             startY = pointer.y;
-            console.log("starty=",startY);
-
+            console.log('starty=', startY);
 
             highlightRect = new fabric.Rect({
               left: startX,
@@ -1081,7 +1239,7 @@ const CanvasEditor = () => {
           const onMouseUp = () => {
             const finalRect = highlightRect;
             underlineHighlightedRegion(finalRect);
-            console.log("logged higlight");
+            console.log('logged higlight');
             highlightRect = null;
             canvas.off('mouse:down', onMouseDown);
             canvas.off('mouse:move', onMouseMove);
@@ -1095,151 +1253,147 @@ const CanvasEditor = () => {
     });
   }, [activeTool]);
 
- // Define these at the top level, outside any function
-let isPopupOpen = false;
-let popupRect = null;
-let popupText = null;
+  // Define these at the top level, outside any function
+  let isPopupOpen = false;
+  let popupRect = null;
+  let popupText = null;
 
-const captureHighlightedRegion = (highlightRect) => {
-  const canvas = canvases[activeCanvasIndex];
-  if (!canvas) return;
+  const captureHighlightedRegion = (highlightRect) => {
+    const canvas = canvases[activeCanvasIndex];
+    if (!canvas) return;
 
-  // Render the canvas and get full image data
-  canvas.renderAll();
+    // Render the canvas and get full image data
+    canvas.renderAll();
 
-  const rect = highlightRect.getBoundingRect(true);
+    const rect = highlightRect.getBoundingRect(true);
 
-  console.log("Capture region in funct:", rect.left, rect.top, rect.width, rect.height);
+    console.log(
+      'Capture region in funct:',
+      rect.left,
+      rect.top,
+      rect.width,
+      rect.height
+    );
 
-  const fullDataURL = canvas.toDataURL({
-    format: 'png',
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    multiplier: 1,
-  });
-
-  const base64Image = fullDataURL.split(',')[1];
-  console.log("Base64 image:", base64Image);
-
-  function createPopup(message) {
-    // Only create new ones if they don’t exist
-    if (!popupRect && !popupText) {
-      popupRect = new fabric.Rect({
-        left: rect.left +5,
-        top: rect.top - 105,
-        width: 200,
-        height: 100,
-        fill: 'rgba(0, 0, 0, 0.7)',
-        rx: 20,
-        ry: 20,
-        selectable: false,
-        evented: false,
-      });
-
-      popupText = new fabric.Textbox(message || "sample message", {
-        left: popupRect.left + 10,
-        top: popupRect.top + 10,
-        width: 200 - 10,
-        fontSize: 10,
-        fill: 'white',
-        editable: false,
-        selectable: false,
-        evented: false,
-      });
-
-      canvas.add(popupRect, popupText);
-      canvas.renderAll();
-    }
-  }
-
-  function openPopup(message) {
-    if (!isPopupOpen) {
-      createPopup(message);
-      isPopupOpen = true;
-    }
-  }
-
-  function closePopup() {
-    if (isPopupOpen && popupRect && popupText) {
-      canvas.remove(popupRect);
-      canvas.remove(popupText);
-      popupRect = null;
-      popupText = null;
-      isPopupOpen = false;
-      canvas.renderAll();
-    }
-  }
-
-  console.log("rect=",highlightRect);
-
-  let topics = "";
-
-  // Highlight bolding
-  const objectsInRegion = canvas.getObjects();
-
-  objectsInRegion.forEach(obj => {
-    if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
-      topics += obj.text; // Collect text from text objects
-    } else {
-    }
-  });
-
-
-
-  let data=base64Image;
-   // Handle form submission to backend
-   const handleSubmit = () => {
-    fetch('https://inkquizly.onrender.com/getdefinition', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ topic: topics ,img:data}) // Send data as an object with topic
-    })
-    .then(response => response.json())
-    .then(data => {
-      setResponse(data.definition);
-      console.log("log is",data.definition);
-      console.log("response is",response);
-
-      // Display the text summary after submission
-      highlightRect.on('mousedown', () => {
-        console.log("rect is pressed");
-        if (!isPopupOpen) {
-          openPopup(data.definition);
-        } else {
-          closePopup();
-        }
-      });
-
-  canvas.renderAll();
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      setResponse("An Error occurred while submitting the form.");
+    const fullDataURL = canvas.toDataURL({
+      format: 'png',
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      multiplier: 1,
     });
+
+    const base64Image = fullDataURL.split(',')[1];
+    console.log('Base64 image:', base64Image);
+
+    function createPopup(message) {
+      // Only create new ones if they don’t exist
+      if (!popupRect && !popupText) {
+        popupRect = new fabric.Rect({
+          left: rect.left + 5,
+          top: rect.top - 105,
+          width: 200,
+          height: 100,
+          fill: 'rgba(0, 0, 0, 0.7)',
+          rx: 20,
+          ry: 20,
+          selectable: false,
+          evented: false,
+        });
+
+        popupText = new fabric.Textbox(message || 'sample message', {
+          left: popupRect.left + 10,
+          top: popupRect.top + 10,
+          width: 200 - 10,
+          fontSize: 10,
+          fill: 'white',
+          editable: false,
+          selectable: false,
+          evented: false,
+        });
+
+        canvas.add(popupRect, popupText);
+        canvas.renderAll();
+      }
+    }
+
+    function openPopup(message) {
+      if (!isPopupOpen) {
+        createPopup(message);
+        isPopupOpen = true;
+      }
+    }
+
+    function closePopup() {
+      if (isPopupOpen && popupRect && popupText) {
+        canvas.remove(popupRect);
+        canvas.remove(popupText);
+        popupRect = null;
+        popupText = null;
+        isPopupOpen = false;
+        canvas.renderAll();
+      }
+    }
+
+    console.log('rect=', highlightRect);
+
+    let topics = '';
+
+    // Highlight bolding
+    const objectsInRegion = canvas.getObjects();
+
+    objectsInRegion.forEach((obj) => {
+      if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
+        topics += obj.text; // Collect text from text objects
+      } else {
+      }
+    });
+
+    let data = base64Image;
+    // Handle form submission to backend
+    const handleSubmit = () => {
+      fetch('https://inkquizly.onrender.com/getdefinition', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic: topics, img: data }), // Send data as an object with topic
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setResponse(data.definition);
+          console.log('log is', data.definition);
+          console.log('response is', response);
+
+          // Display the text summary after submission
+          highlightRect.on('mousedown', () => {
+            console.log('rect is pressed');
+            if (!isPopupOpen) {
+              openPopup(data.definition);
+            } else {
+              closePopup();
+            }
+          });
+
+          canvas.renderAll();
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          setResponse('An Error occurred while submitting the form.');
+        });
+    };
+
+    handleSubmit(); // Submit the data to the backend
+
+    // //Download the image
+    // const link = document.createElement('a');
+    // link.href = fullDataURL;
+    // link.download = 'highlighted_region.png';
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
   };
-
-  handleSubmit(); // Submit the data to the backend
-
-
-
-
-
-
-  // //Download the image
-  // const link = document.createElement('a');
-  // link.href = fullDataURL;
-  // link.download = 'highlighted_region.png';
-  // document.body.appendChild(link);
-  // link.click();
-  // document.body.removeChild(link);
-};
-
-  
-
 
   const captureHighlightedRegio = (highlightRect) => {
     const canvas = canvases[activeCanvasIndex];
@@ -1256,74 +1410,70 @@ const captureHighlightedRegion = (highlightRect) => {
     });
 
     const base64Image = fullDataURL.split(',')[1];
-    console.log("Base64 image:", base64Image);
+    console.log('Base64 image:', base64Image);
 
     let isPopupOpen = false;
-let popupRect = null;
-let popupText = null;
+    let popupRect = null;
+    let popupText = null;
 
     function createPopup(message) {
-     // Create the background rectangle for the popup
-  const popupRect = new fabric.Rect({
-    left: highlightRect.left-5, // Position
-    top: highlightRect.top+10,
-    width: 400,
-    height: 200,
-    fill: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
-    rx: 20, // Rounded corners
-    ry: 20, 
-    selectable: false, // Not selectable
-    evented: false, // Not interactive
-  });
+      // Create the background rectangle for the popup
+      const popupRect = new fabric.Rect({
+        left: highlightRect.left - 5, // Position
+        top: highlightRect.top + 10,
+        width: 400,
+        height: 200,
+        fill: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+        rx: 20, // Rounded corners
+        ry: 20,
+        selectable: false, // Not selectable
+        evented: false, // Not interactive
+      });
 
-  // Create the text inside the popup
-  const popupText = new fabric.Textbox("sample message", {
-    left: popupRect.left + 20, // Padding from the left
-    top: popupRect.top + 20,   // Padding from the top
-    width: 400 - 40,    // Adjust the width for padding
-    fontSize: 20,
-    fill: 'white',
-    editable: false,  // Prevent the user from editing the text
-    selectable: false,  // Make the text not selectable
-    evented: false,  // Make it non-interactive
-  });
+      // Create the text inside the popup
+      const popupText = new fabric.Textbox('sample message', {
+        left: popupRect.left + 20, // Padding from the left
+        top: popupRect.top + 20, // Padding from the top
+        width: 400 - 40, // Adjust the width for padding
+        fontSize: 20,
+        fill: 'white',
+        editable: false, // Prevent the user from editing the text
+        selectable: false, // Make the text not selectable
+        evented: false, // Make it non-interactive
+      });
 
-  // Add the popup to the canvas
-  canvas.add(popupRect, popupText);
-  }
+      // Add the popup to the canvas
+      canvas.add(popupRect, popupText);
+    }
 
-// Function to open the popup
-function openPopup(message) {
-  if (!isPopupOpen) {
-    createPopup(message);
-    isPopupOpen = true;
-    canvas.renderAll();
-  }
-}
+    // Function to open the popup
+    function openPopup(message) {
+      if (!isPopupOpen) {
+        createPopup(message);
+        isPopupOpen = true;
+        canvas.renderAll();
+      }
+    }
 
-// Function to close the popup
-function closePopup() {
-  if (isPopupOpen) {
-    canvas.remove(popupRect);
-    canvas.remove(popupText);
-    isPopupOpen = false;
-    canvas.renderAll();
-  }
-}
+    // Function to close the popup
+    function closePopup() {
+      if (isPopupOpen) {
+        canvas.remove(popupRect);
+        canvas.remove(popupText);
+        isPopupOpen = false;
+        canvas.renderAll();
+      }
+    }
 
-
-
-highlightRect.on('mousedown', () => {
-  console.log("rect is pressed");
-  if (!isPopupOpen) {
-    openPopup();
-  } else {
-    closePopup();
-  }
-  isPopupOpen = !isPopupOpen;
-});
-
-
+    highlightRect.on('mousedown', () => {
+      console.log('rect is pressed');
+      if (!isPopupOpen) {
+        openPopup();
+      } else {
+        closePopup();
+      }
+      isPopupOpen = !isPopupOpen;
+    });
 
     // // Create a download link
     // const link = document.createElement('a');
@@ -1339,31 +1489,29 @@ highlightRect.on('mousedown', () => {
     try {
       // Wait until the image is loaded and create an image object
       const img = await fabric.FabricImage.fromURL(url);
-  
-      const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
 
-    // Calculate the scaling factor to fit the image in the canvas
-    const scaleX = (canvasWidth*0.8) / img.width;
-    const scaleY = (canvasHeight*0.8) / img.height;
-    const scale = Math.min(scaleX, scaleY); // Choose the smaller scale to fit the image inside
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+
+      // Calculate the scaling factor to fit the image in the canvas
+      const scaleX = (canvasWidth * 0.8) / img.width;
+      const scaleY = (canvasHeight * 0.8) / img.height;
+      const scale = Math.min(scaleX, scaleY); // Choose the smaller scale to fit the image inside
 
       // Optionally, set position or scale the image
       img.set({
         left: 100, // Adjust as needed
-        top: 100,  // Adjust as needed
-        angle: 0,  // Optionally, you can set an initial angle
-        selectable:true,
-        evented:true,
+        top: 100, // Adjust as needed
+        angle: 0, // Optionally, you can set an initial angle
+        selectable: true,
+        evented: true,
         scaleX: scale,
-      scaleY: scale,
+        scaleY: scale,
       });
 
-      
-  
       // Add the image to the canvas and render it
       canvas.add(img);
-      setActiveTool("point");
+      setActiveTool('point');
       canvas.renderAll();
     } catch (error) {
       console.error('Error loading image:', error);
@@ -1372,232 +1520,240 @@ highlightRect.on('mousedown', () => {
 
   const topicsindexes = useRef(0);
 
-const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
-  console.log("im here yup");
-  const canvas = canvases[activeCanvasIndex];
-  if (!canvas || !rect) return;
+  const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
+    console.log('im here yup');
+    const canvas = canvases[activeCanvasIndex];
+    if (!canvas || !rect) return;
 
-  let topic = "";
+    let topic = '';
 
-  // Highlight bolding
-  const objectsInRegion = canvas.getObjects().filter(obj => {
-    const bounds = obj.getBoundingRect();
-    return (
-      bounds.left + bounds.width > rect.left &&
-      bounds.top + bounds.height > rect.top &&
-      bounds.left < rect.left + rect.width &&
-      bounds.top < rect.top + rect.height
-    );
-  });
-
-  const topicindex = topicsindexes.current;
-topicsindexes.current++; // persists across re-renders
-
-  objectsInRegion.forEach(obj => {
-    if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
-      obj.set("fontWeight", "bold");
-      obj.setCoords(); // Force update of bounding box after setting font weight
-      topic += obj.text; // Collect text from text objects
-      // topicindex=topicsindexes;
-      // topicsindexes++;
-    } else {
-      obj.set("strokeWidth", (obj.strokeWidth || 1) * 1.5);
-    }
-  });
-
-  // Underline
-  const underline = new fabric.Line(
-    [rect.left, rect.top + rect.height + 2, rect.left + rect.width, rect.top + rect.height + 2],
-    {
-      stroke: 'black',
-      strokeWidth: 2,
-      selectable: true,
-      evented: true,
-    }
-  );
-  canvas.add(underline);
-  canvas.remove(rect);
-
-  // Constants for slider
-  const sliderMaxWidth = 100;
-  const sliderHeight = 10;
-  const sliderLeft = rect.left + rect.width + 45;
-  const sliderTop = rect.top + rect.height - 5;
-
-  const sliderBorder = new fabric.Rect({
-    left: sliderLeft,
-    top: sliderTop,
-    width: sliderMaxWidth,
-    height: sliderHeight,
-    fill: 'transparent',
-    stroke: 'gray',
-    strokeWidth: 1,
-    selectable: false,
-    evented: false,
-    originX: 'left',
-    originY: 'top',
-  });
-  canvas.add(sliderBorder);
-
-
-  // Slider
-  const slider = new fabric.Rect({
-    left: sliderLeft,
-    top: sliderTop,
-    width: sliderMaxWidth * confidence,
-    height: sliderHeight,
-    fill: 'rgb(23, 225, 23)',
-    hasBorders: false,
-    hasControls: true,
-    lockScalingY: true,
-    lockMovementY: true,
-    lockMovementX: true,
-    lockRotation: true,
-    originX: 'left',
-    originY: 'top',
-  });
-
-  // Only allow right-side scaling
-  slider.setControlsVisibility({
-    mt: false, mb: false, ml: false, mr: true,
-    tl: false, tr: false, bl: false, br: false,
-    mtr: false,
-  });
-
-  const scaledWidth = slider.width * slider.scaleX;
-                  const newWidth = Math.min(100, Math.max(1, scaledWidth));
-
-                const newConfidence = newWidth / 100;
-
-                  setConfidenceLevels(prev => {
-                    const updated = [...prev];
-                    updated[topicindex] = newConfidence;
-                    return updated;
-                  });
-
-  // // Confidence % text
-  // const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
-  //   left: sliderLeft + slider.width + 10,
-  //   top: sliderTop + slider.height / 2,
-  //   fontSize: 12,
-  //   originY: 'center',
-  //   selectable: false,
-  //   evented: false,
-  //   customType: 'confidence',
-  // });
-
-  // Scaling behavior
-  // slider.on('scaling', function () {
-  //   const scaledWidth = slider.width * slider.scaleX;
-
-  //   const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
-  //   slider.set({
-  //     scaleX: 1,
-  //     width: newWidth,
-  //     left: sliderLeft // lock left position
-  //   });
-
-  //   const newConfidence = newWidth / sliderMaxWidth;
-  //   confidenceText.set({
-  //     text: `${Math.round(newConfidence * 100)}%`,
-  //     left: slider.left + newWidth + 10
-  //   });
-
-  //   // Store confidence for the current topic
-  //   const existing = confidenceLevels.find(entry => entry.topic === topic);
-  //   if (existing) {
-  //     existing.confidence = newConfidence;
-  //   } else {
-  //     confidenceLevels.push({ topic, confidence: newConfidence });
-  //   }
-
-  //   canvas.requestRenderAll();
-  // });
-
-  slider.on('scaling', function () {
-    const scaledWidth = slider.width * slider.scaleX;
-    const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
-    
-    slider.set({
-      scaleX: 1,
-      width: newWidth,
-      left: sliderLeft // lock left position
+    // Highlight bolding
+    const objectsInRegion = canvas.getObjects().filter((obj) => {
+      const bounds = obj.getBoundingRect();
+      return (
+        bounds.left + bounds.width > rect.left &&
+        bounds.top + bounds.height > rect.top &&
+        bounds.left < rect.left + rect.width &&
+        bounds.top < rect.top + rect.height
+      );
     });
-  
-    const newConfidence = newWidth / sliderMaxWidth;
-  
 
-    //confidenceLevels[topicindex] = newConfidence;
-    setConfidenceLevels(prev => {
+    const topicindex = topicsindexes.current;
+    topicsindexes.current++; // persists across re-renders
+
+    objectsInRegion.forEach((obj) => {
+      if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
+        obj.set('fontWeight', 'bold');
+        obj.setCoords(); // Force update of bounding box after setting font weight
+        topic += obj.text; // Collect text from text objects
+        // topicindex=topicsindexes;
+        // topicsindexes++;
+      } else {
+        obj.set('strokeWidth', (obj.strokeWidth || 1) * 1.5);
+      }
+    });
+
+    // Underline
+    const underline = new fabric.Line(
+      [
+        rect.left,
+        rect.top + rect.height + 2,
+        rect.left + rect.width,
+        rect.top + rect.height + 2,
+      ],
+      {
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: true,
+        evented: true,
+      }
+    );
+    canvas.add(underline);
+    canvas.remove(rect);
+
+    // Constants for slider
+    const sliderMaxWidth = 100;
+    const sliderHeight = 10;
+    const sliderLeft = rect.left + rect.width + 45;
+    const sliderTop = rect.top + rect.height - 5;
+
+    const sliderBorder = new fabric.Rect({
+      left: sliderLeft,
+      top: sliderTop,
+      width: sliderMaxWidth,
+      height: sliderHeight,
+      fill: 'transparent',
+      stroke: 'gray',
+      strokeWidth: 1,
+      selectable: false,
+      evented: false,
+      originX: 'left',
+      originY: 'top',
+    });
+    canvas.add(sliderBorder);
+
+    // Slider
+    const slider = new fabric.Rect({
+      left: sliderLeft,
+      top: sliderTop,
+      width: sliderMaxWidth * confidence,
+      height: sliderHeight,
+      fill: 'rgb(23, 225, 23)',
+      hasBorders: false,
+      hasControls: true,
+      lockScalingY: true,
+      lockMovementY: true,
+      lockMovementX: true,
+      lockRotation: true,
+      originX: 'left',
+      originY: 'top',
+    });
+
+    // Only allow right-side scaling
+    slider.setControlsVisibility({
+      mt: false,
+      mb: false,
+      ml: false,
+      mr: true,
+      tl: false,
+      tr: false,
+      bl: false,
+      br: false,
+      mtr: false,
+    });
+
+    const scaledWidth = slider.width * slider.scaleX;
+    const newWidth = Math.min(100, Math.max(1, scaledWidth));
+
+    const newConfidence = newWidth / 100;
+
+    setConfidenceLevels((prev) => {
       const updated = [...prev];
       updated[topicindex] = newConfidence;
-      console.log("index=",topicindex);
       return updated;
     });
-  
-    canvas.requestRenderAll();
-  });
 
-  // Image button (for triggering additional functionality)
-  const img = await fabric.Image.fromURL('/inkai.png');
-  img.scaleToHeight(30);
-  img.scaleToWidth(30);
-  img.set({
-    left: rect.left + rect.width + 10,
-    top: rect.top + rect.height - 15,
-    selectable: false,
-    evented: true,
-  });
+    // // Confidence % text
+    // const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
+    //   left: sliderLeft + slider.width + 10,
+    //   top: sliderTop + slider.height / 2,
+    //   fontSize: 12,
+    //   originY: 'center',
+    //   selectable: false,
+    //   evented: false,
+    //   customType: 'confidence',
+    // });
 
-  img.on('mousedown', () => {
-    console.log('Image button was pressed with topic',topic);
-    // Send topic to Python code here for summary
-    let data = topic;
+    // Scaling behavior
+    // slider.on('scaling', function () {
+    //   const scaledWidth = slider.width * slider.scaleX;
 
-    // Handle form submission to backend
-    const handleSubmit = () => {
-      fetch('https://inkquizly.onrender.com/getsummarized', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ topic: data }) // Send data as an object with topic
-      })
-      .then(response => response.json())
-      .then(data => {
-        setResponse(data.summary);
-        console.log("log is",data.summary);
-        console.log("response is",response);
+    //   const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
+    //   slider.set({
+    //     scaleX: 1,
+    //     width: newWidth,
+    //     left: sliderLeft // lock left position
+    //   });
 
-        // Display the text summary after submission
-    const summ = new fabric.Textbox(data.summary, {
-      left: rect.left,
-      top: rect.top + rect.height + 10,
-      width: 600,
-      fontSize: 20,
-      selectable:false,
-    });
-    canvas.add(summ);
-    canvas.renderAll();
-    underline.set({ stroke:'rgb(40, 2, 143)' });
+    //   const newConfidence = newWidth / sliderMaxWidth;
+    //   confidenceText.set({
+    //     text: `${Math.round(newConfidence * 100)}%`,
+    //     left: slider.left + newWidth + 10
+    //   });
 
-    canvas.renderAll();
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        setResponse("An Error occurred while submitting the form.");
+    //   // Store confidence for the current topic
+    //   const existing = confidenceLevels.find(entry => entry.topic === topic);
+    //   if (existing) {
+    //     existing.confidence = newConfidence;
+    //   } else {
+    //     confidenceLevels.push({ topic, confidence: newConfidence });
+    //   }
+
+    //   canvas.requestRenderAll();
+    // });
+
+    slider.on('scaling', function () {
+      const scaledWidth = slider.width * slider.scaleX;
+      const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
+
+      slider.set({
+        scaleX: 1,
+        width: newWidth,
+        left: sliderLeft, // lock left position
       });
-    };
 
-    handleSubmit(); // Submit the data to the backend
+      const newConfidence = newWidth / sliderMaxWidth;
 
-  });
+      //confidenceLevels[topicindex] = newConfidence;
+      setConfidenceLevels((prev) => {
+        const updated = [...prev];
+        updated[topicindex] = newConfidence;
+        console.log('index=', topicindex);
+        return updated;
+      });
 
-  canvas.add(slider, img);
-  canvas.renderAll();
+      canvas.requestRenderAll();
+    });
 
-  console.log("Confidences:", confidenceLevels);
-};
+    // Image button (for triggering additional functionality)
+    const img = await fabric.Image.fromURL('/inkai.png');
+    img.scaleToHeight(30);
+    img.scaleToWidth(30);
+    img.set({
+      left: rect.left + rect.width + 10,
+      top: rect.top + rect.height - 15,
+      selectable: false,
+      evented: true,
+    });
+
+    img.on('mousedown', () => {
+      console.log('Image button was pressed with topic', topic);
+      // Send topic to Python code here for summary
+      let data = topic;
+
+      // Handle form submission to backend
+      const handleSubmit = () => {
+        fetch('https://inkquizly.onrender.com/getsummarized', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ topic: data }), // Send data as an object with topic
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setResponse(data.summary);
+            console.log('log is', data.summary);
+            console.log('response is', response);
+
+            // Display the text summary after submission
+            const summ = new fabric.Textbox(data.summary, {
+              left: rect.left,
+              top: rect.top + rect.height + 10,
+              width: 600,
+              fontSize: 20,
+              selectable: false,
+            });
+            canvas.add(summ);
+            canvas.renderAll();
+            underline.set({ stroke: 'rgb(40, 2, 143)' });
+
+            canvas.renderAll();
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            setResponse('An Error occurred while submitting the form.');
+          });
+      };
+
+      handleSubmit(); // Submit the data to the backend
+    });
+
+    canvas.add(slider, img);
+    canvas.renderAll();
+
+    console.log('Confidences:', confidenceLevels);
+  };
 
   const openColorPallet = () => {
     setShowColorPicker(true);
@@ -1655,9 +1811,23 @@ topicsindexes.current++; // persists across re-renders
     border: '1px solid black',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   };
 
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const goHome = () => {
+    setIsLoading(true); // Start the loading spinner
+    saveCanvases();
+  
+    // Simulate a delay for the loading spinner (e.g., 3 seconds)
+    setTimeout(() => {
+      navigate('/AccountDashboard'); // Navigate after the delay
+      setIsLoading(false);
+    }, 3000); // 3000ms = 3 seconds
+  };
 
 
   return (
@@ -1667,14 +1837,59 @@ topicsindexes.current++; // persists across re-renders
         flexDirection: 'column',
         alignItems: 'center',
         minHeight: '100vh',
-        color:'#fff',
+        color: '#fff',
         padding: '50px',
-        justifyContent: 'flex-start', /* Change this to align content from the top */
-        marginTop: '10900px',  /* Add this to push the content down */
-
+        justifyContent:
+          'center' /* Change this to align content from the top */,
+        marginTop: '10900px' /* Add this to push the content down */,
       }}
     >
+      {/* Home Button */}
+      <div
+  style={{
+    position: 'fixed',
+    top: '20px',
+    left: '20px',
+    backgroundColor: 'rgba(0, 16, 120, 0.9)', // dark gray with transparency
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+    color: '#fff',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center', // <--- CENTER everything horizontally
+    gap: '10px', // Space between items
+    minWidth: '200px',
+    textAlign: 'center', // <--- CENTER the text itself too
+  }}
+>
+  <button
+    onClick={goHome}
+    style={{
+      width: '100%',
+      padding: '10px',
+      backgroundColor: isLoading ? '#6c757d' : '#007bff', // Gray while saving
+      color: '#fff',
+      border: 'none',
+      borderRadius: '5px',
+      fontSize: '16px',
+      cursor: 'pointer',
+    }}
+    disabled={isLoading} // Prevent clicking multiple times
+  >
+    {isLoading ? 'Saving...' : 'Your Dashboard'}
+  </button>
+
+  <div style={{ fontSize: '14px' }}>
+    <strong><h2>{noteID}</h2></strong>
+  </div>
+
+  <div style={{ fontSize: '14px' }}>
+    <strong>{notetitle}</strong>
+  </div>
+</div>
       <h2>{noteID}</h2>
+
       {Array.from({ length: numPages }, (_, index) => (
         <div
           key={index}
@@ -1726,9 +1941,7 @@ topicsindexes.current++; // persists across re-renders
           }}
         >
           {/* Tool buttons (pen, marker, color pallet, etc.) */}
-          <div style={{ marginBottom: '8px', fontSize: '16px', fontWeight: 'bold' }}>
-  {notetitle}
-</div>
+
           <button
             onClick={() => setActiveTool('pen')}
             style={{
@@ -1753,7 +1966,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/pen_image.png"
               alt="Pen Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
           <button
@@ -1780,7 +1998,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/marker_image.png"
               alt="Marker Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
           <button
@@ -1791,7 +2014,8 @@ topicsindexes.current++; // persists across re-renders
               padding: 0,
               cursor: 'pointer',
               transition: 'transform 0.2s',
-              transform: activeTool === 'colorpallet' ? 'scale(1.8)' : 'scale(1)',
+              transform:
+                activeTool === 'colorpallet' ? 'scale(1.8)' : 'scale(1)',
             }}
             onMouseEnter={(e) => {
               if (activeTool !== 'colorpallet') {
@@ -1807,7 +2031,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/colorpallet_image.png"
               alt="Color Pallet"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'cover' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'cover',
+              }}
             />
           </button>
           <button
@@ -1818,7 +2047,8 @@ topicsindexes.current++; // persists across re-renders
               padding: 0,
               cursor: 'pointer',
               transition: 'transform 0.2s',
-              transform: activeTool === 'highlighter' ? 'scale(1.8)' : 'scale(1)',
+              transform:
+                activeTool === 'highlighter' ? 'scale(1.8)' : 'scale(1)',
             }}
             onMouseEnter={(e) => {
               if (activeTool !== 'highlighter') {
@@ -1834,7 +2064,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/highlighter_image.png"
               alt="Highlighter Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
           <button
@@ -1861,7 +2096,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/eraser_image.png"
               alt="Eraser Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
           <button
@@ -1888,7 +2128,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/texttool_image.png"
               alt="Text Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'cover' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'cover',
+              }}
             />
           </button>
           <button
@@ -1915,7 +2160,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/aihighlighter_image.png"
               alt="AI Highlighter Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
           <button
@@ -1942,7 +2192,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/magichighlighter_image.png"
               alt="Special Highlighter Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
           <button
@@ -1969,7 +2224,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="https://cdn3.iconfinder.com/data/icons/hand-gesture/512/cursor_press_button_index_finger_pointer_point_click_touch_gesture-512.png"
               alt="Pointer Tool"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
         </div>
@@ -2012,7 +2272,10 @@ topicsindexes.current++; // persists across re-renders
         style={{
           position: 'fixed',
           //left: `${floatingIconPosition.x}px`,
-          left: `${Math.max(floatingIconPosition.x, (window.innerWidth / 2)-430)}px`, // Ensure it stays in the right half
+          left: `${Math.max(
+            floatingIconPosition.x,
+            window.innerWidth / 2 - 430
+          )}px`, // Ensure it stays in the right half
           top: `${floatingIconPosition.y}px`,
           backgroundColor: '#98a1f5',
           color: '#fff',
@@ -2036,35 +2299,46 @@ topicsindexes.current++; // persists across re-renders
         <img
           src="/inkai-removebg-preview.png"
           alt="Gemini Hover Bar"
-          style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+          style={{
+            width: '50px',
+            height: '50px',
+            borderRadius: '4px',
+            objectFit: 'scale-down',
+          }}
         />
       </div>
 
-{/* Fixed-position Pomodoro Rectangle with Timer and 6 inner rectangles */}
-{showPomodoroRect && (
+      {/* Fixed-position Pomodoro Rectangle with Timer and 6 inner rectangles */}
+      {showPomodoroRect && (
         <div
-        style={{
-          position: 'fixed',
-          left: '10px',
-          top: '90px',
-          width: '270px',
-          height: '600px',
-          backgroundColor: 'rgb(4, 8, 75)',
-          border: '2px solid black',
-          borderRadius: '20px',           // <-- Curved edges
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)', // <-- Soft shadow
-          zIndex: 20,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '10px',
-          color: 'white',                 // <-- Better contrast text
-          fontFamily: 'Arial, sans-serif', // <-- Cleaner font
-          transition: 'all 0.3s ease'     // <-- Smooth visual feel
-        }}
+          style={{
+            position: 'fixed',
+            left: '10px',
+            top: '90px',
+            width: '270px',
+            height: '600px',
+            backgroundColor: 'rgb(4, 8, 75)',
+            border: '2px solid black',
+            borderRadius: '20px', // <-- Curved edges
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)', // <-- Soft shadow
+            zIndex: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: '10px',
+            color: 'white', // <-- Better contrast text
+            fontFamily: 'Arial, sans-serif', // <-- Cleaner font
+            transition: 'all 0.3s ease', // <-- Smooth visual feel
+          }}
         >
           {/* Timer display */}
-          <div style={{ fontSize: '48px', fontWeight: 'bold', textAlign: 'center' }}>
+          <div
+            style={{
+              fontSize: '48px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+            }}
+          >
             {formatTime(pomodoroTime)}
           </div>
 
@@ -2076,70 +2350,91 @@ topicsindexes.current++; // persists across re-renders
               flexDirection: 'column',
               gap: '15px',
               marginTop: '10px',
-              marginBottom: '10px'
+              marginBottom: '10px',
             }}
           >
             {/* Start button */}
-          <button
-            onClick={() => setIsTimerRunning(true)}
-            disabled={isTimerRunning || pomodoroTime === 0}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              cursor: isTimerRunning ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Start
-          </button>
+            <button
+              onClick={() => setIsTimerRunning(true)}
+              disabled={isTimerRunning || pomodoroTime === 0}
+              style={{
+                padding: '10px 20px',
+                fontSize: '16px',
+                cursor: isTimerRunning ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Start
+            </button>
             {/* Session 1 */}
-            <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-        Study Session 1
-      </div>
-      <textarea
-        style={boxStyle}
-        value={first}
-        onChange={(e) => setfirst(e.target.value)} // Update state on typing
-        placeholder="Type goals for your 1st 25 min study session..."
-      />
+            <div
+              style={{
+                height: '30px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            >
+              Study Session 1
+            </div>
+            <textarea
+              style={boxStyle}
+              value={first}
+              onChange={(e) => setfirst(e.target.value)} // Update state on typing
+              placeholder="Type goals for your 1st 25 min study session..."
+            />
 
-  {/* Session 2 */}
-  <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-        Study Session 2
-      </div>
-      <textarea
-        style={boxStyle}
-        value={second}
-        onChange={(e) => setsecond(e.target.value)} // Update state on typing
-        placeholder="Type goals for your 2nd 25 min study session..."
-      />
+            {/* Session 2 */}
+            <div
+              style={{
+                height: '30px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            >
+              Study Session 2
+            </div>
+            <textarea
+              style={boxStyle}
+              value={second}
+              onChange={(e) => setsecond(e.target.value)} // Update state on typing
+              placeholder="Type goals for your 2nd 25 min study session..."
+            />
 
-  {/* Session 3 */}
-  <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-        Study Session 3
-      </div>
-      <textarea
-        style={boxStyle}
-        value={third}
-        onChange={(e) => setthird(e.target.value)} // Update state on typing
-        placeholder="Type goals for your 3rd 25 min study session..."
-      />
+            {/* Session 3 */}
+            <div
+              style={{
+                height: '30px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            >
+              Study Session 3
+            </div>
+            <textarea
+              style={boxStyle}
+              value={third}
+              onChange={(e) => setthird(e.target.value)} // Update state on typing
+              placeholder="Type goals for your 3rd 25 min study session..."
+            />
 
-  {/* Session 4 */}
-  <div style={{ height: '30px', fontWeight: 'bold', textAlign: 'center' }}>
-        Study Session 4
-      </div>
-      <textarea
-        style={boxStyle}
-        value={fourth}
-        onChange={(e) => setfourth(e.target.value)} // Update state on typing
-        placeholder="Type goals for your last 25 min study session..."
-      />
+            {/* Session 4 */}
+            <div
+              style={{
+                height: '30px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            >
+              Study Session 4
+            </div>
+            <textarea
+              style={boxStyle}
+              value={fourth}
+              onChange={(e) => setfourth(e.target.value)} // Update state on typing
+              placeholder="Type goals for your last 25 min study session..."
+            />
           </div>
         </div>
       )}
-
-
-
 
       {/* Floating Options that appear when clicking the icon */}
       {showFloatingOptions && (
@@ -2147,7 +2442,10 @@ topicsindexes.current++; // persists across re-renders
           style={{
             position: 'fixed',
             //left: `${floatingIconPosition.x}px`,
-            left: `${Math.max(floatingIconPosition.x, (window.innerWidth / 2)-400)}px`, // Ensure it stays in the right half
+            left: `${Math.max(
+              floatingIconPosition.x,
+              window.innerWidth / 2 - 400
+            )}px`, // Ensure it stays in the right half
             top: `${floatingIconPosition.y + 70}px`,
             transform: 'translate(-50%, 0)', // Center horizontally
             backgroundColor: '#fff',
@@ -2165,7 +2463,12 @@ topicsindexes.current++; // persists across re-renders
             <img
               src="/diagram_image.png"
               alt="Diagram Button"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
 
@@ -2177,10 +2480,9 @@ topicsindexes.current++; // persists across re-renders
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleEnterKey();
-                  if(searchimg==true){
+                  if (searchimg == true) {
                     setsearch(false);
-                  }
-                  else{
+                  } else {
                     setsearch(true);
                   }
                 }
@@ -2224,7 +2526,12 @@ topicsindexes.current++; // persists across re-renders
                 <img
                   src={img1}
                   alt="Image 1"
-                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '4px',
+                    objectFit: 'scale-down',
+                  }}
                 />
               </button>
               <button
@@ -2243,7 +2550,12 @@ topicsindexes.current++; // persists across re-renders
                 <img
                   src={img2}
                   alt="Image 2"
-                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '4px',
+                    objectFit: 'scale-down',
+                  }}
                 />
               </button>
               <button
@@ -2262,7 +2574,12 @@ topicsindexes.current++; // persists across re-renders
                 <img
                   src={img3}
                   alt="Image 3"
-                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '4px',
+                    objectFit: 'scale-down',
+                  }}
                 />
               </button>
               <button
@@ -2281,7 +2598,12 @@ topicsindexes.current++; // persists across re-renders
                 <img
                   src={img4}
                   alt="Image 4"
-                  style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '4px',
+                    objectFit: 'scale-down',
+                  }}
                 />
               </button>
             </div>
@@ -2295,14 +2617,21 @@ topicsindexes.current++; // persists across re-renders
             />
           </button> */}
 
-          <button onClick={handlePomodoroClick} style={{ marginBottom: '10px' }}>
+          <button
+            onClick={handlePomodoroClick}
+            style={{ marginBottom: '10px' }}
+          >
             <img
               src="/pomodoro_mode_image.png"
               alt="Pomodoro Button"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                objectFit: 'scale-down',
+              }}
             />
           </button>
-
         </div>
       )}
     </div>
@@ -2310,6 +2639,3 @@ topicsindexes.current++; // persists across re-renders
 };
 
 export default CanvasEditor;
-
-
-

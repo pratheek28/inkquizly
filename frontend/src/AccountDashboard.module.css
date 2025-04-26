@@ -31,3 +31,152 @@
     margin: 5px 0;
     display: block;
 }
+
+.dashboardWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+  }
+  
+  .notesGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  
+  /* Card Style */
+  .noteCard, .noteCardNew {
+    width: 150px;
+    height: 210px; /* Approximate A4 ratio */
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .noteCard:hover, .noteCardNew:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  }
+  
+  /* For New Note Card */
+  .plusSign {
+    font-size: 48px;
+    font-weight: bold;
+    color: #3f51b5;
+  }
+  
+  .cardLabel {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #555;
+  }
+  
+  /* Existing Notes */
+  .noteTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  /* Popup Styling*/
+  .popupBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); /* Slightly darker for better focus */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px); /* Smooth blur effect */
+    z-index: 999;
+  }
+  
+  .popupContent {
+    background: white; /* Clean white background */
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Soft shadow */
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .popupButtons {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .popupButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .popupCreateButton {
+    background-color: #4f46e5; /* Indigo */
+    color: white;
+  }
+  
+  .popupCancelButton {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+  
+  /* Optional: Smooth fade-in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .logoutWrapper {
+    display: flex;
+    justify-content: flex-end;
+    padding: 5rem;
+  }
+  
+  .logoutButton {
+    background-color: #f44336; /* Red */
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  .logoutButton:hover {
+    background-color: #d32f2f;
+    transform: scale(1.05);
+  }
+
+  
+  
+  
