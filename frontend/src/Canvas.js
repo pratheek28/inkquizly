@@ -795,6 +795,9 @@ const CanvasEditor = () => {
   const [img4, setimg4] = useState('');
   // Load image lookup on change
   useEffect(() => {
+    if (!diagramInput) {
+      return; // Don't run if diagramInput is null, undefined, or empty
+    }
     let data = diagramInput;
     console.log('diagram data:', data);
 

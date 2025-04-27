@@ -166,8 +166,8 @@ def getNote():
             return jsonify({"message": "UID not provided"}), 400
 
         # Connect to the database
-        client = DataAPIClient(DATA_API_CLIENT) #IMPORTANT MANY
-        db = client.get_database_by_api_endpoint(API_KEY)
+        # client = DataAPIClient(DATA_API_CLIENT) #IMPORTANT MANY
+        # db = client.get_database_by_api_endpoint(API_KEY)
         table = db.get_table("notes")
 
         # Fetch records based on UID
@@ -492,7 +492,7 @@ def CanvasLoad():
         table = db.get_table("notes")
 
         # Find all rows with the given note name
-        matching_rows = table.find({"note": note_name})
+        matching_rows = list(table.find({"note": note_name}))
 
         # Sort rows by the index field
         sorted_rows = sorted(matching_rows, key=lambda row: row['indx'])

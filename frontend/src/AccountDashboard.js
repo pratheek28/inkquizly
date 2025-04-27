@@ -189,7 +189,7 @@ function AccountDashboard() {
           padding: '10px 20px',
           color: 'white',
           fontSize: '18px',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: for better visibility
+          backgroundColor: 'rgba(0, 0, 0, 0.13)', // Optional: for better visibility
           borderRadius: '5px', // Optional: rounded corners
           zIndex: 9999,
         }}

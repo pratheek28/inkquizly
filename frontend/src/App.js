@@ -12,6 +12,33 @@ import iOSInstallPopup from "./iOSInstallPopup";
 
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time (example: 2 seconds)
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{
+        height: '100vh',
+        width: '100vw',
+        backgroundColor: 'black',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column'
+      }}>
+        <img src="/512logo.png" alt="Loading..." style={{ width: '150px', height: '150px' }} />
+        <p style={{ marginTop: '20px', fontSize: '20px',color:'white' }}>InkQuizly</p>
+      </div>
+    );
+  }
   return (
     <div>
       <Router>
