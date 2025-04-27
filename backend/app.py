@@ -16,7 +16,8 @@ from googleapiclient.discovery import build
 from google import genai
 import re
 import os
-import pytesseract
+from google.cloud import vision
+from google.cloud.vision import types
 import io
 
 
@@ -277,18 +278,29 @@ def ocr_from_base64(b64_str):
         # If you want, you can add more error handling or logging
         return ""  # Or raise a custom exception
     
-def ocr_from_base64_tesseract(base64_data):
-    image_data = base64.b64decode(base64_data)
-    image = Image.open(io.BytesIO(image_data))
+def ocr_from_base64_google_vision(b64_str):
+    # Decode the base64 string
+    image_data = base64.b64decode(b64_str)
 
-    # Resize and convert to grayscale (optional)
-    image = image.resize((image.width // 2, image.height // 2))
-    image = image.convert('L')  # Grayscale image
+    api_key = os.getenv('VISION_API_KEY')
 
-    # Run OCR with Tesseract
-    text = pytesseract.image_to_string(image)
 
-    return text
+    # Initialize the Vision API client
+    client = vision.ImageAnnotatorClient(credentials=api_key)
+
+    # Create an image object for the Vision API request
+    image = types.Image(content=image_data)
+
+    # Perform OCR using Google Vision
+    response = client.text_detection(image=image)
+    texts = response.text_annotations
+
+    # Return the recognized text from the image
+    if texts:
+        return texts[0].description
+    else:
+        return "No text found"
+
     
 
 @app.route("/getsummarized", methods=['POST'])
@@ -314,7 +326,7 @@ def summarize_AI_written():
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64_tesseract(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
+    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64_google_vision(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
     )
     
     # Return the AI-generated summary as a JSON response
