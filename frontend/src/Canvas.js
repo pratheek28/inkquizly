@@ -1238,6 +1238,7 @@ const CanvasEditor = () => {
           canvas.on('mouse:move', onMouseMovesub);
           canvas.on('mouse:up', onMouseUpsub);
           canvas.on('pointerdown', (e) => {
+            e.preventDefault();
             console.log("touchstart triggered");
             registration.showNotification('touchstart!', {
               body: 'Your 25 minute study session is over',
@@ -1247,6 +1248,7 @@ const CanvasEditor = () => {
             onMouseDownsub(e);
           });
           canvas.on('pointermove', (e) => {
+            e.preventDefault();
             console.log("touchmove triggered");
             registration.showNotification('touchmove!', {
               body: 'Your 25 minute study session is over',
@@ -1256,6 +1258,7 @@ const CanvasEditor = () => {
             onMouseMovesub(e);
           });
           canvas.on('pointerup', (e) => {
+            e.preventDefault();
             console.log("touchend triggered");
             registration.showNotification('touchend!', {
               body: 'Your 25 minute study session is over',
