@@ -125,6 +125,9 @@ function AccountDashboard() {
     //       .replace(/\\n/g, '\\\\n')
     //   );
     console.log('datasout:', datas);
+    console.log("note:",noteName);
+    console.log("index:",indices);
+    console.log("user:",user.id);
 
     const handleSubmit = () => {
       console.log('here saving user is:',user.id);
