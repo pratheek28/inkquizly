@@ -8,7 +8,6 @@ import time
 import base64
 from io import BytesIO
 import numpy as np
-import easyocr
 from PIL import Image
 from PIL import UnidentifiedImageError
 #import google.generativeai as genai
@@ -16,8 +15,8 @@ from googleapiclient.discovery import build
 from google import genai
 import re
 import os
-from google.cloud import vision
-import io
+import requests
+
 
 
 app = Flask(__name__)
@@ -278,7 +277,66 @@ print("Connected!")
 #         return ""  # Or raise a custom exception
 
 # Initialize EasyOCR reader
-reader = easyocr.Reader(['en'])
+# reader = easyocr.Reader(['en'])
+
+# def ocr_from_base64(b64_str, max_width=800, max_height=800, crop_area=None):
+#     # Ensure the base64 string has proper padding
+#     b64_str += "=" * ((4 - len(b64_str) % 4) % 4)  # Fix padding if missing
+
+#     try:
+#         # Decode the base64 string into bytes
+#         image_data = base64.b64decode(b64_str)
+        
+#         # Open the image from bytes and convert to RGB mode
+#         image = Image.open(BytesIO(image_data)).convert('RGB')
+
+#         # Resize the image for better OCR performance (optional)
+#         image = resize_image(image, max_width, max_height)
+
+#         # Crop the image if a crop area is specified (optional)
+#         if crop_area:
+#             image = image.crop(crop_area)
+
+#         # Convert the image to a numpy array (for EasyOCR processing)
+#         image_np = np.array(image)
+        
+#         # # Initialize EasyOCR reader
+#         # reader = easyocr.Reader(['en'])
+
+#         # Perform OCR on the image
+#         results = reader.readtext(image_np, detail=0)  # detail=0 returns only the text
+
+#         # Join all recognized text into a single string and return it
+#         return " ".join(results)
+    
+#     except UnidentifiedImageError:
+#         # Handle the case where the image is invalid or cannot be identified
+#         print(f"Error: Could not identify image format from base64 string.")
+#         return "Invalid image format."
+    
+#     except Exception as e:
+#         # Catch any other general errors
+#         print(f"Error during OCR processing: {e}")
+#         return "An error occurred during OCR processing."
+
+
+# def resize_image(image, max_width, max_height):
+#     # Get the current size of the image
+#     width, height = image.size
+    
+#     # Calculate the scaling factor for width and height
+#     scale_factor = min(max_width / width, max_height / height)
+
+#     # If the image is smaller than the max dimensions, don't resize it
+#     if scale_factor < 1:
+#         new_width = int(width * scale_factor)
+#         new_height = int(height * scale_factor)
+#         image = image.resize((new_width, new_height), Image.ANTIALIAS)
+
+#     return image
+    
+OCR_API_KEY = os.environ.get("OCR_API_KEY")
+
 
 def ocr_from_base64(b64_str, max_width=800, max_height=800, crop_area=None):
     # Ensure the base64 string has proper padding
@@ -298,28 +356,21 @@ def ocr_from_base64(b64_str, max_width=800, max_height=800, crop_area=None):
         if crop_area:
             image = image.crop(crop_area)
 
-        # Convert the image to a numpy array (for EasyOCR processing)
-        image_np = np.array(image)
-        
-        # # Initialize EasyOCR reader
-        # reader = easyocr.Reader(['en'])
+        # Convert the image to base64 after processing
+        buffered = BytesIO()
+        image.save(buffered, format="JPEG")
+        b64_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-        # Perform OCR on the image
-        results = reader.readtext(image_np, detail=0)  # detail=0 returns only the text
+        # Perform OCR using OCR.space API
+        ocr_text = ocr_space_from_base64(b64_image)
 
-        # Join all recognized text into a single string and return it
-        return " ".join(results)
-    
-    except UnidentifiedImageError:
-        # Handle the case where the image is invalid or cannot be identified
-        print(f"Error: Could not identify image format from base64 string.")
-        return "Invalid image format."
+        # Return the OCR results
+        return ocr_text
     
     except Exception as e:
-        # Catch any other general errors
+        # Handle any general errors
         print(f"Error during OCR processing: {e}")
         return "An error occurred during OCR processing."
-
 
 def resize_image(image, max_width, max_height):
     # Get the current size of the image
@@ -335,7 +386,32 @@ def resize_image(image, max_width, max_height):
         image = image.resize((new_width, new_height), Image.ANTIALIAS)
 
     return image
+
+def ocr_space_from_base64(base64_str, api_key=OCR_API_KEY):
+    url = 'https://api.ocr.space/parse/image'
     
+    # Prepare the payload with the base64 string
+    payload = {
+        'apikey': api_key,
+        'base64Image': f'data:image/jpeg;base64,{base64_str}'
+    }
+    
+    # Send the POST request to OCR.space
+    response = requests.post(url, data=payload)
+
+    # Handle the response
+    if response.status_code == 200:
+        result = response.json()
+        if result.get('ParsedResults'):
+            # Extract the text from the response
+            return " ".join([parsed_result['ParsedText'] for parsed_result in result['ParsedResults']])
+        else:
+            print("OCR failed to extract text.")
+            return "No text found."
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+        return f"Error during OCR API call: {response.status_code}"
+
     
 
     
