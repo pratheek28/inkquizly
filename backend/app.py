@@ -436,8 +436,8 @@ def CanvasSave():
         res = request.get_json()
 
         # Connect to the database
-        client = DataAPIClient(DATA_API_CLIENT)
-        db = client.get_database_by_api_endpoint(API_KEY)
+        # client = DataAPIClient(DATA_API_CLIENT)
+        # db = client.get_database_by_api_endpoint(API_KEY)
         print("Connected!") #Important change 4 times
         table = db.get_table("notes")
 
@@ -486,8 +486,8 @@ def CanvasLoad():
         note_name = res['note']  # The note name to load
 
         # Connect to the database
-        client = DataAPIClient(DATA_API_CLIENT)
-        db = client.get_database_by_api_endpoint(API_KEY)
+        # client = DataAPIClient(DATA_API_CLIENT)
+        # db = client.get_database_by_api_endpoint(API_KEY)
         print("Connected!")
         table = db.get_table("notes")
 
