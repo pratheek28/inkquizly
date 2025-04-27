@@ -964,8 +964,12 @@ const CanvasEditor = () => {
     // };
 
     // handleSubmit(); // Submit the data to the backend
-
-    setShowPomodoroRect(true);
+    if(showPomodoroRect===true){
+      setShowPomodoroRect(false);
+    }
+    else{
+      setShowPomodoroRect(true);
+    }
   };
 
   const handleCanvasClick = (index) => {
@@ -1831,12 +1835,12 @@ const handleIconTouchStart = (e) => {
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-    window.removeEventListener('touchmove', handleTouchMove);
-    window.removeEventListener('touchend', handleTouchEnd);
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
   };
 
-  window.addEventListener('touchmove', handleTouchMove);
-  window.addEventListener('touchend', handleTouchEnd);
+  document.addEventListener('touchmove', handleTouchMove);
+  document.addEventListener('touchend', handleTouchEnd);
 };
 
   useEffect(() => {
@@ -1853,11 +1857,11 @@ const handleIconTouchStart = (e) => {
         setIsDragging(false);
       }
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragOffset]);
 
@@ -2376,6 +2380,7 @@ const handleIconTouchStart = (e) => {
             height: '50px',
             borderRadius: '4px',
             objectFit: 'scale-down',
+            pointerEvents: 'none',  // Prevent the image from interfering with the drag
           }}
         />
       </div>
