@@ -1089,6 +1089,24 @@ const CanvasEditor = () => {
           let highlightRect = null;
           console.log('prevstartx=', startX);
 
+            // Save the previous state of all objects (for later restoration)
+  const previousStates = canvas.getObjects().map((obj) => ({
+    obj:obj,
+    lockMovementX: obj.lockMovementX,
+    lockMovementY: obj.lockMovementY,
+    selectable: obj.selectable,
+  }));
+
+  // Disable movement and selection for all objects
+  canvas.getObjects().forEach((obj) => {
+    if (obj) {
+    obj.lockMovementX = true;
+    obj.lockMovementY = true;
+    obj.selectable = false;
+    }
+  });
+  canvas.renderAll(); // Ensure the canvas reflects these changes
+
           const onMouseDownsub = (e) => {
             if (highlightRect) {
               // Reset the previous highlightRect before creating a new one
@@ -1195,6 +1213,18 @@ const CanvasEditor = () => {
             canvas.off('mouse:down', onMouseDownsub);
             canvas.off('mouse:move', onMouseMovesub);
             canvas.off('mouse:up', onMouseUpsub);
+
+
+    // Re-enable movement and selection for all objects after the tool is used
+    canvas.getObjects().forEach((obj, index) => {
+      const previousState = previousStates[index];
+      if (previousState && previousState.obj) { // Ensure the object exists
+        previousState.obj.lockMovementX = previousState.lockMovementX;
+        previousState.obj.lockMovementY = previousState.lockMovementY;
+        previousState.obj.selectable = previousState.selectable;
+      }
+    });
+    canvas.renderAll(); // Ensure the canvas reflects these changes
           };
 
           canvas.on('mouse:down', onMouseDownsub);
