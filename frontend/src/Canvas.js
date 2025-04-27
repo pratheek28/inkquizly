@@ -593,6 +593,7 @@ const CanvasEditor = () => {
     );
 
     console.log("HELLOOOOdatasin:",datas);
+    console.log("userkey:",key);
 
     const canvasesData = canvases.map((canvas, index) => ({
       note: noteID,

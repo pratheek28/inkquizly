@@ -37,7 +37,7 @@ function AccountDashboard() {
     if (selectedOption !== null) {
       // Only navigate when selectedOption has been updated
       console.log("Navigating with selected note:", selectedOption);
-      navigate('/CanvasEditor', { state: { noteID: selectedOption } });
+      navigate('/CanvasEditor', { state: { noteID: selectedOption, key:user.id } });
     }
   }, [selectedOption, navigate]); // Dependency on selectedOption
 
@@ -78,7 +78,7 @@ function AccountDashboard() {
 
   const handleOpen = () => {
     console.log("selected:",selectedOption);
-    navigate('/CanvasEditor', { state: { noteID: selectedOption } });
+    navigate('/CanvasEditor', { state: { noteID: selectedOption, key:user.id} });
   };
 
   const [noteName, setNotebookName] = useState('');
