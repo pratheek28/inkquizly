@@ -1809,16 +1809,35 @@ const CanvasEditor = () => {
     });
   };
 
+
   // Handlers for floating icon dragging (touch)
-  const handleIconTouchStart = (e) => {
-    e.preventDefault(); // Prevents default touch action (like scrolling)
-    setIsDragging(true);
-    const rect = e.currentTarget.getBoundingClientRect();
-    setDragOffset({
-      x: e.touches[0].clientX - rect.left,
-      y: e.touches[0].clientY - rect.top,
-    });
+const handleIconTouchStart = (e) => {
+  e.preventDefault(); // Prevents default touch action (like scrolling)
+  setIsDragging(true);
+  const rect = e.currentTarget.getBoundingClientRect();
+  setDragOffset({
+    x: e.touches[0].clientX - rect.left,
+    y: e.touches[0].clientY - rect.top,
+  });
+
+  // Add touchmove and touchend listeners for dragging
+  const handleTouchMove = (moveEvent) => {
+    if (!isDragging) return;
+    const newX = moveEvent.touches[0].clientX - dragOffset.x;
+    const newY = moveEvent.touches[0].clientY - dragOffset.y;
+
+    setFloatingIconPosition({ x: newX, y: newY });
   };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    window.removeEventListener('touchmove', handleTouchMove);
+    window.removeEventListener('touchend', handleTouchEnd);
+  };
+
+  window.addEventListener('touchmove', handleTouchMove);
+  window.addEventListener('touchend', handleTouchEnd);
+};
 
   useEffect(() => {
     const handleMouseMove = (e) => {
