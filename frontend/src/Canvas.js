@@ -1237,7 +1237,7 @@ const CanvasEditor = () => {
           canvas.on('mouse:down', onMouseDownsub);
           canvas.on('mouse:move', onMouseMovesub);
           canvas.on('mouse:up', onMouseUpsub);
-          canvas.on('touchstart', (e) => {
+          canvas.addEventListener('pointerdown', (e) => {
             console.log("touchstart triggered");
             registration.showNotification('touchstart!', {
               body: 'Your 25 minute study session is over',
@@ -1246,7 +1246,7 @@ const CanvasEditor = () => {
             });
             onMouseDownsub(e);
           });
-          canvas.on('touchmove', (e) => {
+          canvas.addEventListener('pointermove', (e) => {
             console.log("touchmove triggered");
             registration.showNotification('touchmove!', {
               body: 'Your 25 minute study session is over',
@@ -1255,7 +1255,7 @@ const CanvasEditor = () => {
             });
             onMouseMovesub(e);
           });
-          canvas.on('touchend', (e) => {
+          canvas.addEventListener('pointerup', (e) => {
             console.log("touchend triggered");
             registration.showNotification('touchend!', {
               body: 'Your 25 minute study session is over',
@@ -1986,7 +1986,7 @@ const handleIconTouchStart = (e) => {
   </button>
 
   <div style={{ fontSize: '14px' }}>
-    <strong><h2>{noteID}</h2></strong>
+    <strong><h2>v1:{noteID}</h2></strong>
   </div>
 
   <div style={{ fontSize: '14px' }}>
