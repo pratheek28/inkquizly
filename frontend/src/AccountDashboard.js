@@ -370,14 +370,35 @@ function AccountDashboard() {
             >
               <div className={styles.noteTitle}>{note}</div>
               <div>{conf[index]}</div>
-              <div><button
-  onClick={(e) => {
-    e.stopPropagation(); // Prevent click from reaching the card
-    handleDelete(note);
-  }}
->
-  Delete
-</button></div>
+              <div>
+  <button
+    onClick={(e) => {
+      e.stopPropagation(); // Prevent click from reaching the card
+      handleDelete(note);
+    }}
+    style={{
+      backgroundColor: 'white', /* Red background */
+      color: 'red',              /* White text */
+      border: 'none',              /* No border */
+      fontSize: '16px',            /* Font size */
+      borderRadius: '5px',         /* Rounded corners */
+      cursor: 'pointer',          /* Pointer cursor on hover */
+      transition: 'all 0.3s ease', /* Smooth transition for hover effects */
+      marginTop:50,
+    }}
+    onMouseOver={(e) => {
+        e.target.style.backgroundColor = '#d32f2f'; /* Darker red on hover */
+        e.target.style.color = 'white';              /* White text on hover */
+      }}
+      onMouseOut={(e) => {
+        e.target.style.backgroundColor = 'white'; /* Reset to original red */
+        e.target.style.color = 'red';              /* Keep text white */
+      }}
+  >
+    🗑️
+  </button>
+</div>
+
               </div>
           ))}
       </div>
