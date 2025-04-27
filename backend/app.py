@@ -256,49 +256,83 @@ print("Connected!")
 
 
 # converts base64 type to readable text for general use
-def ocr_from_base64(b64_str):
-    # Decode the base-64 string into bytes
-    # Add padding if necessary
-    # The padding logic is correct, adding padding if it's not a multiple of 4
-    b64_str += "=" * ((4 - len(b64_str) % 4) % 4)  
+# def ocr_from_base64(b64_str):
+#     # Decode the base-64 string into bytes
+#     # Add padding if necessary
+#     # The padding logic is correct, adding padding if it's not a multiple of 4
+#     b64_str += "=" * ((4 - len(b64_str) % 4) % 4)  
     
+#     try:
+#         # The likely issue is with the image data itself. So, wrap it in a try-except
+#         image_data = base64.b64decode(b64_str)
+#         image = Image.open(BytesIO(image_data)).convert('RGB')
+#         image_np = np.array(image)
+#         reader = easyocr.Reader(['en'])
+#         results = reader.readtext(image_np, detail=0)
+#         return " ".join(results)
+#     except UnidentifiedImageError:
+#         # Handle the specific exception that PIL throws
+#         # print out this helpful debugging message
+#         print(f"Error: Could not identify image format from base64 string.")
+#         # If you want, you can add more error handling or logging
+#         return ""  # Or raise a custom exception
+
+def ocr_from_base64(b64_str, max_width=800, max_height=800, crop_area=None):
+    # Ensure the base64 string has proper padding
+    b64_str += "=" * ((4 - len(b64_str) % 4) % 4)  # Fix padding if missing
+
     try:
-        # The likely issue is with the image data itself. So, wrap it in a try-except
+        # Decode the base64 string into bytes
         image_data = base64.b64decode(b64_str)
+        
+        # Open the image from bytes and convert to RGB mode
         image = Image.open(BytesIO(image_data)).convert('RGB')
+
+        # Resize the image for better OCR performance (optional)
+        image = resize_image(image, max_width, max_height)
+
+        # Crop the image if a crop area is specified (optional)
+        if crop_area:
+            image = image.crop(crop_area)
+
+        # Convert the image to a numpy array (for EasyOCR processing)
         image_np = np.array(image)
+        
+        # Initialize EasyOCR reader
         reader = easyocr.Reader(['en'])
-        results = reader.readtext(image_np, detail=0)
+
+        # Perform OCR on the image
+        results = reader.readtext(image_np, detail=0)  # detail=0 returns only the text
+
+        # Join all recognized text into a single string and return it
         return " ".join(results)
-    except UnidentifiedImageError:
-        # Handle the specific exception that PIL throws
-        # print out this helpful debugging message
-        print(f"Error: Could not identify image format from base64 string.")
-        # If you want, you can add more error handling or logging
-        return ""  # Or raise a custom exception
     
-def ocr_from_base64_google_vision(b64_str):
-    # Decode the base64 string
-    image_data = base64.b64decode(b64_str)
+    except UnidentifiedImageError:
+        # Handle the case where the image is invalid or cannot be identified
+        print(f"Error: Could not identify image format from base64 string.")
+        return "Invalid image format."
+    
+    except Exception as e:
+        # Catch any other general errors
+        print(f"Error during OCR processing: {e}")
+        return "An error occurred during OCR processing."
 
-    api_key = os.getenv('VISION_API_KEY')
 
+def resize_image(image, max_width, max_height):
+    # Get the current size of the image
+    width, height = image.size
+    
+    # Calculate the scaling factor for width and height
+    scale_factor = min(max_width / width, max_height / height)
 
-    # Initialize the Vision API client
-    client = vision.ImageAnnotatorClient(credentials=api_key)
+    # If the image is smaller than the max dimensions, don't resize it
+    if scale_factor < 1:
+        new_width = int(width * scale_factor)
+        new_height = int(height * scale_factor)
+        image = image.resize((new_width, new_height), Image.ANTIALIAS)
 
-    # Create an image object for the Vision API request
-    image = vision.Image(content=image_data)
-
-    # Perform OCR using Google Vision
-    response = client.text_detection(image=image)
-    texts = response.text_annotations
-
-    # Return the recognized text from the image
-    if texts:
-        return texts[0].description
-    else:
-        return "No text found"
+    return image
+    
     
 
     
@@ -326,7 +360,7 @@ def summarize_AI_written():
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64_google_vision(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
+    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
     )
     
     # Return the AI-generated summary as a JSON response

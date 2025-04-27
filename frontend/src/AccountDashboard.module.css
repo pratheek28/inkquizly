@@ -102,7 +102,7 @@
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(4px); /* Smooth blur effect */
-    z-index: 999;
+    z-index: 1000;
   }
   
   .popupContent {

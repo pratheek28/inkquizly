@@ -197,33 +197,59 @@ function AccountDashboard() {
 
   return (
     <div className={styles.dashboardWrapper}>
-      <NavigationBar />
+      {/* <NavigationBar /> */}
+      <div
+  style={{
+    position: 'fixed',    // Fix it at the top
+    top: '0',             // Position it at the top
+    left: '50%',          // Horizontally center it
+    transform: 'translateX(-50%)', // Adjust for true center
+    zIndex: 999,          // Ensure it stays on top of other content
+    display: 'flex',      // Flex to align content
+    alignItems: 'center', // Center logo vertically within the container
+    justifyContent: 'center', // Ensure it's centered in the parent
+    padding: '10px',      // Optional padding for the logo's container
+  }}
+>
+  <img
+    src="iq.png"
+    alt="Logo"
+    style={{
+      height: '150px', // Adjust size of the logo
+      width: 'auto',  // Maintain aspect ratio
+    }}
+  />
+</div>
 
       <div
         style={{
           position: 'fixed',  // Position it fixed to the screen
           top: '5',
           left: '5',
-          padding: '10px 20px',
           color: 'white',
           fontSize: '18px',
-          backgroundColor: 'rgba(0, 0, 0, 0.13)', // Optional: for better visibility
-          borderRadius: '5px', // Optional: rounded corners
-          zIndex: 9999,
+          backgroundColor: 'rgba(67, 73, 93, 0.99)', // Optional: for better visibility
+          borderRadius: '30px', // Optional: rounded corners
+          zIndex: 999,
           display: 'flex',          // <--- Add flex
           alignItems: 'center',     // <--- Center vertically
           gap: '10px',              // <--- Add some space between
           justifyContent: 'space-between', // Space out items to the ends
           width: '80%',      // Stretch across the full width
+          padding: '30px',  // Add padding around the content
+
 
         }}
       >
  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+ <div
+  style={{
+    fontFamily: 'Orbitron, sans-serif', // Apply the futuristic font
+  }}
+>
+  {splitText("Welcome, " + (user?.name || 'Loading...'))}
+</div>
   <div>
-    {splitText("Welcome, " + (user?.name || 'Loading...'))}
-  </div>
-  <div>
-    {splitText("What will you study today?" || 'Loading...')}
   </div>
 {/* Log Out Button */}
 <div className={styles.logoutWrapper}>
@@ -259,20 +285,7 @@ function AccountDashboard() {
           {digit}
         </span>
       ))}
-      <style>
-        {`
-          @keyframes slideAnimation {
-            from {
-              transform: translateX(100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateX(0);
-              opacity: 1;
-            }
-          }
-        `}
-      </style>
+
     </div>
       <style>
         {`
