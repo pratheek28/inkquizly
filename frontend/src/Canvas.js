@@ -1237,7 +1237,7 @@ const CanvasEditor = () => {
           canvas.on('mouse:down', onMouseDownsub);
           canvas.on('mouse:move', onMouseMovesub);
           canvas.on('mouse:up', onMouseUpsub);
-          canvas.addEventListener('pointerdown', (e) => {
+          canvas.on('pointerdown', (e) => {
             console.log("touchstart triggered");
             registration.showNotification('touchstart!', {
               body: 'Your 25 minute study session is over',
@@ -1246,7 +1246,7 @@ const CanvasEditor = () => {
             });
             onMouseDownsub(e);
           });
-          canvas.addEventListener('pointermove', (e) => {
+          canvas.on('pointermove', (e) => {
             console.log("touchmove triggered");
             registration.showNotification('touchmove!', {
               body: 'Your 25 minute study session is over',
@@ -1255,7 +1255,7 @@ const CanvasEditor = () => {
             });
             onMouseMovesub(e);
           });
-          canvas.addEventListener('pointerup', (e) => {
+          canvas.on('pointerup', (e) => {
             console.log("touchend triggered");
             registration.showNotification('touchend!', {
               body: 'Your 25 minute study session is over',
