@@ -1217,6 +1217,9 @@ const CanvasEditor = () => {
             canvas.off('mouse:down', onMouseDownsub);
             canvas.off('mouse:move', onMouseMovesub);
             canvas.off('mouse:up', onMouseUpsub);
+            canvas.off('touch:down', onMouseDownsub);
+            canvas.off('touch:move', onMouseMovesub);
+            canvas.off('touch:up', onMouseUpsub);
 
 
     // Re-enable movement and selection for all objects after the tool is used
@@ -1234,6 +1237,10 @@ const CanvasEditor = () => {
           canvas.on('mouse:down', onMouseDownsub);
           canvas.on('mouse:move', onMouseMovesub);
           canvas.on('mouse:up', onMouseUpsub);
+          canvas.on('touch:down', onMouseDownsub);
+          canvas.on('touch:move', onMouseMovesub);
+          canvas.on('touch:up', onMouseUpsub);
+
         } else if (activeTool === 'aihl') {
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
