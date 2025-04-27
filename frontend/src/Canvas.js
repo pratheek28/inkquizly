@@ -118,6 +118,8 @@ const CanvasEditor = () => {
         };
 
         canvas.on('mouse:over', () => handleClick(index));
+        canvas.on('touchstart', handleClick);
+
 
           objects.forEach((obj) => {
             console.log('object:', obj);
@@ -218,6 +220,8 @@ const CanvasEditor = () => {
 
         // Set up mouseover event
         canvas.on('mouse:over', handleClick);
+        canvas.on('touchstart', handleClick);
+
 
         newCanvases.push(canvas);
 
@@ -474,6 +478,7 @@ const CanvasEditor = () => {
       newCanvases.forEach((canvas) => {
         canvas.dispose();
         canvas.off('mouse:over');
+        canvas.off('touchstart');
       });
     };
   }, []);
@@ -565,6 +570,7 @@ const CanvasEditor = () => {
             src.startsWith('data:') ||
             src.startsWith('blob:') ||
             src.includes('localhost') ||
+            src.includes('inkquizly.tech') ||
             src.includes('inkquizly.onrender.com');
 
           if (isLocalImage) {
@@ -1773,6 +1779,17 @@ const CanvasEditor = () => {
     });
   };
 
+  // Handlers for floating icon dragging (touch)
+  const handleIconTouchStart = (e) => {
+    e.preventDefault(); // Prevents default touch action (like scrolling)
+    setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top,
+    });
+  };
+
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (isDragging) {
@@ -1942,6 +1959,7 @@ const CanvasEditor = () => {
             flexDirection: 'row',
             gap: '20px',
             textAlign: 'center',
+            color: 'black',
           }}
         >
           {/* Tool buttons (pen, marker, color pallet, etc.) */}
@@ -2292,6 +2310,7 @@ const CanvasEditor = () => {
           userSelect: 'none',
         }}
         onMouseDown={handleIconMouseDown}
+        onTouchStart={handleIconTouchStart}  // Add touch start listener for tablets
         onClick={handleIconClick}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#031b33';

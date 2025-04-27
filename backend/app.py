@@ -277,6 +277,9 @@ print("Connected!")
 #         # If you want, you can add more error handling or logging
 #         return ""  # Or raise a custom exception
 
+# Initialize EasyOCR reader
+reader = easyocr.Reader(['en'])
+
 def ocr_from_base64(b64_str, max_width=800, max_height=800, crop_area=None):
     # Ensure the base64 string has proper padding
     b64_str += "=" * ((4 - len(b64_str) % 4) % 4)  # Fix padding if missing
@@ -298,8 +301,8 @@ def ocr_from_base64(b64_str, max_width=800, max_height=800, crop_area=None):
         # Convert the image to a numpy array (for EasyOCR processing)
         image_np = np.array(image)
         
-        # Initialize EasyOCR reader
-        reader = easyocr.Reader(['en'])
+        # # Initialize EasyOCR reader
+        # reader = easyocr.Reader(['en'])
 
         # Perform OCR on the image
         results = reader.readtext(image_np, detail=0)  # detail=0 returns only the text
