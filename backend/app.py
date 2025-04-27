@@ -210,36 +210,33 @@ def getNote():
         print(f"Error occurred: {str(e)}")
         return jsonify({"message": "Error occurred while fetching notes"}), 500
     
-@app.route("/deleteNote", methods=['POST', 'OPTIONS'])
-def deleteNote():
-    if request.method == "OPTIONS":
-        return jsonify({}), 204
-    
+@app.route("/deleteNote", methods=['POST'])
+def delete_note():
     try:
+        # Get the data from the request body
         data = request.get_json()
-
         user_uid = data.get('user')
         note_name = data.get('note')
-
+        
         if not user_uid or not note_name:
-            return jsonify({"message": "UID or note name not provided"}), 400
+            return jsonify({"message": "User UID or Note Name not provided"}), 400
+        
+        # Fetch all notes matching note and uid to get the ids
+        notes = table.find({"note": note_name, "uid": user_uid})
+        
+        if not notes:
+            return jsonify({"message": "No matching notes found"}), 404
 
-        # Connect to the database
-        table = db.get_table("notes")
-
-        # Delete records matching the UID and Note name
-        deleted_count = table.delete_many({
-            "uid": user_uid,
-            "note": note_name
-        })
-
-        print(f"Deleted {deleted_count} records for user {user_uid} and note {note_name}")
-
+        # Delete all matching notes using their ids
+        for note in notes:
+            table.delete({"id": note["id"]})
+        
         return jsonify({"message": "Notes deleted successfully"}), 200
-
+    
     except Exception as e:
         print(f"Error occurred: {str(e)}")
-        return jsonify({"message": "Error occurred while deleting notes"}), 500
+        return jsonify({"message": "Error occurred while deleting the note"}), 500
+
 
 
 
