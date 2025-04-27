@@ -33,6 +33,28 @@ function AccountDashboard() {
     console.log("here option:",option);
   };
 
+  const handleDelete =  (option) => {
+    const confirmed = window.confirm('Are you sure you want to delete this note?');
+    if (!confirmed) return; // If user cancels, just stop.
+  
+    try {
+      const response =  fetch('https://inkquizly.onrender.com/deleteNote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ note: option, user: user.id }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to delete note');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+  
+
   useEffect(() => {
     if (selectedOption !== null) {
       // Only navigate when selectedOption has been updated
@@ -87,6 +109,8 @@ function AccountDashboard() {
   const handleNew = () => {
     setShowPopup(true); // Show the popup to ask for the notebook name
   };
+
+
 
   const handleNameChange = (e) => {
     setNotebookName(e.target.value); // Update the notebook name
@@ -346,7 +370,15 @@ function AccountDashboard() {
             >
               <div className={styles.noteTitle}>{note}</div>
               <div>{conf[index]}</div>
-            </div>
+              <div><button
+  onClick={(e) => {
+    e.stopPropagation(); // Prevent click from reaching the card
+    handleDelete(note);
+  }}
+>
+  Delete
+</button></div>
+              </div>
           ))}
       </div>
       
