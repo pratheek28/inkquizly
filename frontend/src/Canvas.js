@@ -281,9 +281,6 @@ const CanvasEditor = () => {
       // };
     
       // handleSubmit(); // Submit the data to the backend
-
-
-
     }
     else{
       for (let i = 0; i < numPages; i++) {
@@ -1603,13 +1600,24 @@ topicsindexes.current++; // persists across re-renders
     setShowColorPicker(true);
   };
 
-  // Handlers for floating icon dragging
+  // Handlers for floating icon dragging (mouse)
   const handleIconMouseDown = (e) => {
     setIsDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
     setDragOffset({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
+    });
+  };
+
+  // Handlers for floating icon dragging (touch)
+  const handleIconTouchStart = (e) => {
+    e.preventDefault(); // Prevents default touch action (like scrolling)
+    setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top,
     });
   };
 
@@ -1726,7 +1734,7 @@ topicsindexes.current++; // persists across re-renders
           }}
         >
           {/* Tool buttons (pen, marker, color pallet, etc.) */}
-          <div style={{ marginBottom: '8px', fontSize: '16px', fontWeight: 'bold' }}>
+          <div style={{ color: 'black', marginBottom: '8px', fontSize: '16px', fontWeight: 'bold' }}>
   {notetitle}
 </div>
           <button
@@ -2011,8 +2019,7 @@ topicsindexes.current++; // persists across re-renders
       <div
         style={{
           position: 'fixed',
-          //left: `${floatingIconPosition.x}px`,
-          left: `${Math.max(floatingIconPosition.x, (window.innerWidth / 2)-430)}px`, // Ensure it stays in the right half
+          left: `${Math.max(floatingIconPosition.x, (window.innerWidth / 2) - 430)}px`, // Ensure it stays in the right half
           top: `${floatingIconPosition.y}px`,
           backgroundColor: '#98a1f5',
           color: '#fff',
@@ -2025,6 +2032,7 @@ topicsindexes.current++; // persists across re-renders
           userSelect: 'none',
         }}
         onMouseDown={handleIconMouseDown}
+        onTouchStart={handleIconTouchStart}  // Add touch start listener for tablets
         onClick={handleIconClick}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#031b33';

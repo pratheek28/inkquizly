@@ -279,32 +279,32 @@ def get_top_image_URL():
 
 
 
-# returns response from gemini that creates a 5 question MCQ based on a specific subtitle and returns a parsable dictionary
-@app.route("/get", methods=['POST'])
-def AI_MCQ():
-    resp = request.get_json()
-    response = model.generate_content(f"Create 5 multiple choice questions with 3 options each about {resp.data}. Please generate in the following format => Q1: (first question)\nA: (first choice for first question)\nB (second choice for first question)\nC (third choice for first question)\nCheck: (correct option A, B, or C)." \
-                                      "PLEASE DON'T SAY ANYTHING ELSE BUT JUST GIVE WHAT I ASK. Also, go to the next line for every single new line")
-    pattern = (
-        r"Q\d+:\s*(.+?)\n"   # Capture the question text (non-greedy)
-        r"A:\s*(.+?)\n"      # Capture option A
-        r"B:\s*(.+?)\n"      # Capture option B
-        r"C:\s*(.+?)\n"      # Capture option C
-        r"Check:\s*([ABC])"  # Capture the correct option (A, B, or C)
-    )
+# # returns response from gemini that creates a 5 question MCQ based on a specific subtitle and returns a parsable dictionary
+# @app.route("/get", methods=['POST'])
+# def AI_MCQ():
+#     resp = request.get_json()
+#     response = model.generate_content(f"Create 5 multiple choice questions with 3 options each about {resp.data}. Please generate in the following format => Q1: (first question)\nA: (first choice for first question)\nB (second choice for first question)\nC (third choice for first question)\nCheck: (correct option A, B, or C)." \
+#                                       "PLEASE DON'T SAY ANYTHING ELSE BUT JUST GIVE WHAT I ASK. Also, go to the next line for every single new line")
+#     pattern = (
+#         r"Q\d+:\s*(.+?)\n"   # Capture the question text (non-greedy)
+#         r"A:\s*(.+?)\n"      # Capture option A
+#         r"B:\s*(.+?)\n"      # Capture option B
+#         r"C:\s*(.+?)\n"      # Capture option C
+#         r"Check:\s*([ABC])"  # Capture the correct option (A, B, or C)
+#     )
     
-    matches = re.findall(pattern, response, re.DOTALL)
+#     matches = re.findall(pattern, response, re.DOTALL)
 
-    # Build a list of dictionaries, one for each question
-    mcq_list = []
-    for question, option_a, option_b, option_c, correct in matches:
-        mcq_list.append({
-            'Q': question.strip(),
-            'A': option_a.strip(),
-            'B': option_b.strip(),
-            'C': option_c.strip(),
-            'Check': correct.strip()
-        })
+#     # Build a list of dictionaries, one for each question
+#     mcq_list = []
+#     for question, option_a, option_b, option_c, correct in matches:
+#         mcq_list.append({
+#             'Q': question.strip(),
+#             'A': option_a.strip(),
+#             'B': option_b.strip(),
+#             'C': option_c.strip(),
+#             'Check': correct.strip()
+#         })
 
 
 
@@ -341,9 +341,9 @@ def AI_study_schedule():
 def CanvasSave():
     res=request.get_json()
 
-    client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
+    # client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
     db = client.get_database_by_api_endpoint(
-    API_KEY #ENV VAR
+    # API_KEY #ENV VAR
     )
     print("Connected!")
     table=db.get_table("notes")
