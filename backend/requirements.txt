@@ -9,3 +9,4 @@ google-api-python-client
 gunicorn
 google-genai
 google-cloud-vision
+gevent>=1.4

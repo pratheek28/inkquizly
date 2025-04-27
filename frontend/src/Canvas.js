@@ -1891,7 +1891,7 @@ const CanvasEditor = () => {
     <strong>{notetitle}</strong>
   </div>
 </div>
-      <h2>{noteID}</h2>
+
 
       {Array.from({ length: numPages }, (_, index) => (
         <div
@@ -2317,9 +2317,9 @@ const CanvasEditor = () => {
           style={{
             position: 'fixed',
             left: '10px',
-            top: '90px',
+            top: '210px',
             width: '270px',
-            height: '600px',
+            height: '500px',
             backgroundColor: 'rgb(4, 8, 75)',
             border: '2px solid black',
             borderRadius: '20px', // <-- Curved edges

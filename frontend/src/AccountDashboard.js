@@ -193,7 +193,22 @@ function AccountDashboard() {
       minute: '2-digit',
     });
   
-    const splitTime = formattedTime.split(' ');
+    const splitTime = formattedTime.split('  ');
+
+
+    const [currentDate, setCurrentDate] = useState('');
+
+  // Function to format the date
+  const getFormattedDate = () => {
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return today.toLocaleDateString('en-US', options);
+  };
+
+  // Effect hook to set the date when the component mounts
+  useEffect(() => {
+    setCurrentDate(getFormattedDate());
+  }, []); // Empty dependency array ensures it runs only once on mount
 
   return (
     <div className={styles.dashboardWrapper}>
@@ -244,7 +259,7 @@ function AccountDashboard() {
  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
  <div
   style={{
-    fontFamily: 'Orbitron, sans-serif', // Apply the futuristic font
+    fontFamily: 'SF Pro Display,sans-serif', // Apply the futuristic font
   }}
 >
   {splitText("Welcome, " + (user?.name || 'Loading...'))}
@@ -270,8 +285,11 @@ function AccountDashboard() {
         fontFamily: 'monospace',
         display: 'inline-flex',
         gap: '10px',
+        flexDirection: 'column',
         boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
         marginTop: '10px',
+        alignItems: 'center',  // Centers items horizontally
+
       }}
     >
       {splitTime.map((digit, index) => (
@@ -286,7 +304,11 @@ function AccountDashboard() {
         </span>
       ))}
 
+<div>
+      {currentDate}
     </div>
+    </div>
+
       <style>
         {`
           @keyframes letterAnimation {
