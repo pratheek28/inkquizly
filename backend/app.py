@@ -17,7 +17,6 @@ from google import genai
 import re
 import os
 from google.cloud import vision
-from google.cloud.vision import types
 import io
 
 
@@ -289,7 +288,7 @@ def ocr_from_base64_google_vision(b64_str):
     client = vision.ImageAnnotatorClient(credentials=api_key)
 
     # Create an image object for the Vision API request
-    image = types.Image(content=image_data)
+    image = vision.Image(content=image_data)
 
     # Perform OCR using Google Vision
     response = client.text_detection(image=image)
@@ -300,6 +299,7 @@ def ocr_from_base64_google_vision(b64_str):
         return texts[0].description
     else:
         return "No text found"
+    
 
     
 

@@ -44,7 +44,7 @@
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    margin-top: 2rem;
+    margin-top: 15rem;
   }
   
   /* Card Style */
@@ -157,8 +157,8 @@
 
   .logoutWrapper {
     display: flex;
-    justify-content: flex-end;
-    padding: 5rem;
+    justify-content: flex-start;
+    padding: 1rem;
   }
   
   .logoutButton {

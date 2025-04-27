@@ -179,6 +179,7 @@ function AccountDashboard() {
     ));
   };
 
+
   // Function to animate each number separately
     const [time, setTime] = useState(new Date());
   
@@ -192,7 +193,7 @@ function AccountDashboard() {
       minute: '2-digit',
     });
   
-    const splitTime = formattedTime.split(':');
+    const splitTime = formattedTime.split(' ');
 
   return (
     <div className={styles.dashboardWrapper}>
@@ -200,6 +201,7 @@ function AccountDashboard() {
 
       <div
         style={{
+          position: 'fixed',  // Position it fixed to the screen
           top: '5',
           left: '5',
           padding: '10px 20px',
@@ -211,11 +213,27 @@ function AccountDashboard() {
           display: 'flex',          // <--- Add flex
           alignItems: 'center',     // <--- Center vertically
           gap: '10px',              // <--- Add some space between
+          justifyContent: 'space-between', // Space out items to the ends
+          width: '80%',      // Stretch across the full width
+
         }}
       >
-        <div>
-    {splitText("Hello, " + (user?.name || 'Loading...'))}
+ <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+  <div>
+    {splitText("Welcome, " + (user?.name || 'Loading...'))}
   </div>
+  <div>
+    {splitText("What will you study today?" || 'Loading...')}
+  </div>
+{/* Log Out Button */}
+<div className={styles.logoutWrapper}>
+        <button onClick={handleLogout} className={styles.logoutButton}>
+          Log Out
+        </button>
+      </div>
+  
+</div>
+  
   <div
       style={{
         backgroundColor: 'rgba(0, 0, 0, 0.2)',
@@ -270,13 +288,8 @@ function AccountDashboard() {
           }
         `}
       </style>
-      {/* Log Out Button */}
-            <div className={styles.logoutWrapper}>
-        <button onClick={handleLogout} className={styles.logoutButton}>
-          Log Out
-        </button>
       </div>
-      </div>
+      
 
       <div className={styles.notesGrid}>
         {/* New Note Button */}
@@ -301,6 +314,7 @@ function AccountDashboard() {
             </div>
           ))}
       </div>
+      
 
       {/* Popup for naming new note */}
       {showPopup && (
@@ -353,6 +367,7 @@ function AccountDashboard() {
                 Cancel
               </button>
             </div>
+
           </div>
         </div>
       )}
