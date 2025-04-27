@@ -1237,9 +1237,33 @@ const CanvasEditor = () => {
           canvas.on('mouse:down', onMouseDownsub);
           canvas.on('mouse:move', onMouseMovesub);
           canvas.on('mouse:up', onMouseUpsub);
-          canvas.on('touch:down', onMouseDownsub);
-          canvas.on('touch:move', onMouseMovesub);
-          canvas.on('touch:up', onMouseUpsub);
+          canvas.on('touchstart', (e) => {
+            console.log("touchstart triggered");
+            registration.showNotification('touchstart!', {
+              body: 'Your 25 minute study session is over',
+              icon: './logo192.png',
+              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+            });
+            onMouseDownsub(e);
+          });
+          canvas.on('touchmove', (e) => {
+            console.log("touchmove triggered");
+            registration.showNotification('touchmove!', {
+              body: 'Your 25 minute study session is over',
+              icon: './logo192.png',
+              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+            });
+            onMouseMovesub(e);
+          });
+          canvas.on('touchend', (e) => {
+            console.log("touchend triggered");
+            registration.showNotification('touchend!', {
+              body: 'Your 25 minute study session is over',
+              icon: './logo192.png',
+              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+            });
+            onMouseUpsub(e);
+          });
 
         } else if (activeTool === 'aihl') {
           // Special Highlighter tool handler
