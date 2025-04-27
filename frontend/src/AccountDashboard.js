@@ -171,11 +171,28 @@ function AccountDashboard() {
   // };
   const splitText = (text) => {
     return text.split('').map((letter, index) => (
-      <span key={index} style={{ animation: `letterAnimation 0.5s ease forwards`, animationDelay: `${index * 0.1}s` }}>
+      <span key={index} style={{     opacity: 0,  // <-- Start invisible!
+        animation: `letterAnimation 0.5s ease forwards`, animationDelay: `${index * 0.1}s` ,    animationFillMode: 'forwards', // <-- Important to keep final animation state
+    }}>
         {letter}
       </span>
     ));
   };
+
+  // Function to animate each number separately
+    const [time, setTime] = useState(new Date());
+  
+    useEffect(() => {
+      const interval = setInterval(() => setTime(new Date()), 60000); // Update every minute
+      return () => clearInterval(interval); // Cleanup on unmount
+    }, []);
+  
+    const formattedTime = time.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  
+    const splitTime = formattedTime.split(':');
 
   return (
     <div className={styles.dashboardWrapper}>
@@ -183,7 +200,6 @@ function AccountDashboard() {
 
       <div
         style={{
-          position: 'absolute',
           top: '5',
           left: '5',
           padding: '10px 20px',
@@ -192,10 +208,54 @@ function AccountDashboard() {
           backgroundColor: 'rgba(0, 0, 0, 0.13)', // Optional: for better visibility
           borderRadius: '5px', // Optional: rounded corners
           zIndex: 9999,
+          display: 'flex',          // <--- Add flex
+          alignItems: 'center',     // <--- Center vertically
+          gap: '10px',              // <--- Add some space between
         }}
       >
-        {splitText("Hello, "+user?.name || 'Loading...')}
-      </div>
+        <div>
+    {splitText("Hello, " + (user?.name || 'Loading...'))}
+  </div>
+  <div
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        color: 'white',
+        padding: '10px 20px',
+        fontSize: '24px',
+        borderRadius: '10px',
+        fontFamily: 'monospace',
+        display: 'inline-flex',
+        gap: '10px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+        marginTop: '10px',
+      }}
+    >
+      {splitTime.map((digit, index) => (
+        <span
+          key={index}
+          style={{
+            display: 'inline-block',
+            animation: `slideAnimation 1s ease forwards ${index * 0.2}s`,
+          }}
+        >
+          {digit}
+        </span>
+      ))}
+      <style>
+        {`
+          @keyframes slideAnimation {
+            from {
+              transform: translateX(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateX(0);
+              opacity: 1;
+            }
+          }
+        `}
+      </style>
+    </div>
       <style>
         {`
           @keyframes letterAnimation {
@@ -215,6 +275,7 @@ function AccountDashboard() {
         <button onClick={handleLogout} className={styles.logoutButton}>
           Log Out
         </button>
+      </div>
       </div>
 
       <div className={styles.notesGrid}>

@@ -8,3 +8,4 @@ Pillow
 google-api-python-client
 gunicorn
 google-genai
+pytesseract

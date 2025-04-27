@@ -16,6 +16,9 @@ from googleapiclient.discovery import build
 from google import genai
 import re
 import os
+import pytesseract
+import io
+
 
 app = Flask(__name__)
 from flask_cors import CORS
@@ -274,6 +277,19 @@ def ocr_from_base64(b64_str):
         # If you want, you can add more error handling or logging
         return ""  # Or raise a custom exception
     
+def ocr_from_base64_tesseract(base64_data):
+    image_data = base64.b64decode(base64_data)
+    image = Image.open(io.BytesIO(image_data))
+
+    # Resize and convert to grayscale (optional)
+    image = image.resize((image.width // 2, image.height // 2))
+    image = image.convert('L')  # Grayscale image
+
+    # Run OCR with Tesseract
+    text = pytesseract.image_to_string(image)
+
+    return text
+    
 
 @app.route("/getsummarized", methods=['POST'])
 def summarize_user_written():
@@ -298,7 +314,7 @@ def summarize_AI_written():
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
+    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64_tesseract(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
     )
     
     # Return the AI-generated summary as a JSON response
