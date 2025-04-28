@@ -232,7 +232,7 @@ def delete_note():
 
         # Delete all matching notes using their ids
         for note in notes:
-            table.delete({"id": note["id"]})
+            table.delete_one({"id": note["id"]})
         
         return jsonify({"message": "Notes deleted successfully"}), 200
     
