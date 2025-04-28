@@ -33,12 +33,12 @@ function AccountDashboard() {
     console.log("here option:",option);
   };
 
-  const handleDelete =  (option) => {
+  const handleDelete =  async (option) => {
     const confirmed = window.confirm('Are you sure you want to delete this note?');
     if (!confirmed) return; // If user cancels, just stop.
   
     try {
-      const response =  fetch('https://inkquizly.onrender.com/deleteNote', {
+      const response = await fetch('https://inkquizly.onrender.com/deleteNote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,6 +49,7 @@ function AccountDashboard() {
       if (!response.ok) {
         throw new Error('Failed to delete note');
       }
+      window.location.reload();
     } catch (error) {
       console.error('Error:', error);
     }

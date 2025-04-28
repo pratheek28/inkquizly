@@ -1989,7 +1989,7 @@ const handleIconTouchStart = (e) => {
   </button>
 
   <div style={{ fontSize: '14px' }}>
-    <strong><h2>v1:{noteID}</h2></strong>
+    <strong><h2>{noteID}</h2></strong>
   </div>
 
   <div style={{ fontSize: '14px' }}>
@@ -2383,7 +2383,7 @@ const handleIconTouchStart = (e) => {
           //left: `${floatingIconPosition.x}px`,
           left: `${Math.max(
             floatingIconPosition.x,
-            window.innerWidth / 2 - 430
+            window.innerWidth / 2+430
           )}px`, // Ensure it stays in the right half
           top: `${floatingIconPosition.y}px`,
           backgroundColor: '#98a1f5',
