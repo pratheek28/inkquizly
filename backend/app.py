@@ -455,9 +455,9 @@ def summarize_user_written():
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents="Can you generate a response to this that max 20 lines and is super understandable to any students? " \
+    model="gemini-2.0-flash", contents="Can you generate a response to the following with max 20 lines and is super understandable to any students like a textbook paragraph? " \
                                       "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-                                      f"and be able also to learn the implications of this and its application:{ocr_from_base64(subtitle['topic'])}"
+                                      f"and be able to also learn the implications of this and its application:{ocr_from_base64(subtitle['topic'])}"
     )
     
     # Return the AI-generated summary as a JSON response
