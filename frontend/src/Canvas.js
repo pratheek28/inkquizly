@@ -1605,33 +1605,50 @@ const CanvasEditor = () => {
     const canvas = canvases[activeCanvasIndex];
     if (!canvas || !rect) return;
 
-    let topic = '';
+    // let topic = '';
+
+    canvas.renderAll();
+
+    const Rect = rect.getBoundingRect(true);
+
+    const fullDataURL = canvas.toDataURL({
+      format: 'png',
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      multiplier: 1,
+    });
+
+    const topic = fullDataURL.split(',')[1];
+    console.log('Base64 image:', topic);
+
 
     // Highlight bolding
-    const objectsInRegion = canvas.getObjects().filter((obj) => {
-      const bounds = obj.getBoundingRect();
-      return (
-        bounds.left + bounds.width > rect.left &&
-        bounds.top + bounds.height > rect.top &&
-        bounds.left < rect.left + rect.width &&
-        bounds.top < rect.top + rect.height
-      );
-    });
+    // const objectsInRegion = canvas.getObjects().filter((obj) => {
+    //   const bounds = obj.getBoundingRect();
+    //   return (
+    //     bounds.left + bounds.width > rect.left &&
+    //     bounds.top + bounds.height > rect.top &&
+    //     bounds.left < rect.left + rect.width &&
+    //     bounds.top < rect.top + rect.height
+    //   );
+    // });
 
     const topicindex = topicsindexes.current;
     topicsindexes.current++; // persists across re-renders
 
-    objectsInRegion.forEach((obj) => {
-      if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
-        obj.set('fontWeight', 'bold');
-        obj.setCoords(); // Force update of bounding box after setting font weight
-        topic += obj.text; // Collect text from text objects
-        // topicindex=topicsindexes;
-        // topicsindexes++;
-      } else {
-        obj.set('strokeWidth', (obj.strokeWidth || 1) * 1.5);
-      }
-    });
+    // objectsInRegion.forEach((obj) => {
+    //   if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
+    //     obj.set('fontWeight', 'bold');
+    //     obj.setCoords(); // Force update of bounding box after setting font weight
+    //     topic += obj.text; // Collect text from text objects
+    //     // topicindex=topicsindexes;
+    //     // topicsindexes++;
+    //   } else {
+    //     obj.set('strokeWidth', (obj.strokeWidth || 1) * 1.5);
+    //   }
+    // });
 
     // Underline
     const underline = new fabric.Line(
