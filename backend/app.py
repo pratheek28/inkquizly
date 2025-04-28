@@ -471,7 +471,7 @@ def summarize_AI_written():
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 2 sentences to define the following phrase: {ocr_from_base64(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
+    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 15-20 words to define the following phrase: {ocr_from_base64(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
     )
     
     # Return the AI-generated summary as a JSON response
