@@ -1089,6 +1089,9 @@ const CanvasEditor = () => {
             }
           });
         } else if (activeTool === 'subhl') {
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
           let startX, startY;
@@ -1271,6 +1274,9 @@ const CanvasEditor = () => {
           });
 
         } else if (activeTool === 'aihl') {
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
           let startX, startY;
