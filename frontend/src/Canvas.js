@@ -222,7 +222,7 @@ const CanvasEditor = () => {
 
         // Set up mouseover event
         canvas.on('mouse:over', handleClick);
-        canvas.on('touchstart', handleClick);
+        canvas.on('mouse:down', handleClick);
 
 
         newCanvases.push(canvas);
@@ -480,7 +480,7 @@ const CanvasEditor = () => {
       newCanvases.forEach((canvas) => {
         canvas.dispose();
         canvas.off('mouse:over');
-        canvas.off('touchstart');
+        canvas.off('mouse:down');
       });
     };
   }, []);
@@ -1969,7 +1969,7 @@ const handleIconTouchStart = (e) => {
     flexDirection: 'column',
     alignItems: 'center', // <--- CENTER everything horizontally
     gap: '10px', // Space between items
-    minWidth: '200px',
+    minWidth: '150px',
     textAlign: 'center', // <--- CENTER the text itself too
   }}
 >

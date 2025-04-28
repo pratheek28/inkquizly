@@ -258,7 +258,7 @@ function AccountDashboard() {
     src="iq.png"
     alt="Logo"
     style={{
-      height: '150px', // Adjust size of the logo
+      height: '100px', // Adjust size of the logo
       width: 'auto',  // Maintain aspect ratio
     }}
   />

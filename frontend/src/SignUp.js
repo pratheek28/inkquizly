@@ -20,8 +20,11 @@ function SignUp() {
     });
   };
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true);
     fetch("https://inkquizly.onrender.com/getSignUpDetails", {
       method: "POST",
       headers: {
@@ -35,8 +38,11 @@ function SignUp() {
     })
     .catch(error => {
       console.error("Error:", error);
-      setResponse("An error occurred while submitting the form.");
-    });
+      setResponse("An error occurred. Please try again later!");
+    })
+    .finally(() => {
+      setLoading(false);
+  });
   };
 
   return (
@@ -101,7 +107,10 @@ function SignUp() {
         </div>
 
         <div className="submit">
-          <button type="submit">Create Account</button>
+        <button type="submit" disabled={loading}>
+                    {loading ? "Incredible things take time, please wait..." : "Create Account"}
+                </button>
+          {/* <button type="submit">Create Account</button> */}
         </div>
         {response && <p style={{ marginTop: "1rem", color: response.includes("Successfully") ? "green" : "red"}}>{response}</p>}
       </form>
