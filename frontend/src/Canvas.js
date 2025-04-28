@@ -23,7 +23,7 @@ const CanvasEditor = () => {
   const [showTextbox, setShowTextbox] = useState(false);
   const [diagramInput, setDiagramInput] = useState('');
   const [showGrid, setShowGrid] = useState(false);
-  const [pomodoroTime, setPomodoroTime] = useState(2); // 25 minutes in seconds
+  const [pomodoroTime, setPomodoroTime] = useState(1500); // 25 minutes in seconds
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [searchimg, setsearch] = useState(false);
 
@@ -2555,7 +2555,7 @@ const handleIconTouchStart = (e) => {
             //left: `${floatingIconPosition.x}px`,
             left: `${Math.max(
               floatingIconPosition.x,
-              window.innerWidth / 2 - 400
+              window.innerWidth / 2 + 400
             )}px`, // Ensure it stays in the right half
             top: `${floatingIconPosition.y + 70}px`,
             transform: 'translate(-50%, 0)', // Center horizontally

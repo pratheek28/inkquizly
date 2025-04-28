@@ -89,6 +89,7 @@ function AccountDashboard() {
         const data = await response.json();
         setNoteNames(data.note_names); // Assuming the server returns a list of note names
         setConf(data.confidences);
+        setCloud("☁️✅")
       } catch (error) {
         console.error('Error:', error);
       }
@@ -207,6 +208,8 @@ function AccountDashboard() {
 
   // Function to animate each number separately
     const [time, setTime] = useState(new Date());
+    const [cloud, setCloud] = useState("☁️ 🔄 Syncing");
+
   
     useEffect(() => {
       const interval = setInterval(() => setTime(new Date()), 60000); // Update every minute
@@ -299,7 +302,6 @@ function AccountDashboard() {
       </div>
   
 </div>
-  
   <div
       style={{
         backgroundColor: 'rgba(0, 0, 0, 0.2)',
@@ -317,7 +319,20 @@ function AccountDashboard() {
 
       }}
     >
-      {splitTime.map((digit, index) => (
+<div style={{
+        backgroundColor: 'rgba(36, 240, 0, 0.5)',
+        color: 'white',
+        padding: '5px',
+        fontSize: '15px',
+        borderRadius: '10px',
+        fontFamily: 'monospace',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.71)',
+        alignItems: 'center',  // Centers items horizontally
+
+      }}>{cloud}</div>
+     {splitTime.map((digit, index) => (
         <span
           key={index}
           style={{
@@ -333,7 +348,6 @@ function AccountDashboard() {
       {currentDate}
     </div>
     </div>
-
       <style>
         {`
           @keyframes letterAnimation {
