@@ -2383,7 +2383,7 @@ const handleIconTouchStart = (e) => {
           //left: `${floatingIconPosition.x}px`,
           left: `${Math.max(
             floatingIconPosition.x,
-            window.innerWidth / 2 - 430
+            window.innerWidth / 2 + 430
           )}px`, // Ensure it stays in the right half
           top: `${floatingIconPosition.y}px`,
           backgroundColor: '#98a1f5',
