@@ -118,7 +118,9 @@ const CanvasEditor = () => {
         };
 
         canvas.on('mouse:over', () => handleClick(index));
-        canvas.on('touchstart', handleClick);
+        canvas.on('mouse:down', handleClick(index));
+
+        // canvas.on('touchstart', handleClick);
 
 
           objects.forEach((obj) => {
@@ -1957,7 +1959,7 @@ const handleIconTouchStart = (e) => {
   style={{
     position: 'fixed',
     top: '20px',
-    left: '20px',
+    right: '20px',
     backgroundColor: 'rgba(0, 16, 120, 0.9)', // dark gray with transparency
     padding: '20px',
     borderRadius: '10px',
@@ -2005,7 +2007,7 @@ const handleIconTouchStart = (e) => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            width: '100%',
+            width: '95%',
             height: 'auto',
             overflowY: 'auto',
             maxWidth: '794px',
@@ -2425,8 +2427,8 @@ const handleIconTouchStart = (e) => {
           style={{
             position: 'fixed',
             left: '10px',
-            top: '210px',
-            width: '270px',
+            top: '100px',
+            width: '220px',
             height: '500px',
             backgroundColor: 'rgb(4, 8, 75)',
             border: '2px solid black',
