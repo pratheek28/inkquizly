@@ -221,6 +221,9 @@ def delete_note():
         if not user_uid or not note_name:
             return jsonify({"message": "User UID or Note Name not provided"}), 400
         
+        table = db.get_table("notes")
+
+        
         # Fetch all notes matching note and uid to get the ids
         notes = table.find({"note": note_name, "uid": user_uid})
         
