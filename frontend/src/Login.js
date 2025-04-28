@@ -45,7 +45,7 @@ function Login() {
         })
         .catch(error => {
             console.error("Error:", error);
-            setResponse("An Error occurred while submitting the form.");
+            setResponse("An error occurred. Please try again in a few mins.");
         })
         .finally(() => {
             setLoading(false);
