@@ -118,13 +118,24 @@ const CanvasEditor = () => {
         };
 
         canvas.upperCanvasEl.addEventListener('touchstart', (e) => {
-          if (e.touches.length > 1) {
-            // Ignore if it's a multi-touch (could be palm)
-            e.preventDefault();
+          const touch = e.touches[0];
+        
+          // Some browsers support this:
+          if (touch.touchType && touch.touchType !== 'stylus') {
+            e.preventDefault(); // Ignore fingers/palms
             return;
           }
-          // Allow single-touch drawing
+        
+          // Fallback: allow only touches with a small radius (rough stylus heuristic)
+          if (touch.radiusX > 10 || touch.radiusY > 10) {
+            e.preventDefault(); // Likely palm/finger
+            return;
+          }
+        
+          // At this point, likely a stylus touch
+          console.log('Stylus input detected');
         });
+        
 
         //canvas.on('mouse:over', () => handleClick(index));
         // canvas.on('mouse:down', () => handleClick(index));
