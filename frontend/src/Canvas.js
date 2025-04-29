@@ -118,7 +118,7 @@ const CanvasEditor = () => {
         };
 
         // canvas.on('mouse:over', () => handleClick(index));
-        canvas.on('mouse:down', handleClick(index));
+        canvas.on('mouse:down', () => handleClick(index));
 
         // canvas.on('touchstart', handleClick);
 
