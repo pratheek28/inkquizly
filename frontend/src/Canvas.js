@@ -798,10 +798,10 @@ const CanvasEditor = () => {
   };
 
   //let img1='';
-  const [img1, setimg1] = useState('');
-  const [img2, setimg2] = useState('');
-  const [img3, setimg3] = useState('');
-  const [img4, setimg4] = useState('');
+  const [img1, setimg1] = useState(null);
+  const [img2, setimg2] = useState(null);
+  const [img3, setimg3] = useState(null);
+  const [img4, setimg4] = useState(null);
   // Load image lookup on change
   useEffect(() => {
     if (!diagramInput) {
@@ -1574,7 +1574,8 @@ const CanvasEditor = () => {
     const canvas = canvases[activeCanvasIndex];
     try {
       // Wait until the image is loaded and create an image object
-      const img = await fabric.FabricImage.fromURL(url, null, { crossOrigin: 'anonymous' });
+      const img = await fabric.FabricImage.fromURL(url);
+      img.set({ crossOrigin: 'anonymous' });
 
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
@@ -1603,6 +1604,7 @@ const CanvasEditor = () => {
       console.error('Error loading image:', error);
     }
   };
+
 
   const topicsindexes = useRef(0);
 

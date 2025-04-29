@@ -483,6 +483,12 @@ def summarize_AI_written():
     # Return the AI-generated summary as a JSON response
     return jsonify({"definition": response.text})  # Ensure the response is correctly wrapped in a dictionary for jsonify
 
+@app.route("/keepactive", methods=['POST'])
+def active():
+
+    # Return the AI-generated summary as a JSON response
+    return jsonify("activated")  # Ensure the response is correctly wrapped in a dictionary for jsonify
+
 
 # # returns response by taking 'subtitle' and generates a concise AI summary of that given 'subtitle'
 # @app.route("/getsummarized", methods=['POST'])
