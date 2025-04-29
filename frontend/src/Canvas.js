@@ -1574,7 +1574,7 @@ const CanvasEditor = () => {
     const canvas = canvases[activeCanvasIndex];
     try {
       // Wait until the image is loaded and create an image object
-      const img = await fabric.FabricImage.fromURL(url);
+      const img = await fabric.FabricImage.fromURL(url, null, { crossOrigin: 'anonymous' });
 
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
