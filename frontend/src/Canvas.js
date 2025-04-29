@@ -117,8 +117,10 @@ const CanvasEditor = () => {
           console.log(`Canvas ${index} clicked`);
         };
 
-        // canvas.on('mouse:over', () => handleClick(index));
-        canvas.on('mouse:down', () => handleClick(index));
+        canvas.on('mouse:over', () => handleClick(index));
+        // canvas.on('mouse:down', () => handleClick(index));
+        const clickHandler = handleCanvasClick(index);
+        canvas.on('mouse:down', clickHandler);
 
         // canvas.on('touchstart', handleClick);
 
@@ -221,8 +223,10 @@ const CanvasEditor = () => {
         // };
 
         // // Set up mouseover event
-        // canvas.on('mouse:over', handleClick);
-        // canvas.on('mouse:down', handleClick);
+        // // canvas.on('mouse:over', handleClick);
+        // // canvas.on('mouse:down', handleClick);
+        // canvas.on('mouse:over', () => handleClick(index));
+        // canvas.on('mouse:down', () => handleClick(index));
 
 
         newCanvases.push(canvas);
@@ -997,50 +1001,74 @@ const CanvasEditor = () => {
     canvases.forEach((canvas) => {
       if (canvas) {
         if (activeTool === 'pen') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
+          canvas.off('mouse:down', eraserMouseDown);
+          canvas.off('mouse:move', eraserMouseMove);
+          canvas.off('mouse:up', eraserMouseUp);
+          canvas.off('mouse:up', handleTextToolMouseUp);
+          canvas.off('mouse:down', onMouseDownsub);
+          canvas.off('mouse:move', onMouseMovesub);
+          canvas.off('mouse:up', onMouseUpsub);
+          canvas.off('mouse:down', onMouseDown);
+          canvas.off('mouse:move', onMouseMove);
+          canvas.off('mouse:up', onMouseUp);
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 5;
         } else if (activeTool === 'marker') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
+          canvas.off('mouse:down', eraserMouseDown);
+          canvas.off('mouse:move', eraserMouseMove);
+          canvas.off('mouse:up', eraserMouseUp);
+          canvas.off('mouse:up', handleTextToolMouseUp);
+          canvas.off('mouse:down', onMouseDownsub);
+          canvas.off('mouse:move', onMouseMovesub);
+          canvas.off('mouse:up', onMouseUpsub);
+          canvas.off('mouse:down', onMouseDown);
+          canvas.off('mouse:move', onMouseMove);
+          canvas.off('mouse:up', onMouseUp);
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 10;
         } else if (activeTool === 'highlighter') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
+          canvas.off('mouse:down', eraserMouseDown);
+          canvas.off('mouse:move', eraserMouseMove);
+          canvas.off('mouse:up', eraserMouseUp);
+          canvas.off('mouse:up', handleTextToolMouseUp);
+          canvas.off('mouse:down', onMouseDownsub);
+          canvas.off('mouse:move', onMouseMovesub);
+          canvas.off('mouse:up', onMouseUpsub);
+          canvas.off('mouse:down', onMouseDown);
+          canvas.off('mouse:move', onMouseMove);
+          canvas.off('mouse:up', onMouseUp);
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           let bColor = hexToRgba(brushColor, 0.5);
           canvas.freeDrawingBrush.color = bColor;
           canvas.freeDrawingBrush.width = 15;
         } else if (activeTool === 'eraser') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
-          canvas.isDrawingMode = true;
-          canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-          canvas.freeDrawingBrush.color = 'rgba(255, 169, 78, 0.5)';
-          canvas.freeDrawingBrush.width = 5;
-          canvas.on('mouse:down', function (e) {
+          canvas.off('mouse:up', handleTextToolMouseUp);
+          canvas.off('mouse:down', onMouseDownsub);
+          canvas.off('mouse:move', onMouseMovesub);
+          canvas.off('mouse:up', onMouseUpsub);
+          canvas.off('mouse:down', onMouseDown);
+          canvas.off('mouse:move', onMouseMove);
+          canvas.off('mouse:up', onMouseUp);
+
+          function eraserMouseDown(e) {
             const pointer = canvas.getPointer(e.e);
             canvas._currentEraserPoints = [pointer];
             canvas.isErasing = true;
-          });
-          canvas.on('mouse:move', function (e) {
+          }
+          
+          function eraserMouseMove(e) {
             if (canvas.isErasing) {
               const pointer = canvas.getPointer(e.e);
               canvas._currentEraserPoints.push(pointer);
             }
-          });
-          canvas.on('mouse:up', function (e) {
+          }
+          
+          function eraserMouseUp(e) {
             if (canvas.isErasing) {
               canvas.isErasing = false;
               const eraserPoints = canvas._currentEraserPoints;
@@ -1062,18 +1090,36 @@ const CanvasEditor = () => {
               });
               canvas.renderAll();
             }
-          });
+          }
+          canvas.on('mouse:down', eraserMouseDown);
+          canvas.on('mouse:move', eraserMouseMove);
+          canvas.on('mouse:up', eraserMouseUp);
+
         } else if (activeTool === 'point') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
+          canvas.off('mouse:down', eraserMouseDown);
+          canvas.off('mouse:move', eraserMouseMove);
+          canvas.off('mouse:up', eraserMouseUp);
+          canvas.off('mouse:up', handleTextToolMouseUp);
+          canvas.off('mouse:down', onMouseDownsub);
+          canvas.off('mouse:move', onMouseMovesub);
+          canvas.off('mouse:up', onMouseUpsub);
+          canvas.off('mouse:down', onMouseDown);
+          canvas.off('mouse:move', onMouseMove);
+          canvas.off('mouse:up', onMouseUp);
           canvas.isDrawingMode = false;
         } else if (activeTool === 'text') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
+          canvas.off('mouse:down', eraserMouseDown);
+          canvas.off('mouse:move', eraserMouseMove);
+          canvas.off('mouse:up', eraserMouseUp);
+          canvas.off('mouse:down', onMouseDownsub);
+          canvas.off('mouse:move', onMouseMovesub);
+          canvas.off('mouse:up', onMouseUpsub);
+          canvas.off('mouse:down', onMouseDown);
+          canvas.off('mouse:move', onMouseMove);
+          canvas.off('mouse:up', onMouseUp);
+
           canvas.isDrawingMode = false;
-          canvas.on('mouse:up', (e) => {
+          function handleTextToolMouseUp(e) {
             if (!e.target) {
               const pointer = canvas.getPointer(e.e);
               const text = new fabric.Textbox('Click to edit text', {
@@ -1087,11 +1133,17 @@ const CanvasEditor = () => {
               canvas.setActiveObject(text);
               canvas.renderAll();
             }
-          });
+          }
+          canvas.on('mouse:up', handleTextToolMouseUp); // add the named function
+
         } else if (activeTool === 'subhl') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
+          canvas.off('mouse:down', eraserMouseDown);
+          canvas.off('mouse:move', eraserMouseMove);
+          canvas.off('mouse:up', eraserMouseUp);
+          canvas.off('mouse:up', handleTextToolMouseUp);
+          canvas.off('mouse:down', onMouseDown);
+          canvas.off('mouse:move', onMouseMove);
+          canvas.off('mouse:up', onMouseUp);
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
           let startX, startY;
@@ -1219,12 +1271,6 @@ const CanvasEditor = () => {
 
             // Reset and clean up
             highlightRect = null;
-            canvas.off('mouse:down', onMouseDownsub);
-            canvas.off('mouse:move', onMouseMovesub);
-            canvas.off('mouse:up', onMouseUpsub);
-            canvas.off('touch:down', onMouseDownsub);
-            canvas.off('touch:move', onMouseMovesub);
-            canvas.off('touch:up', onMouseUpsub);
 
 
     // Re-enable movement and selection for all objects after the tool is used
@@ -1242,41 +1288,15 @@ const CanvasEditor = () => {
           canvas.on('mouse:down', onMouseDownsub);
           canvas.on('mouse:move', onMouseMovesub);
           canvas.on('mouse:up', onMouseUpsub);
-          canvas.on('pointerdown', (e) => {
-            e.preventDefault();
-            console.log("touchstart triggered");
-            registration.showNotification('touchstart!', {
-              body: 'Your 25 minute study session is over',
-              icon: './logo192.png',
-              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
-            });
-            onMouseDownsub(e);
-          });
-          canvas.on('pointermove', (e) => {
-            e.preventDefault();
-            console.log("touchmove triggered");
-            registration.showNotification('touchmove!', {
-              body: 'Your 25 minute study session is over',
-              icon: './logo192.png',
-              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
-            });
-            onMouseMovesub(e);
-          });
-          canvas.on('pointerup', (e) => {
-            e.preventDefault();
-            console.log("touchend triggered");
-            registration.showNotification('touchend!', {
-              body: 'Your 25 minute study session is over',
-              icon: './logo192.png',
-              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
-            });
-            onMouseUpsub(e);
-          });
 
         } else if (activeTool === 'aihl') {
-          canvas.off('mouse:down');
-          canvas.off('mouse:move');
-          canvas.off('mouse:up');
+          canvas.off('mouse:down', eraserMouseDown);
+          canvas.off('mouse:move', eraserMouseMove);
+          canvas.off('mouse:up', eraserMouseUp);
+          canvas.off('mouse:up', handleTextToolMouseUp);
+          canvas.off('mouse:down', onMouseDownsub);
+          canvas.off('mouse:move', onMouseMovesub);
+          canvas.off('mouse:up', onMouseUpsub);
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
           let startX, startY;
@@ -1327,9 +1347,6 @@ const CanvasEditor = () => {
             underlineHighlightedRegion(finalRect);
             console.log('logged higlight');
             highlightRect = null;
-            canvas.off('mouse:down', onMouseDown);
-            canvas.off('mouse:move', onMouseMove);
-            canvas.off('mouse:up', onMouseUp);
           };
           canvas.on('mouse:down', onMouseDown);
           canvas.on('mouse:move', onMouseMove);
