@@ -117,6 +117,15 @@ const CanvasEditor = () => {
           console.log(`Canvas ${index} clicked`);
         };
 
+        canvas.upperCanvasEl.addEventListener('touchstart', (e) => {
+          if (e.touches.length > 1) {
+            // Ignore if it's a multi-touch (could be palm)
+            e.preventDefault();
+            return;
+          }
+          // Allow single-touch drawing
+        });
+
         //canvas.on('mouse:over', () => handleClick(index));
         // canvas.on('mouse:down', () => handleClick(index));
         //canvas.on('pointer:down', () => handleClick(index));
