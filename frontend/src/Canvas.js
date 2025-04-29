@@ -117,7 +117,7 @@ const CanvasEditor = () => {
           console.log(`Canvas ${index} clicked`);
         };
 
-        canvas.on('mouse:over', () => handleClick(index));
+        // canvas.on('mouse:over', () => handleClick(index));
         canvas.on('mouse:down', handleClick(index));
 
         // canvas.on('touchstart', handleClick);
@@ -214,15 +214,15 @@ const CanvasEditor = () => {
         canvas.renderAll();
         console.log('Canvasref=', canvasRef.current[index]);
 
-        // Handle canvas click event
-        const handleClick = () => {
-          setActiveCanvasIndex(index);
-          console.log(`Canvas ${index} clicked`);
-        };
+        // // Handle canvas click event
+        // const handleClick = () => {
+        //   setActiveCanvasIndex(index);
+        //   console.log(`Canvas ${index} clicked`);
+        // };
 
-        // Set up mouseover event
-        canvas.on('mouse:over', handleClick);
-        canvas.on('mouse:down', handleClick);
+        // // Set up mouseover event
+        // canvas.on('mouse:over', handleClick);
+        // canvas.on('mouse:down', handleClick);
 
 
         newCanvases.push(canvas);
