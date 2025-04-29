@@ -22,7 +22,13 @@ import requests
 app = Flask(__name__)
 from flask_cors import CORS
 
-CORS(app, resources={r"/*": {"origins": ["*"]}})
+# CORS(app, resources={r"/*": {"origins": ["*"]}})
+CORS(app, resources={r"/*": {"origins": [
+    "https://inkquizly.tech",
+    "https://www.inkquizly.tech",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]}}, supports_credentials=True)
 #"https://inkquizly.tech", "https://www.inkquizly.tech"
 
 
