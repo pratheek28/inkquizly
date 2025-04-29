@@ -117,12 +117,14 @@ const CanvasEditor = () => {
           console.log(`Canvas ${index} clicked`);
         };
 
-        canvas.on('mouse:over', () => handleClick(index));
+        //canvas.on('mouse:over', () => handleClick(index));
         // canvas.on('mouse:down', () => handleClick(index));
-        const clickHandler = handleCanvasClick(index);
-        canvas.on('mouse:down', clickHandler);
+        //canvas.on('pointer:down', () => handleClick(index));
 
         // canvas.on('touchstart', handleClick);
+
+        
+
 
 
           objects.forEach((obj) => {
@@ -539,6 +541,15 @@ const CanvasEditor = () => {
         });
     });
   }
+
+  canvases.forEach((canvas, index) => {
+    canvas.upperCanvasEl.addEventListener('pointerdown', () => {
+      setActiveCanvasIndex(index);
+      console.log(`Canvas ${index} clicked`);
+    });
+  });
+
+  
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -1000,325 +1011,106 @@ const CanvasEditor = () => {
   useEffect(() => {
     canvases.forEach((canvas) => {
       if (canvas) {
-        function eraserMouseDown(e) {
-          const pointer = canvas.getPointer(e.e);
-          canvas._currentEraserPoints = [pointer];
-          canvas.isErasing = true;
-        }
-        
-        function eraserMouseMove(e) {
-          if (canvas.isErasing) {
-            const pointer = canvas.getPointer(e.e);
-            canvas._currentEraserPoints.push(pointer);
-          }
-        }
-        
-        function eraserMouseUp(e) {
-          if (canvas.isErasing) {
-            canvas.isErasing = false;
-            const eraserPoints = canvas._currentEraserPoints;
-            delete canvas._currentEraserPoints;
-            canvas.getObjects().forEach((obj) => {
-              const bbox = obj.getBoundingRect();
-              for (let i = 0; i < eraserPoints.length; i++) {
-                const pt = eraserPoints[i];
-                if (
-                  pt.x >= bbox.left &&
-                  pt.x <= bbox.left + bbox.width &&
-                  pt.y >= bbox.top &&
-                  pt.y <= bbox.top + bbox.height
-                ) {
-                  canvas.remove(obj);
-                  break;
-                }
-              }
-            });
-            canvas.renderAll();
-          }
-        }
-        function handleTextToolMouseUp(e) {
-          if (!e.target) {
-            const pointer = canvas.getPointer(e.e);
-            const text = new fabric.Textbox('Click to edit text', {
-              left: pointer.x,
-              top: pointer.y,
-              width: 200,
-              fontSize: 24,
-            });
-            canvas.add(text);
-            setActiveTool('point');
-            canvas.setActiveObject(text);
-            canvas.renderAll();
-          }
-        }
-
-        let startX, startY;
-        let highlightRect = null;
-
-        const onMouseDownsub = (e) => {
-          if (highlightRect) {
-            // Reset the previous highlightRect before creating a new one
-            console.log('there exists highlightrect so deleting');
-            canvas.remove(highlightRect); // Remove the old rectangle
-            highlightRect = null; // Reset the variable
-          }
-          const pointer = canvas.getPointer(e.e);
-          startX = pointer.x;
-          console.log('startx=', startX);
-          startY = pointer.y;
-          console.log('starty=', startY);
-
-          highlightRect = new fabric.Rect({
-            left: pointer.x,
-            top: pointer.y,
-            width: 0,
-            height: 0,
-            fill: 'rgba(255, 255, 0, 0.3)',
-            stroke: 'yellow',
-            strokeWidth: 1,
-            selectable: true,
-            evented: true,
-            hasControls: false, // no resize/rotate handles
-            lockMovementX: true, // disable horizontal drag
-            lockMovementY: true, // disable vertical drag
-            hoverCursor: 'pointer',
-          });
-          console.log(
-            'Capture region sent initial:',
-            highlightRect.left,
-            highlightRect.top,
-            highlightRect.width,
-            highlightRect.height
-          );
-
-          canvas.add(highlightRect);
-        };
-
-        const onMouseMovesub = (e) => {
-          if (!highlightRect) return;
-
-          const pointer = canvas.getPointer(e.e);
-          let width = pointer.x - startX;
-          let height = pointer.y - startY;
-
-          console.log('width:', width);
-          console.log('height:', height);
-          console.log('pointer:', pointer.x, pointer.y);
-          console.log('startx:', startX, startY);
-
-          // Update the rectangle's dimensions and position based on pointer movement
-          highlightRect.set({
-            width: Math.abs(width), // Always use positive width
-            height: Math.abs(height), // Always use positive height
-            left: width < 0 ? pointer.x : startX, // If width is negative, adjust left
-            top: height < 0 ? pointer.y : startY, // If height is negative, adjust top
-            selectable: true,
-            evented: true,
-          });
-          canvas.renderAll();
-
-          console.log(
-            'Capture region sent:',
-            highlightRect.left,
-            highlightRect.top,
-            highlightRect.width,
-            highlightRect.height
-          );
-          console.log('highlight:', highlightRect);
-
-          // Final render to update the canvas with the latest changes
-          canvas.renderAll();
-        };
-
-        const onMouseUpsub = () => {
-          if (!highlightRect) return;
-
-          // Ensure the latest properties are up-to-date before capturing
-          const rect = highlightRect.getBoundingRect(true);
-          console.log(
-            'Capture region sent rn:',
-            highlightRect.left,
-            highlightRect.top,
-            highlightRect.width,
-            highlightRect.height
-          );
-          console.log(
-            'Capture region sent rn after:',
-            rect.left,
-            rect.top,
-            rect.width,
-            rect.height
-          );
-
-          console.log('highlight:', highlightRect);
-
-          // Capture the highlighted region
-          captureHighlightedRegion(highlightRect);
-          console.log('sub logged');
-
-          // Reset and clean up
-          highlightRect = null;
-
-
-  // Re-enable movement and selection for all objects after the tool is used
-  canvas.getObjects().forEach((obj, index) => {
-    const previousState = previousStates[index];
-    if (previousState && previousState.obj) { // Ensure the object exists
-      previousState.obj.lockMovementX = previousState.lockMovementX;
-      previousState.obj.lockMovementY = previousState.lockMovementY;
-      previousState.obj.selectable = previousState.selectable;
-    }
-  });
-  canvas.renderAll(); // Ensure the canvas reflects these changes
-        };
-
-        const onMouseDown = (e) => {
-          const pointer = canvas.getPointer(e.e);
-          startX = pointer.x;
-          console.log('startx=', startX);
-          startY = pointer.y;
-          console.log('starty=', startY);
-
-          highlightRect = new fabric.Rect({
-            left: startX,
-            top: startY,
-            width: 0,
-            height: 0,
-            fill: 'rgba(255, 255, 0, 0.3)',
-            stroke: 'yellow',
-            strokeWidth: 1,
-            selectable: false,
-            evented: false,
-          });
-
-          canvas.add(highlightRect);
-        };
-
-        const onMouseMove = (e) => {
-          if (!highlightRect) return;
-
-          const pointer = canvas.getPointer(e.e);
-          const width = pointer.x - startX;
-          const height = pointer.y - startY;
-
-          highlightRect.set({
-            width: Math.abs(width),
-            height: Math.abs(height),
-            left: width < 0 ? pointer.x : startX,
-            top: height < 0 ? pointer.y : startY,
-          });
-
-          canvas.renderAll();
-        };
-
-        const onMouseUp = () => {
-          const finalRect = highlightRect;
-          underlineHighlightedRegion(finalRect);
-          console.log('logged higlight');
-          highlightRect = null;
-        };
-
-
-
-
-
-
         if (activeTool === 'pen') {
-          canvas.off('mouse:down', eraserMouseDown);
-          canvas.off('mouse:move', eraserMouseMove);
-          canvas.off('mouse:up', eraserMouseUp);
-          canvas.off('mouse:up', handleTextToolMouseUp);
-          canvas.off('mouse:down', onMouseDownsub);
-          canvas.off('mouse:move', onMouseMovesub);
-          canvas.off('mouse:up', onMouseUpsub);
-          canvas.off('mouse:down', onMouseDown);
-          canvas.off('mouse:move', onMouseMove);
-          canvas.off('mouse:up', onMouseUp);
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 5;
         } else if (activeTool === 'marker') {
-          canvas.off('mouse:down', eraserMouseDown);
-          canvas.off('mouse:move', eraserMouseMove);
-          canvas.off('mouse:up', eraserMouseUp);
-          canvas.off('mouse:up', handleTextToolMouseUp);
-          canvas.off('mouse:down', onMouseDownsub);
-          canvas.off('mouse:move', onMouseMovesub);
-          canvas.off('mouse:up', onMouseUpsub);
-          canvas.off('mouse:down', onMouseDown);
-          canvas.off('mouse:move', onMouseMove);
-          canvas.off('mouse:up', onMouseUp);
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           canvas.freeDrawingBrush.color = brushColor;
           canvas.freeDrawingBrush.width = 10;
         } else if (activeTool === 'highlighter') {
-          canvas.off('mouse:down', eraserMouseDown);
-          canvas.off('mouse:move', eraserMouseMove);
-          canvas.off('mouse:up', eraserMouseUp);
-          canvas.off('mouse:up', handleTextToolMouseUp);
-          canvas.off('mouse:down', onMouseDownsub);
-          canvas.off('mouse:move', onMouseMovesub);
-          canvas.off('mouse:up', onMouseUpsub);
-          canvas.off('mouse:down', onMouseDown);
-          canvas.off('mouse:move', onMouseMove);
-          canvas.off('mouse:up', onMouseUp);
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
           let bColor = hexToRgba(brushColor, 0.5);
           canvas.freeDrawingBrush.color = bColor;
           canvas.freeDrawingBrush.width = 15;
         } else if (activeTool === 'eraser') {
-          canvas.off('mouse:up', handleTextToolMouseUp);
-          canvas.off('mouse:down', onMouseDownsub);
-          canvas.off('mouse:move', onMouseMovesub);
-          canvas.off('mouse:up', onMouseUpsub);
-          canvas.off('mouse:down', onMouseDown);
-          canvas.off('mouse:move', onMouseMove);
-          canvas.off('mouse:up', onMouseUp);
-
-          canvas.on('mouse:down', eraserMouseDown);
-          canvas.on('mouse:move', eraserMouseMove);
-          canvas.on('mouse:up', eraserMouseUp);
-
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
+          canvas.isDrawingMode = true;
+          canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+          canvas.freeDrawingBrush.color = 'rgba(255, 169, 78, 0.5)';
+          canvas.freeDrawingBrush.width = 5;
+          canvas.on('mouse:down', function (e) {
+            const pointer = canvas.getPointer(e.e);
+            canvas._currentEraserPoints = [pointer];
+            canvas.isErasing = true;
+          });
+          canvas.on('mouse:move', function (e) {
+            if (canvas.isErasing) {
+              const pointer = canvas.getPointer(e.e);
+              canvas._currentEraserPoints.push(pointer);
+            }
+          });
+          canvas.on('mouse:up', function (e) {
+            if (canvas.isErasing) {
+              canvas.isErasing = false;
+              const eraserPoints = canvas._currentEraserPoints;
+              delete canvas._currentEraserPoints;
+              canvas.getObjects().forEach((obj) => {
+                const bbox = obj.getBoundingRect();
+                for (let i = 0; i < eraserPoints.length; i++) {
+                  const pt = eraserPoints[i];
+                  if (
+                    pt.x >= bbox.left &&
+                    pt.x <= bbox.left + bbox.width &&
+                    pt.y >= bbox.top &&
+                    pt.y <= bbox.top + bbox.height
+                  ) {
+                    canvas.remove(obj);
+                    break;
+                  }
+                }
+              });
+              canvas.renderAll();
+            }
+          });
         } else if (activeTool === 'point') {
-          canvas.off('mouse:down', eraserMouseDown);
-          canvas.off('mouse:move', eraserMouseMove);
-          canvas.off('mouse:up', eraserMouseUp);
-          canvas.off('mouse:up', handleTextToolMouseUp);
-          canvas.off('mouse:down', onMouseDownsub);
-          canvas.off('mouse:move', onMouseMovesub);
-          canvas.off('mouse:up', onMouseUpsub);
-          canvas.off('mouse:down', onMouseDown);
-          canvas.off('mouse:move', onMouseMove);
-          canvas.off('mouse:up', onMouseUp);
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = false;
         } else if (activeTool === 'text') {
-          canvas.off('mouse:down', eraserMouseDown);
-          canvas.off('mouse:move', eraserMouseMove);
-          canvas.off('mouse:up', eraserMouseUp);
-          canvas.off('mouse:down', onMouseDownsub);
-          canvas.off('mouse:move', onMouseMovesub);
-          canvas.off('mouse:up', onMouseUpsub);
-          canvas.off('mouse:down', onMouseDown);
-          canvas.off('mouse:move', onMouseMove);
-          canvas.off('mouse:up', onMouseUp);
-
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           canvas.isDrawingMode = false;
-          canvas.on('mouse:up', handleTextToolMouseUp); // add the named function
-
+          canvas.on('mouse:up', (e) => {
+            if (!e.target) {
+              const pointer = canvas.getPointer(e.e);
+              const text = new fabric.Textbox('Click to edit text', {
+                left: pointer.x,
+                top: pointer.y,
+                width: 200,
+                fontSize: 24,
+              });
+              canvas.add(text);
+              setActiveTool('point');
+              canvas.setActiveObject(text);
+              canvas.renderAll();
+            }
+          });
         } else if (activeTool === 'subhl') {
-          canvas.off('mouse:down', eraserMouseDown);
-          canvas.off('mouse:move', eraserMouseMove);
-          canvas.off('mouse:up', eraserMouseUp);
-          canvas.off('mouse:up', handleTextToolMouseUp);
-          canvas.off('mouse:down', onMouseDown);
-          canvas.off('mouse:move', onMouseMove);
-          canvas.off('mouse:up', onMouseUp);
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
-
+          let startX, startY;
+          let highlightRect = null;
           console.log('prevstartx=', startX);
 
             // Save the previous state of all objects (for later restoration)
@@ -1339,24 +1131,221 @@ const CanvasEditor = () => {
   });
   canvas.renderAll(); // Ensure the canvas reflects these changes
 
+          const onMouseDownsub = (e) => {
+            if (highlightRect) {
+              // Reset the previous highlightRect before creating a new one
+              console.log('there exists highlightrect so deleting');
+              canvas.remove(highlightRect); // Remove the old rectangle
+              highlightRect = null; // Reset the variable
+            }
+            const pointer = canvas.getPointer(e.e);
+            startX = pointer.x;
+            console.log('startx=', startX);
+            startY = pointer.y;
+            console.log('starty=', startY);
+
+            highlightRect = new fabric.Rect({
+              left: pointer.x,
+              top: pointer.y,
+              width: 0,
+              height: 0,
+              fill: 'rgba(255, 255, 0, 0.3)',
+              stroke: 'yellow',
+              strokeWidth: 1,
+              selectable: true,
+              evented: true,
+              hasControls: false, // no resize/rotate handles
+              lockMovementX: true, // disable horizontal drag
+              lockMovementY: true, // disable vertical drag
+              hoverCursor: 'pointer',
+            });
+            console.log(
+              'Capture region sent initial:',
+              highlightRect.left,
+              highlightRect.top,
+              highlightRect.width,
+              highlightRect.height
+            );
+
+            canvas.add(highlightRect);
+          };
+
+          const onMouseMovesub = (e) => {
+            if (!highlightRect) return;
+
+            const pointer = canvas.getPointer(e.e);
+            let width = pointer.x - startX;
+            let height = pointer.y - startY;
+
+            console.log('width:', width);
+            console.log('height:', height);
+            console.log('pointer:', pointer.x, pointer.y);
+            console.log('startx:', startX, startY);
+
+            // Update the rectangle's dimensions and position based on pointer movement
+            highlightRect.set({
+              width: Math.abs(width), // Always use positive width
+              height: Math.abs(height), // Always use positive height
+              left: width < 0 ? pointer.x : startX, // If width is negative, adjust left
+              top: height < 0 ? pointer.y : startY, // If height is negative, adjust top
+              selectable: true,
+              evented: true,
+            });
+            canvas.renderAll();
+
+            console.log(
+              'Capture region sent:',
+              highlightRect.left,
+              highlightRect.top,
+              highlightRect.width,
+              highlightRect.height
+            );
+            console.log('highlight:', highlightRect);
+
+            // Final render to update the canvas with the latest changes
+            canvas.renderAll();
+          };
+
+          const onMouseUpsub = () => {
+            if (!highlightRect) return;
+
+            // Ensure the latest properties are up-to-date before capturing
+            const rect = highlightRect.getBoundingRect(true);
+            console.log(
+              'Capture region sent rn:',
+              highlightRect.left,
+              highlightRect.top,
+              highlightRect.width,
+              highlightRect.height
+            );
+            console.log(
+              'Capture region sent rn after:',
+              rect.left,
+              rect.top,
+              rect.width,
+              rect.height
+            );
+
+            console.log('highlight:', highlightRect);
+
+            // Capture the highlighted region
+            captureHighlightedRegion(highlightRect);
+            console.log('sub logged');
+
+            // Reset and clean up
+            highlightRect = null;
+            canvas.off('mouse:down', onMouseDownsub);
+            canvas.off('mouse:move', onMouseMovesub);
+            canvas.off('mouse:up', onMouseUpsub);
+            canvas.off('touch:down', onMouseDownsub);
+            canvas.off('touch:move', onMouseMovesub);
+            canvas.off('touch:up', onMouseUpsub);
+
+
+    // Re-enable movement and selection for all objects after the tool is used
+    canvas.getObjects().forEach((obj, index) => {
+      const previousState = previousStates[index];
+      if (previousState && previousState.obj) { // Ensure the object exists
+        previousState.obj.lockMovementX = previousState.lockMovementX;
+        previousState.obj.lockMovementY = previousState.lockMovementY;
+        previousState.obj.selectable = previousState.selectable;
+      }
+    });
+    canvas.renderAll(); // Ensure the canvas reflects these changes
+          };
 
           canvas.on('mouse:down', onMouseDownsub);
           canvas.on('mouse:move', onMouseMovesub);
           canvas.on('mouse:up', onMouseUpsub);
+          canvas.on('pointerdown', (e) => {
+            e.preventDefault();
+            console.log("touchstart triggered");
+            registration.showNotification('touchstart!', {
+              body: 'Your 25 minute study session is over',
+              icon: './logo192.png',
+              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+            });
+            onMouseDownsub(e);
+          });
+          canvas.on('pointermove', (e) => {
+            e.preventDefault();
+            console.log("touchmove triggered");
+            registration.showNotification('touchmove!', {
+              body: 'Your 25 minute study session is over',
+              icon: './logo192.png',
+              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+            });
+            onMouseMovesub(e);
+          });
+          canvas.on('pointerup', (e) => {
+            e.preventDefault();
+            console.log("touchend triggered");
+            registration.showNotification('touchend!', {
+              body: 'Your 25 minute study session is over',
+              icon: './logo192.png',
+              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
+            });
+            onMouseUpsub(e);
+          });
 
         } else if (activeTool === 'aihl') {
-          canvas.off('mouse:down', eraserMouseDown);
-          canvas.off('mouse:move', eraserMouseMove);
-          canvas.off('mouse:up', eraserMouseUp);
-          canvas.off('mouse:up', handleTextToolMouseUp);
-          canvas.off('mouse:down', onMouseDownsub);
-          canvas.off('mouse:move', onMouseMovesub);
-          canvas.off('mouse:up', onMouseUpsub);
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
           // Special Highlighter tool handler
           canvas.isDrawingMode = false;
-
+          let startX, startY;
+          let highlightRect = null;
           console.log('prevstartx=', startX);
 
+          const onMouseDown = (e) => {
+            const pointer = canvas.getPointer(e.e);
+            startX = pointer.x;
+            console.log('startx=', startX);
+            startY = pointer.y;
+            console.log('starty=', startY);
+
+            highlightRect = new fabric.Rect({
+              left: startX,
+              top: startY,
+              width: 0,
+              height: 0,
+              fill: 'rgba(255, 255, 0, 0.3)',
+              stroke: 'yellow',
+              strokeWidth: 1,
+              selectable: false,
+              evented: false,
+            });
+
+            canvas.add(highlightRect);
+          };
+
+          const onMouseMove = (e) => {
+            if (!highlightRect) return;
+
+            const pointer = canvas.getPointer(e.e);
+            const width = pointer.x - startX;
+            const height = pointer.y - startY;
+
+            highlightRect.set({
+              width: Math.abs(width),
+              height: Math.abs(height),
+              left: width < 0 ? pointer.x : startX,
+              top: height < 0 ? pointer.y : startY,
+            });
+
+            canvas.renderAll();
+          };
+
+          const onMouseUp = () => {
+            const finalRect = highlightRect;
+            underlineHighlightedRegion(finalRect);
+            console.log('logged higlight');
+            highlightRect = null;
+            canvas.off('mouse:down', onMouseDown);
+            canvas.off('mouse:move', onMouseMove);
+            canvas.off('mouse:up', onMouseUp);
+          };
           canvas.on('mouse:down', onMouseDown);
           canvas.on('mouse:move', onMouseMove);
           canvas.on('mouse:up', onMouseUp);
