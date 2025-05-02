@@ -5,6 +5,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
 import { useNavigate, useLocation } from 'react-router-dom';
+ 
 
 const CanvasEditor = () => {
   const [canvases, setCanvases] = useState([]); // Single canvas
