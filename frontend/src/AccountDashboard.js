@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NavigationBar from './NavigationBar';
 import styles from './AccountDashboard.module.css';
+import UpdatePopup from './update';
 
 function AccountDashboard() {
   const location = useLocation();
@@ -241,6 +242,7 @@ function AccountDashboard() {
   return (
     <div className={styles.dashboardWrapper}>
       {/* <NavigationBar /> */}
+      <UpdatePopup />
       <div
   style={{
     position: 'fixed',    // Fix it at the top
