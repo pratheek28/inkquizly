@@ -116,10 +116,14 @@ const CanvasEditor = () => {
         canvas.freeDrawingBrush.width = 5;
 
         // new "saveState"
-        canvas.on('path:created', (e) => {
-          const path = e.path;                  
-          setUndoStack(u => [...u, path]);
-          setRedoStack([]);                      
+        canvas.on('object:added', (e) => {
+          if (e.target.__fromRedo) {
+            // cleanup the flag and don’t treat this as a brand-new action
+            delete e.target.__fromRedo;
+            return;
+          }
+          setUndoStack(u => [...u, e.target]);
+          setRedoStack([]);   // clear redo whenever a true new object lands
         });
 
         const handleClick = () => {
@@ -1819,6 +1823,10 @@ const handleIconTouchStart = (e) => {
       // 1) pop from redo
       const toRestore = redoStack[redoStack.length - 1];
       setRedoStack(r => r.slice(0, -1));
+  
+      // ← add this line right here:
+      toRestore.__fromRedo = true;
+  
       // 2) put it back in undo
       setUndoStack(u => [...u, toRestore]);
       // 3) add back to canvas
