@@ -118,12 +118,24 @@ const CanvasEditor = () => {
         // new "saveState"
         canvas.on('object:added', (e) => {
           if (e.target.__fromRedo) {
-            // cleanup the flag and don’t treat this as a brand-new action
             delete e.target.__fromRedo;
             return;
           }
+          // mark how it got here
+          e.target.__lastAction = 'added';
           setUndoStack(u => [...u, e.target]);
-          setRedoStack([]);   // clear redo whenever a true new object lands
+          setRedoStack([]);   // clear redo on a true new add
+        });
+
+        canvas.on('object:removed', (e) => {
+          if (e.target.__fromUndo) {
+            delete e.target.__fromUndo;
+            return;
+          }
+          // mark how it got here
+          e.target.__lastAction = 'removed';
+          setUndoStack(u => [...u, e.target]);
+          setRedoStack([]);   // clear redo on a true remove
         });
 
         const handleClick = () => {
@@ -1791,7 +1803,6 @@ const handleIconTouchStart = (e) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-
   const goHome = () => {
     setIsLoading(true); // Start the loading spinner
     saveCanvases();
@@ -1809,31 +1820,37 @@ const handleIconTouchStart = (e) => {
   
     if (action === 'undo') {
       if (undoStack.length === 0) return;
-      // 1) pop the last path
       const last = undoStack[undoStack.length - 1];
       setUndoStack(u => u.slice(0, -1));
-      // 2) store it for redo
       setRedoStack(r => [...r, last]);
-      // 3) remove from canvas
-      canvas.remove(last);
+      // flag so removal listener skips this
+      last.__fromUndo = true;
+  
+      // if it was added → remove; if removed → re-add
+      if (last.__lastAction === 'added') {
+        canvas.remove(last);
+      } else {
+        canvas.add(last);
+      }
       canvas.renderAll();
   
     } else if (action === 'redo') {
       if (redoStack.length === 0) return;
-      // 1) pop from redo
       const toRestore = redoStack[redoStack.length - 1];
       setRedoStack(r => r.slice(0, -1));
-  
-      // ← add this line right here:
+      setUndoStack(u => [...u, toRestore]);
+      // flag so addition listener skips this
       toRestore.__fromRedo = true;
   
-      // 2) put it back in undo
-      setUndoStack(u => [...u, toRestore]);
-      // 3) add back to canvas
-      canvas.add(toRestore);
+      // if it was added → re-add; if removed → remove again
+      if (toRestore.__lastAction === 'added') {
+        canvas.add(toRestore);
+      } else {
+        canvas.remove(toRestore);
+      }
       canvas.renderAll();
     }
-  };  
+  };
 
   useEffect(() => { //Autosave
     const intervalId = setInterval(() => {
