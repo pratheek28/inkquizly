@@ -1827,6 +1827,14 @@ const handleIconTouchStart = (e) => {
     }
   };  
 
+  useEffect(() => { //Autosave
+    const intervalId = setInterval(() => {
+      saveCanvases();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, []);
+
   return (
     <div
       style={{
