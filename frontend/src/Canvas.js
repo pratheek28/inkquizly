@@ -14,6 +14,8 @@ const CanvasEditor = () => {
   const [activeCanvasIndex, setActiveCanvasIndex] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [response, setResponse] = useState(null);
+  const [undoStack, setUndoStack] = useState([]); // undo stack
+  const [redoStack, setRedoStack] = useState([]); // redo stack
 
   // New state for floating icon options
   const [showFloatingOptions, setShowFloatingOptions] = useState(false);
@@ -108,10 +110,17 @@ const CanvasEditor = () => {
           const objects = canvas.getObjects();
           console.log('Objects loaded:', objects.length);
 
-          canvas.isDrawingMode = true;
+        canvas.isDrawingMode = true;
         canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
         canvas.freeDrawingBrush.color = brushColor;
         canvas.freeDrawingBrush.width = 5;
+
+        // new "saveState"
+        canvas.on('path:created', (e) => {
+          const path = e.path;                  
+          setUndoStack(u => [...u, path]);
+          setRedoStack([]);                      
+        });
 
         const handleClick = () => {
           setActiveCanvasIndex(index);
@@ -143,10 +152,6 @@ const CanvasEditor = () => {
         //canvas.on('pointer:down', () => handleClick(index));
 
         // canvas.on('touchstart', handleClick);
-
-        
-
-
 
           objects.forEach((obj) => {
             console.log('object:', obj);
@@ -255,8 +260,11 @@ const CanvasEditor = () => {
         newCanvases.push(canvas);
 
 
-            });
+          });
             setCanvases(newCanvases);
+            if (newCanvases.length > 0) {
+              setActiveCanvasIndex(0);
+            }
           })
           .catch((error) => {
             console.error('Error:', error);
@@ -265,218 +273,6 @@ const CanvasEditor = () => {
       };
 
       handleSubmitload(); // Submit the data to the backend
-
-      // for (let i = 0; i < numPages; i++) {
-      //   const canvas = new fabric.Canvas(canvasRef.current[i], {
-      //     width: A4_WIDTH,
-      //     height: A4_HEIGHT,
-      //     backgroundColor: null,
-      //   });
-      //   canvas.isDrawingMode = true;
-      //   canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-      //   canvas.freeDrawingBrush.color = brushColor;
-      //   canvas.freeDrawingBrush.width = 5;
-
-      //   const handleClick = () => {
-      //     setActiveCanvasIndex(i);
-      //     console.log(`Canvas ${i} clicked`);
-      //   };
-
-      //   canvas.on('mouse:over', () => handleClick(i));
-      //   newCanvases.push(canvas);
-
-      for (let i = 0; i < numPages; i++) { //HEREEEE
-        // const canvasElement = canvasRef.current[i];
-
-        // // Check if the canvas element is valid and exists
-        // if (!canvasElement) {
-        //   console.error(`Canvas element at index ${i} is not available!`);
-        //   continue;
-        // }
-
-        // const canvas = new fabric.Canvas(canvasElement, {
-        //   width: A4_WIDTH,
-        //   height: A4_HEIGHT,
-        //   backgroundColor: null, // Set background color to white
-        // });
-
-        // let jsonString =
-        //   '{"version":"6.6.2","objects":[{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Thermodynamics","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":78.9054,"top":41.6211,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":69.7246,"top":74.4332,"width":189.0661,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-94.53304303155736,"x2":94.53304303155736,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":304.7907,"top":68.4332,"width":61.2433,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Oscillations","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":132.5347,"top":299.7531,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":120.627,"top":331.6562,"width":145.4355,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-72.71772540889029,"x2":72.71772540889029,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":312.0625,"top":325.6562,"width":22.2107,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Waves","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":96.1758,"top":465.3776,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":88.813,"top":498.1896,"width":95.442,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-47.72100729958425,"x2":47.72100729958425,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"transparent","stroke":"gray","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":230.255,"top":492.1896,"width":100,"height":10,"fill":"rgb(23, 225, 23)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0}]}';
-
-        // console.log('is canvas valid?! ', canvas);
-
-        // // Load JSON content first and then add your custom objects
-        // canvas.clear();
-        // canvas.loadFromJSON(JSON.parse(jsonString)).then(() => {
-        //   console.log('Callback triggered!'); // this will definitely run after all deserialization is complete
-        //   canvas.renderAll();
-
-        //   const objects = canvas.getObjects();
-        //   console.log('Objects loaded:', objects.length);
-
-        //   objects.forEach((obj) => {
-        //     console.log('object:', obj);
-        //     if (obj.fill?.replace(/\s/g, '') === 'rgb(23,225,23)') {
-        //       console.log('object found');
-        //       obj.set({
-        //         hasBorders: false,
-        //         hasControls: true,
-        //         lockScalingY: true,
-        //         lockMovementY: true,
-        //         lockMovementX: true,
-        //         lockRotation: true,
-        //         originX: 'left',
-        //         originY: 'top',
-        //       });
-        //       obj.setControlsVisibility({
-        //         mt: false,
-        //         mb: false,
-        //         ml: false,
-        //         mr: true,
-        //         tl: false,
-        //         tr: false,
-        //         bl: false,
-        //         br: false,
-        //         mtr: false,
-        //       });
-        //       let maxleft = obj.left;
-
-        //       const topicindex = topicsindexes.current;
-        //       topicsindexes.current++; // persists across re-renders
-
-        //       const scaledWidth = obj.width * obj.scaleX;
-        //       const newWidth = Math.min(100, Math.max(1, scaledWidth));
-
-        //       const newConfidence = newWidth / 100;
-
-        //       setConfidenceLevels((prev) => {
-        //         const updated = [...prev];
-        //         updated[topicindex] = newConfidence;
-        //         return updated;
-        //       });
-
-        //       obj.on('scaling', function () {
-        //         const scaledWidth = obj.width * obj.scaleX;
-        //         const newWidth = Math.min(100, Math.max(1, scaledWidth));
-
-        //         obj.set({
-        //           scaleX: 1,
-        //           width: newWidth,
-        //           left: maxleft, // lock left position
-        //         });
-
-        //         const newConfidence = newWidth / 100;
-
-        //         setConfidenceLevels((prev) => {
-        //           const updated = [...prev];
-        //           updated[topicindex] = newConfidence;
-        //           return updated;
-        //         });
-
-        //         // // Store confidence for the current topic
-        //         // const existing = confidenceLevels.find(entry => entry.topic === topic);
-        //         // if (existing) {
-        //         //   existing.confidence = newConfidence;
-        //         // } else {
-        //         //   confidenceLevels.push({ topic, confidence: newConfidence });
-        //         // }
-
-        //         canvas.requestRenderAll();
-        //       });
-        //     }
-        //     if (
-        //       obj.fill?.replace(/\s/g, '') === 'transparent' &&
-        //       obj.stroke === 'gray'
-        //     ) {
-        //       obj.set({
-        //         selectable: false,
-        //         evented: false,
-        //       });
-        //       canvas.requestRenderAll();
-        //     }
-        //   });
-
-        //   canvas.renderAll();
-
-        //   console.log('Canvas loaded yes!');
-        // });
-
-        // // Debug logging to confirm canvas rendering
-        // canvas.renderAll();
-        // console.log('Canvasref=', canvasRef.current[i]);
-
-        // // Handle canvas click event
-        // const handleClick = () => {
-        //   setActiveCanvasIndex(i);
-        //   console.log(`Canvas ${i} clicked`);
-        // };
-
-        // // Set up mouseover event
-        // canvas.on('mouse:over', handleClick);
-
-        // newCanvases.push(canvas);
-      }
-
-      // const handleSubmit = () => {
-      //   console.log("here");
-      //   fetch('http://127.0.0.1:5000/load', {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json"
-      //     },
-      //     body: JSON.stringify({ unique:uid})
-      //   })
-      //   .then(response => response.json())
-      //   .then(data => {
-      //     setResponse(data.definition);
-      //     console.log("log is",data.definition);
-      //     console.log("response is",response);
-
-      //     for (let i = 0; i < numPages; i++) {
-      //       const canvas = new fabric.Canvas(canvasRef.current[i], {
-      //         width: A4_WIDTH,
-      //         height: A4_HEIGHT,
-      //         backgroundColor: 'white',  // Set background color to white
-      //       });
-
-      //       //var canvas = new fabric.Canvas();
-
-      //       let jsonString='{"version":"6.6.2","objects":[{"type":"Path","version":"6.6.2","originX":"left","originY":"top","left":248.201,"top":168.1871,"width":295.4208,"height":75.445,"fill":null,"stroke":"#000000","strokeWidth":5,"strokeDashArray":null,"strokeLineCap":"round","strokeDashOffset":0,"strokeLineJoin":"round","strokeUniform":false,"strokeMiterLimit":10,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"path":[["M",250.7009770182928,246.1320860043442],["Q",250.7009770182928,246.1270860043442,250.7009770182928,245.67262834676455],["Q",250.7009770182928,245.2181706891849,250.7009770182928,242.0369670861274],["Q",250.7009770182928,238.85576348306986,250.7009770182928,232.49335627695478],["Q",250.7009770182928,226.13094907083973,250.7009770182928,217.9507112344061],["Q",250.7009770182928,209.77047339797247,250.7009770182928,200.22686258879986],["Q",250.7009770182928,190.68325177962726,250.7009770182928,184.3208445735122],["Q",250.7009770182928,177.95843736739712,250.7009770182928,175.6861490794989],["Q",250.7009770182928,173.41386079160068,251.15546280209833,172.0504878188617],["Q",251.60994858590388,170.68711484612277,252.9734059373206,170.68711484612277],["Q",254.3368632887373,170.68711484612277,257.0637779915707,170.68711484612277],["Q",259.7906926944041,170.68711484612277,263.8810647486541,172.95940313402102],["Q",267.97143680290424,175.23169142191927,273.425266208571,180.68518331287504],["Q",278.87909561423777,186.1386752038308,282.9694676684878,192.0466247523662],["Q",287.05983972273793,197.9545743009016,290.2412402093769,203.86252384943703],["Q",293.42264069601583,209.77047339797247,296.1495553988492,214.3150499737689],["Q",298.87647010168257,218.85962654956538,300.2399274530993,221.13191483746363],["Q",301.603384804516,223.40420312536185,302.5123563721271,224.31311844052115],["Q",303.4213279397382,225.22203375568046,304.33029950734937,225.6764914132601],["Q",305.2392710749605,226.13094907083973,307.5116999939884,225.6764914132601],["Q",309.78412891301616,225.22203375568046,314.3289867510718,221.58637249504326],["Q",318.87384458912743,217.95071123440607,323.87318821098864,212.49721934345033],["Q",328.87253183284986,207.04372745249458,332.96290388709997,202.49915087669808],["Q",337.05327594135,197.9545743009016,340.2346764279889,194.31891304026442],["Q",343.41607691462787,190.68325177962726,344.7795342660446,188.86542114930867],["Q",346.1429916174613,187.0475905189901,347.0519631850724,187.0475905189901],["Q",347.96093475268356,187.0475905189901,348.41542053648914,187.95650583414937],["Q",348.86990632029466,188.86542114930867,350.23336367171134,191.59216709478656],["Q",351.59682102312803,194.31891304026445,352.9602783745447,197.9545743009016],["Q",354.3237357259614,201.59023556153878,357.0506504287948,206.5892697949149],["Q",359.7775651316282,211.58830402829102,363.8679371858783,216.58733826166716],["Q",367.95830924012836,221.5863724950433,376.1390533486285,226.13094907083973],["Q",384.31979745712863,230.6755256466362,399.77231410651785,233.4022715921141],["Q",415.2248307559071,236.12901753759198,480.67078362390833,227.039864385999],["L",546.1217364919096,217.94571123440608]]},{"fontSize":24,"fontWeight":"bold","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"Hellode","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","minWidth":20,"splitByGrapheme":false,"type":"Textbox","version":"6.6.2","originX":"left","originY":"top","left":166.1666,"top":336.1097,"width":200,"height":27.12,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"type":"Line","version":"6.6.2","originX":"left","originY":"top","left":150.6231,"top":372.5574,"width":119.0753,"height":0,"fill":"rgb(0,0,0)","stroke":"black","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"x1":-59.53763767852891,"x2":59.53763767852891,"y1":0,"y2":0},{"rx":0,"ry":0,"type":"Rect","version":"6.6.2","originX":"left","originY":"top","left":315.6984,"top":366.5574,"width":50,"height":10,"fill":"green","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"fontSize":12,"fontWeight":"normal","fontFamily":"Times New Roman","fontStyle":"normal","lineHeight":1.16,"text":"50%","charSpacing":0,"textAlign":"left","styles":[],"pathStartOffset":0,"pathSide":"left","pathAlign":"baseline","underline":false,"overline":false,"linethrough":false,"textBackgroundColor":"","direction":"ltr","type":"Text","version":"6.6.2","originX":"left","originY":"center","left":375.6984,"top":371.5574,"width":21.9961,"height":13.56,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0},{"cropX":0,"cropY":0,"type":"Image","version":"6.6.2","originX":"left","originY":"top","left":280.6984,"top":356.5574,"width":975,"height":971,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":0,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeUniform":false,"strokeMiterLimit":4,"scaleX":0.0308,"scaleY":0.0308,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","skewX":0,"skewY":0,"src":"http://localhost:3000/inkai.png","crossOrigin":null,"filters":[]}]}'
-
-      //       canvas.loadFromJSON(JSON.parse(jsonString), () => {
-      //         canvas.renderAll();
-      //         console.log("Canvas loaded!");
-      //       });
-
-      //       // Canvas data as a string
-      //       //let canvas_data = '{"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green"}],"background":"rgba(0, 0, 0, 0)"}';
-
-      //       // Parse the string into a JavaScript object
-      //       //const canvasDataObject = JSON.parse(canvas_data);
-
-      //       // Load the canvas data and render the objects
-      //       // canvas.loadFromJSON(canvasDataObject, () => {
-      //       //   canvas.renderAll(); // Ensure the canvas is redrawn
-      //       // });
-
-      //       // Handle canvas click event
-      //       const handleClick = () => {
-      //         setActiveCanvasIndex(i);
-      //         console.log(`Canvas ${i} clicked`);
-      //       };
-
-      //       // Set up mouseover event
-      //       canvas.on('mouse:over', handleClick);
-
-      //       newCanvases.push(canvas);
-      //     }
-
-      //   })
-      //   .catch(error => {
-      //     console.error("Error:", error);
-      //     setResponse("An Error occurred while submitting the form.");
-      //   });
-      // };
 
       // handleSubmit(); // Submit the data to the backend
     } else {
@@ -505,9 +301,12 @@ const CanvasEditor = () => {
     setCanvases(newCanvases);
     return () => {
       newCanvases.forEach((canvas) => {
-        canvas.dispose();
+        // remove the undo‐snapshot listener
+        // remove any other listeners
         canvas.off('mouse:over');
         canvas.off('mouse:down');
+        // finally dispose
+        canvas.dispose();
       });
     };
   }, []);
@@ -2000,6 +1799,33 @@ const handleIconTouchStart = (e) => {
     }, 3000); // 3000ms = 3 seconds
   };
 
+  const handleUndoRedo = (action) => {
+    const canvas = canvases[activeCanvasIndex];
+    if (!canvas) return;
+  
+    if (action === 'undo') {
+      if (undoStack.length === 0) return;
+      // 1) pop the last path
+      const last = undoStack[undoStack.length - 1];
+      setUndoStack(u => u.slice(0, -1));
+      // 2) store it for redo
+      setRedoStack(r => [...r, last]);
+      // 3) remove from canvas
+      canvas.remove(last);
+      canvas.renderAll();
+  
+    } else if (action === 'redo') {
+      if (redoStack.length === 0) return;
+      // 1) pop from redo
+      const toRestore = redoStack[redoStack.length - 1];
+      setRedoStack(r => r.slice(0, -1));
+      // 2) put it back in undo
+      setUndoStack(u => [...u, toRestore]);
+      // 3) add back to canvas
+      canvas.add(toRestore);
+      canvas.renderAll();
+    }
+  };  
 
   return (
     <div
@@ -2402,6 +2228,39 @@ const handleIconTouchStart = (e) => {
                 borderRadius: '4px',
                 objectFit: 'scale-down',
               }}
+            />
+          </button>
+          <button
+            onClick={() => handleUndoRedo('undo')}
+            disabled={!undoStack.length}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: undoStack.length ? 'pointer' : 'not-allowed'
+            }}
+          >
+            <img
+              src="/Undo_Button.png"
+              alt="Undo"
+              style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+            />
+          </button>
+
+          <button
+            onClick={() => handleUndoRedo('redo')}
+            disabled={!redoStack.length}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: redoStack.length ? 'pointer' : 'not-allowed'
+            }}
+          >
+            <img
+              src="/Redo_Button.png"
+              alt="Redo"
+              style={{ width: '40px', height: '40px', objectFit: 'contain' }}
             />
           </button>
         </div>
