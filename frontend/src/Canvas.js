@@ -116,48 +116,27 @@ const CanvasEditor = () => {
         canvas.freeDrawingBrush.width = 5;
 
         // new "saveState"
-        // canvas.on('object:added', (e) => {
-        //   if (e.target.__fromRedo) {
-        //     // cleanup the flag and don’t treat this as a brand-new action
-        //     delete e.target.__fromRedo;
-        //     return;
-        //   }
-        //   setUndoStack(u => [...u, e.target]);
-        //   setRedoStack([]);   // clear redo whenever a true new object lands
-        // });
+        canvas.on('object:added', (e) => {
+          if (e.target.__fromRedo) {
+            delete e.target.__fromRedo;
+            return;
+          }
+          // mark how it got here
+          e.target.__lastAction = 'added';
+          setUndoStack(u => [...u, e.target]);
+          setRedoStack([]);   // clear redo on a true new add
+        });
 
-        // canvas.on('object:removed', (e) => {
-        //   if (e.target.__fromUndo) {
-        //     delete e.target.__fromUndo;
-        //     return;
-        //   }
-        //   e.target.__lastAction = 'removed';
-        //   setUndoStack(u => [...u, e.target]);
-        //   setRedoStack([]);
-        // });
-        // ─── track user-added objects ──────────────────────────────────────────────
-          canvas.on('object:added', (e) => {
-            if (e.target.__fromRedo) {
-              delete e.target.__fromRedo;
-              return;
-            }
-            // mark how it got here
-            e.target.__lastAction = 'added';
-            setUndoStack(u => [...u, e.target]);
-            setRedoStack([]);   // clear redo on a true new add
-          });
-
-          // ─── track user-removed objects ────────────────────────────────────────────
-          canvas.on('object:removed', (e) => {
-            if (e.target.__fromUndo) {
-              delete e.target.__fromUndo;
-              return;
-            }
-            // mark how it got here
-            e.target.__lastAction = 'removed';
-            setUndoStack(u => [...u, e.target]);
-            setRedoStack([]);   // clear redo on a true remove
-          });
+        canvas.on('object:removed', (e) => {
+          if (e.target.__fromUndo) {
+            delete e.target.__fromUndo;
+            return;
+          }
+          // mark how it got here
+          e.target.__lastAction = 'removed';
+          setUndoStack(u => [...u, e.target]);
+          setRedoStack([]);   // clear redo on a true remove
+        });
 
         const handleClick = () => {
           setActiveCanvasIndex(index);
@@ -1824,7 +1803,6 @@ const handleIconTouchStart = (e) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-
   const goHome = () => {
     setIsLoading(true); // Start the loading spinner
     saveCanvases();
@@ -1873,7 +1851,6 @@ const handleIconTouchStart = (e) => {
       canvas.renderAll();
     }
   };
-  
 
   useEffect(() => { //Autosave
     const intervalId = setInterval(() => {
