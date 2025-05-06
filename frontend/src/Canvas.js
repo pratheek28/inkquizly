@@ -1,6 +1,5 @@
 /* Access-Control-Allow-Origin */
 /* global TimestampTrigger */
-
 import React, { useRef, useState, useEffect } from 'react';
 import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
@@ -10,7 +9,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const CanvasEditor = () => {
   const [canvases, setCanvases] = useState([]); // Single canvas
   const [brushColor, setBrushColor] = useState('#000000'); // Default to black marker
-  const [activeTool, setActiveTool] = useState(''); // Track the active tool
+  const [activeTool, setActiveTool] = useState('pen'); // Track the active tool
   const [activeCanvasIndex, setActiveCanvasIndex] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [response, setResponse] = useState(null);
@@ -115,6 +114,67 @@ const CanvasEditor = () => {
         canvas.freeDrawingBrush.color = brushColor;
         canvas.freeDrawingBrush.width = 5;
 
+        canvas.on('path:created', (e) => {
+          // only when in pen mode
+          if (activeTool !== 'pen') return;
+
+          // grab the raw Fabric.Path
+          const raw = e.path || e.target;
+          const pts = raw.path.map(cmd => ({ x: cmd[1], y: cmd[2] }));
+          const p0  = pts[0];
+          const pN  = pts[pts.length - 1];
+
+          // line-distance formula
+          const A = pN.y - p0.y;
+          const B = p0.x - pN.x;
+          const C = pN.x * p0.y - p0.x * pN.y;
+          const maxDist = pts.reduce((mx, pt) => {
+            return Math.max(mx, Math.abs(A*pt.x + B*pt.y + C) / Math.hypot(A, B));
+          }, 0);
+
+          // reference to just this canvas
+          const cv = raw.canvas;
+
+          // STRAIGHT LINES
+          if (maxDist <= 12) {
+            cv.remove(raw);
+            cv.add(new fabric.Line(
+              [ p0.x, p0.y, pN.x, pN.y ],
+              {
+                stroke:      cv.freeDrawingBrush.color,
+                strokeWidth: cv.freeDrawingBrush.width,
+                selectable:  false,
+              }
+            ));
+            cv.requestRenderAll();
+            return;
+          }
+      
+          // Compute centroid & average radius for circle detection
+          const cx    = pts.reduce((s,p) => s + p.x, 0) / pts.length;
+          const cy    = pts.reduce((s,p) => s + p.y, 0) / pts.length;
+          const radii = pts.map(p => Math.hypot(p.x - cx, p.y - cy));
+          const rAvg  = radii.reduce((s,r) => s + r, 0) / radii.length;
+          const maxDev= Math.max(...radii.map(r => Math.abs(r - rAvg)));
+        
+          // CIRCLE
+          const circleTolerance = 15; // max radial dev for a full circle
+          if (maxDev <= circleTolerance) {
+            cv.remove(raw);
+            cv.add(new fabric.Circle({
+              left:        cx - rAvg,
+              top:         cy - rAvg,
+              radius:      rAvg,
+              stroke:      raw.stroke,
+              strokeWidth: raw.strokeWidth,
+              fill:        '',
+              selectable:  false,
+            }));
+            cv.renderAll();
+            return;
+          }
+        });
+        
         // new "saveState"
         canvas.on('object:added', (e) => {
           if (e.target.__fromRedo) {
