@@ -44,8 +44,47 @@
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    margin-top: 15rem;
+    margin-top:15rem;
+    /* padding: 1rem; */
+    /* max-height: 300px; Adjust this value to fit your design */
+    /* overflow-y: auto; Enables vertical scrolling */
+    flex-grow: 1; /*Allow the container to grow*/
   }
+
+  .stackTitle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 300px; /* A4-like width */
+    height: 400px; /* A4-like height */
+    background-color: #f0f0f0; /* Light background color */
+    padding: 20px;
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for a "portfolio" feel */
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .stackTitle:hover {
+    background-color: #e0e0e0; /* Lighter background on hover */
+  }
+
+  .stackRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Vertically align folder with notes */
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .notesInStack {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    overflow-x: auto; /* Allow scroll if too many notes */
+  }
+  
   
   /* Card Style */
   .noteCard, .noteCardNew {
@@ -89,7 +128,23 @@
     text-align: center;
     padding: 10px;
   }
+
+  .noteStack {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
   
+  .stackTitle .stackIcon {
+    background-color: #4CAF50; /* Green background for stack icon */
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    font-size: 18px;
+    margin-bottom: 15px; /* Space between stack title and notes */
+  }
   /* Popup Styling*/
   .popupBackground {
     position: fixed;

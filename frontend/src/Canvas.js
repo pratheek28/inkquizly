@@ -37,6 +37,9 @@ const CanvasEditor = () => {
 
   const location = useLocation();
   const [isNew, setIsNew] = useState(location.state?.isNew);
+  const [loading, setLoading] = useState(false);
+  const [loadtext, setLoadingText] = useState("Letting the ink settle.");
+
 
 
   //const noteID= "note-1"
@@ -64,6 +67,7 @@ const CanvasEditor = () => {
     const newCanvases = [];
 
     if (true) {
+      setLoading(true);
       const handleSubmitload = () => {
         console.log('here loading');
         fetch('https://inkquizly.onrender.com/load', {
@@ -235,7 +239,7 @@ const CanvasEditor = () => {
                 // } else {
                 //   confidenceLevels.push({ topic, confidence: newConfidence });
                 // }
-
+                
                 canvas.requestRenderAll();
               });
             }
@@ -254,6 +258,7 @@ const CanvasEditor = () => {
           canvas.renderAll();
 
           console.log('Canvas loaded yes!');
+          setLoading(false);
         });
 
         // Debug logging to confirm canvas rendering
@@ -314,6 +319,7 @@ const CanvasEditor = () => {
       setIsNew(false);
     }
 
+
     setCanvases(newCanvases);
     return () => {
       newCanvases.forEach((canvas) => {
@@ -328,6 +334,8 @@ const CanvasEditor = () => {
   }, []);
 
   const [notetitle, setnotetitle] = useState('Notebook 1');
+
+  
 
   useEffect(() => {
     // const averageConfidence = confidenceLevels.reduce((sum, val) => sum + val, 0) / confidenceLevels.length;
@@ -1276,6 +1284,9 @@ const CanvasEditor = () => {
     console.log('rect=', highlightRect);
 
     let topics = '';
+    setLoadingText('Analyzing with context.');
+    setLoading(true);
+
 
     // Highlight bolding
     const objectsInRegion = canvas.getObjects();
@@ -1312,7 +1323,7 @@ const CanvasEditor = () => {
               closePopup();
             }
           });
-
+          setLoading(false);
           canvas.renderAll();
         })
         .catch((error) => {
@@ -1426,6 +1437,15 @@ const CanvasEditor = () => {
     try {
       // Wait until the image is loaded and create an image object
       const img = await fabric.FabricImage.fromURL(url);
+      // img.set({
+      //   left: 100, // Adjust as needed
+      //   top: 100, // Adjust as needed
+      //   angle: 0, // Optionally, you can set an initial angle
+      //   selectable: true,
+      //   evented: true,
+      //   scaleX: scale,
+      //   scaleY: scale,
+      // });
       img.set({ crossOrigin: 'anonymous' });
 
       const canvasWidth = canvas.width;
@@ -1455,7 +1475,6 @@ const CanvasEditor = () => {
       console.error('Error loading image:', error);
     }
   };
-
 
   const topicsindexes = useRef(0);
 
@@ -1661,11 +1680,18 @@ const CanvasEditor = () => {
       selectable: false,
       evented: true,
     });
+    
 
     img.on('mousedown', () => {
       console.log('Image button was pressed with topic', topic);
       // Send topic to Python code here for summary
       let data = topic;
+
+      const loadingGif = document.getElementById('loading-gif');
+      setLoadingText("Crafting your response with neural ink.");
+      setLoading(true);
+      canvas.remove(img);
+
 
       // Handle form submission to backend
       const handleSubmit = () => {
@@ -1693,8 +1719,13 @@ const CanvasEditor = () => {
             canvas.add(summ);
             canvas.renderAll();
             underline.set({ stroke: 'rgb(40, 2, 143)' });
+            // if (loadingImage) {
+            //   canvas.remove(loadingImage);
+            // }
+            setLoading(false);
 
             canvas.renderAll();
+            
           })
           .catch((error) => {
             console.error('Error:', error);
@@ -1860,6 +1891,18 @@ const handleIconTouchStart = (e) => {
     return () => clearInterval(intervalId); // Cleanup on unmount
   }, []);
 
+  function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360; // Keep it in 0–359 range
+    return `hsl(${hue}, 70%, 80%)`; // Light pastel color
+  }
+
+
+
+
   return (
     <div
       style={{
@@ -1875,6 +1918,7 @@ const handleIconTouchStart = (e) => {
       }}
     >
       {/* Home Button */}
+      
       <div
   style={{
     position: 'fixed',
@@ -1911,14 +1955,18 @@ const handleIconTouchStart = (e) => {
   </button>
 
   <div style={{ fontSize: '14px' }}>
-    <strong><h2>{noteID}</h2></strong>
+    <strong><h2>{noteID.split('⚪️')[1] || noteID}</h2></strong>
+    {noteID.split('⚪️')[0] !== "" && (
+  <h4 style={{ color: stringToColor(noteID.split('⚪️')[0]) }}>
+    📂 {noteID.split('⚪️')[0] || noteID}
+  </h4>
+)}
   </div>
 
   <div style={{ fontSize: '14px' }}>
     <strong>{notetitle}</strong>
   </div>
 </div>
-
 
       {Array.from({ length: numPages }, (_, index) => (
         <div
@@ -1940,6 +1988,7 @@ const handleIconTouchStart = (e) => {
             marginBottom: '5px',
           }}
         >
+          
           <canvas
             ref={(el) => (canvasRef.current[index] = el)}
             width={A4_WIDTH}
@@ -1948,6 +1997,39 @@ const handleIconTouchStart = (e) => {
           ></canvas>
         </div>
       ))}
+{/* Loading GIF overlay */}
+{loading && (
+  <div
+    style={{
+      position: 'fixed',
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)',
+      textAlign: 'center',
+      zIndex: 1000,
+    }}
+  >
+    <img
+      src="/load.gif"
+      alt="Loading..."
+      style={{
+        display: 'block',
+        margin: '0 auto',
+      }}
+    />
+    <p
+      style={{
+        marginTop: '10px',
+        color: '#333',
+        fontFamily: '"Helvatica", Courier, verdana', // Change font here
+        fontSize: '15px',
+      }}
+    >
+      <b>{loadtext}</b>
+    </p>
+  </div>
+)}
+
 
       {/* Drawing Tools Box with PNG Image Buttons */}
       <div
