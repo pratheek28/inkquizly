@@ -4,7 +4,6 @@ import React, { useRef, useState, useEffect } from 'react';
 import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
 import { useNavigate, useLocation } from 'react-router-dom';
- 
 
 const CanvasEditor = () => {
   const [canvases, setCanvases] = useState([]); // Single canvas
@@ -37,9 +36,7 @@ const CanvasEditor = () => {
   const location = useLocation();
   const [isNew, setIsNew] = useState(location.state?.isNew);
   const [loading, setLoading] = useState(false);
-  const [loadtext, setLoadingText] = useState("Letting the ink settle.");
-
-
+  const [loadtext, setLoadingText] = useState('Letting the ink settle.');
 
   //const noteID= "note-1"
   const noteID = location.state?.noteID; // Get the notebook name from state
@@ -86,262 +83,277 @@ const CanvasEditor = () => {
               console.log('Parsed canvas:', parsed);
               const canvasElement = canvasRef.current[index];
 
-        // Check if the canvas element is valid and exists
-        if (!canvasElement) {
-          console.error(`Canvas element at index ${index} is not available!`);
-        }
-        if (canvasElement?.fabric) {
-          canvasElement.fabric.dispose();
-        }
-
-        const canvas = new fabric.Canvas(canvasElement, {
-          width: A4_WIDTH,
-          height: A4_HEIGHT,
-          backgroundColor: null, // Set background color to white
-        });
-
-
-        let jsonString = canvasData;
-        console.log('is canvas valid?! ', canvas);
-
-        // Load JSON content first and then add your custom objects
-        canvas.clear();
-        canvas.loadFromJSON(JSON.parse(jsonString)).then(() => {
-          console.log('Callback triggered!'); // this will definitely run after all deserialization is complete
-          canvas.renderAll();
-
-          const objects = canvas.getObjects();
-          console.log('Objects loaded:', objects.length);
-
-        canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.color = brushColor;
-        canvas.freeDrawingBrush.width = 5;
-
-        canvas.on('path:created', (e) => {
-          // only when in pen mode
-          if (activeTool !== 'pen') return;
-
-          // grab the raw Fabric.Path
-          const raw = e.path || e.target;
-          const pts = raw.path.map(cmd => ({ x: cmd[1], y: cmd[2] }));
-          const p0  = pts[0];
-          const pN  = pts[pts.length - 1];
-
-          // line-distance formula
-          const A = pN.y - p0.y;
-          const B = p0.x - pN.x;
-          const C = pN.x * p0.y - p0.x * pN.y;
-          const maxDist = pts.reduce((mx, pt) => {
-            return Math.max(mx, Math.abs(A*pt.x + B*pt.y + C) / Math.hypot(A, B));
-          }, 0);
-
-          // reference to just this canvas
-          const cv = raw.canvas;
-
-          // STRAIGHT LINES
-          if (maxDist <= 12) {
-            cv.remove(raw);
-            cv.add(new fabric.Line(
-              [ p0.x, p0.y, pN.x, pN.y ],
-              {
-                stroke:      cv.freeDrawingBrush.color,
-                strokeWidth: cv.freeDrawingBrush.width,
-                selectable:  false,
+              // Check if the canvas element is valid and exists
+              if (!canvasElement) {
+                console.error(
+                  `Canvas element at index ${index} is not available!`
+                );
               }
-            ));
-            cv.requestRenderAll();
-            return;
-          }
-      
-          // Compute centroid & average radius for circle detection
-          const cx    = pts.reduce((s,p) => s + p.x, 0) / pts.length;
-          const cy    = pts.reduce((s,p) => s + p.y, 0) / pts.length;
-          const radii = pts.map(p => Math.hypot(p.x - cx, p.y - cy));
-          const rAvg  = radii.reduce((s,r) => s + r, 0) / radii.length;
-          const maxDev= Math.max(...radii.map(r => Math.abs(r - rAvg)));
-        
-          // CIRCLE
-          const circleTolerance = 15; // max radial dev for a full circle
-          if (maxDev <= circleTolerance) {
-            cv.remove(raw);
-            cv.add(new fabric.Circle({
-              left:        cx - rAvg,
-              top:         cy - rAvg,
-              radius:      rAvg,
-              stroke:      raw.stroke,
-              strokeWidth: raw.strokeWidth,
-              fill:        '',
-              selectable:  false,
-            }));
-            cv.renderAll();
-            return;
-          }
-        });
-        
-        // new "saveState"
-        canvas.on('object:added', (e) => {
-          if (e.target.__fromRedo) {
-            delete e.target.__fromRedo;
-            return;
-          }
-          // mark how it got here
-          e.target.__lastAction = 'added';
-          setUndoStack(u => [...u, e.target]);
-          setRedoStack([]);   // clear redo on a true new add
-        });
+              if (canvasElement?.fabric) {
+                canvasElement.fabric.dispose();
+              }
 
-        canvas.on('object:removed', (e) => {
-          if (e.target.__fromUndo) {
-            delete e.target.__fromUndo;
-            return;
-          }
-          // mark how it got here
-          e.target.__lastAction = 'removed';
-          setUndoStack(u => [...u, e.target]);
-          setRedoStack([]);   // clear redo on a true remove
-        });
-
-        const handleClick = () => {
-          setActiveCanvasIndex(index);
-          console.log(`Canvas ${index} clicked`);
-        };
-
-        canvas.upperCanvasEl.addEventListener('touchstart', (e) => {
-          const touch = e.touches[0];
-        
-          // Some browsers support this:
-          if (touch.touchType && touch.touchType !== 'stylus') {
-            e.preventDefault(); // Ignore fingers/palms
-            return;
-          }
-        
-          // Fallback: allow only touches with a small radius (rough stylus heuristic)
-          if (touch.radiusX > 10 || touch.radiusY > 10) {
-            e.preventDefault(); // Likely palm/finger
-            return;
-          }
-        
-          // At this point, likely a stylus touch
-          console.log('Stylus input detected');
-        });
-        
-
-        //canvas.on('mouse:over', () => handleClick(index));
-        // canvas.on('mouse:down', () => handleClick(index));
-        //canvas.on('pointer:down', () => handleClick(index));
-
-        // canvas.on('touchstart', handleClick);
-
-          objects.forEach((obj) => {
-            console.log('object:', obj);
-            if (obj.fill?.replace(/\s/g, '') === 'rgb(23,225,23)') {
-              console.log('object found');
-              obj.set({
-                hasBorders: false,
-                hasControls: true,
-                lockScalingY: true,
-                lockMovementY: true,
-                lockMovementX: true,
-                lockRotation: true,
-                originX: 'left',
-                originY: 'top',
-              });
-              obj.setControlsVisibility({
-                mt: false,
-                mb: false,
-                ml: false,
-                mr: true,
-                tl: false,
-                tr: false,
-                bl: false,
-                br: false,
-                mtr: false,
-              });
-              let maxleft = obj.left;
-
-              const topicindex = topicsindexes.current;
-              topicsindexes.current++; // persists across re-renders
-
-              const scaledWidth = obj.width * obj.scaleX;
-              const newWidth = Math.min(100, Math.max(1, scaledWidth));
-
-              const newConfidence = newWidth / 100;
-
-              setConfidenceLevels((prev) => {
-                const updated = [...prev];
-                updated[topicindex] = newConfidence;
-                return updated;
+              const canvas = new fabric.Canvas(canvasElement, {
+                width: A4_WIDTH,
+                height: A4_HEIGHT,
+                backgroundColor: null, // Set background color to white
               });
 
-              obj.on('scaling', function () {
-                const scaledWidth = obj.width * obj.scaleX;
-                const newWidth = Math.min(100, Math.max(1, scaledWidth));
+              let jsonString = canvasData;
+              console.log('is canvas valid?! ', canvas);
 
-                obj.set({
-                  scaleX: 1,
-                  width: newWidth,
-                  left: maxleft, // lock left position
+              // Load JSON content first and then add your custom objects
+              canvas.clear();
+              canvas.loadFromJSON(JSON.parse(jsonString)).then(() => {
+                console.log('Callback triggered!'); // this will definitely run after all deserialization is complete
+                canvas.renderAll();
+
+                const objects = canvas.getObjects();
+                console.log('Objects loaded:', objects.length);
+
+                canvas.isDrawingMode = true;
+                canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+                canvas.freeDrawingBrush.color = brushColor;
+                canvas.freeDrawingBrush.width = 5;
+
+                canvas.on('path:created', (e) => {
+                  // only when in pen mode
+                  if (activeTool !== 'pen') return;
+
+                  // grab the raw Fabric.Path
+                  const raw = e.path || e.target;
+                  const pts = raw.path.map((cmd) => ({ x: cmd[1], y: cmd[2] }));
+                  const p0 = pts[0];
+                  const pN = pts[pts.length - 1];
+
+                  // line-distance formula
+                  const A = pN.y - p0.y;
+                  const B = p0.x - pN.x;
+                  const C = pN.x * p0.y - p0.x * pN.y;
+                  const maxDist = pts.reduce((mx, pt) => {
+                    return Math.max(
+                      mx,
+                      Math.abs(A * pt.x + B * pt.y + C) / Math.hypot(A, B)
+                    );
+                  }, 0);
+
+                  // reference to just this canvas
+                  const cv = raw.canvas;
+
+                  // STRAIGHT LINES
+                  if (maxDist <= 12) {
+                    cv.remove(raw);
+                    cv.add(
+                      new fabric.Line([p0.x, p0.y, pN.x, pN.y], {
+                        stroke: cv.freeDrawingBrush.color,
+                        strokeWidth: cv.freeDrawingBrush.width,
+                        selectable: false,
+                      })
+                    );
+                    cv.requestRenderAll();
+                    return;
+                  }
+
+                  // Compute centroid & average radius for circle detection
+                  const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+                  const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+                  const radii = pts.map((p) => Math.hypot(p.x - cx, p.y - cy));
+                  const rAvg = radii.reduce((s, r) => s + r, 0) / radii.length;
+                  const maxDev = Math.max(
+                    ...radii.map((r) => Math.abs(r - rAvg))
+                  );
+
+                  // CIRCLE
+                  const circleTolerance = 15; // max radial dev for a full circle
+                  if (maxDev <= circleTolerance) {
+                    cv.remove(raw);
+                    cv.add(
+                      new fabric.Circle({
+                        left: cx - rAvg,
+                        top: cy - rAvg,
+                        radius: rAvg,
+                        stroke: raw.stroke,
+                        strokeWidth: raw.strokeWidth,
+                        fill: '',
+                        selectable: false,
+                      })
+                    );
+                    cv.renderAll();
+                    return;
+                  }
                 });
 
-                const newConfidence = newWidth / 100;
+                // new "saveState"
+                canvas.on('object:added', (e) => {
+                  if (e.target.__fromRedo) {
+                    delete e.target.__fromRedo;
+                    return;
+                  }
+                  // Check if the object's color is rgba(255, 169, 78, 0.5)
+                  if (e.target.stroke === 'rgba(255, 169, 78, 0.5)') {
+                    console.log('match');
+                    return; // Ignore this object if it matches the color
+                  }
 
-                setConfidenceLevels((prev) => {
-                  const updated = [...prev];
-                  updated[topicindex] = newConfidence;
-                  return updated;
+                  // mark how it got here
+                  e.target.__lastAction = 'added';
+                  setUndoStack((u) => [...u, e.target]);
+                  setRedoStack([]); // clear redo on a true new add
                 });
 
-                // // Store confidence for the current topic
-                // const existing = confidenceLevels.find(entry => entry.topic === topic);
-                // if (existing) {
-                //   existing.confidence = newConfidence;
-                // } else {
-                //   confidenceLevels.push({ topic, confidence: newConfidence });
-                // }
-                
-                canvas.requestRenderAll();
+                canvas.on('object:removed', (e) => {
+                  if (e.target.__fromUndo) {
+                    delete e.target.__fromUndo;
+                    return;
+                  }
+                  // Check if the object's color is rgba(255, 169, 78, 0.5)
+                  if (e.target.stroke === 'rgba(255, 169, 78, 0.5)') {
+                    console.log('match');
+                    return; // Ignore this object if it matches the color
+                  }
+
+                  // mark how it got here
+                  e.target.__lastAction = 'removed';
+                  setUndoStack((u) => [...u, e.target]);
+                  setRedoStack([]); // clear redo on a true remove
+                });
+
+                const handleClick = () => {
+                  setActiveCanvasIndex(index);
+                  console.log(`Canvas ${index} clicked`);
+                };
+
+                canvas.upperCanvasEl.addEventListener('touchstart', (e) => {
+                  const touch = e.touches[0];
+
+                  // Some browsers support this:
+                  if (touch.touchType && touch.touchType !== 'stylus') {
+                    e.preventDefault(); // Ignore fingers/palms
+                    return;
+                  }
+
+                  // Fallback: allow only touches with a small radius (rough stylus heuristic)
+                  if (touch.radiusX > 10 || touch.radiusY > 10) {
+                    e.preventDefault(); // Likely palm/finger
+                    return;
+                  }
+
+                  // At this point, likely a stylus touch
+                  console.log('Stylus input detected');
+                });
+
+                //canvas.on('mouse:over', () => handleClick(index));
+                // canvas.on('mouse:down', () => handleClick(index));
+                //canvas.on('pointer:down', () => handleClick(index));
+
+                // canvas.on('touchstart', handleClick);
+
+                objects.forEach((obj) => {
+                  console.log('object:', obj);
+                  if (obj.fill?.replace(/\s/g, '') === 'rgb(23,225,23)') {
+                    console.log('object found');
+                    obj.set({
+                      hasBorders: false,
+                      hasControls: true,
+                      lockScalingY: true,
+                      lockMovementY: true,
+                      lockMovementX: true,
+                      lockRotation: true,
+                      originX: 'left',
+                      originY: 'top',
+                    });
+                    obj.setControlsVisibility({
+                      mt: false,
+                      mb: false,
+                      ml: false,
+                      mr: true,
+                      tl: false,
+                      tr: false,
+                      bl: false,
+                      br: false,
+                      mtr: false,
+                    });
+                    let maxleft = obj.left;
+
+                    const topicindex = topicsindexes.current;
+                    topicsindexes.current++; // persists across re-renders
+
+                    const scaledWidth = obj.width * obj.scaleX;
+                    const newWidth = Math.min(100, Math.max(1, scaledWidth));
+
+                    const newConfidence = newWidth / 100;
+
+                    setConfidenceLevels((prev) => {
+                      const updated = [...prev];
+                      updated[topicindex] = newConfidence;
+                      return updated;
+                    });
+
+                    obj.on('scaling', function () {
+                      const scaledWidth = obj.width * obj.scaleX;
+                      const newWidth = Math.min(100, Math.max(1, scaledWidth));
+
+                      obj.set({
+                        scaleX: 1,
+                        width: newWidth,
+                        left: maxleft, // lock left position
+                      });
+
+                      const newConfidence = newWidth / 100;
+
+                      setConfidenceLevels((prev) => {
+                        const updated = [...prev];
+                        updated[topicindex] = newConfidence;
+                        return updated;
+                      });
+
+                      // // Store confidence for the current topic
+                      // const existing = confidenceLevels.find(entry => entry.topic === topic);
+                      // if (existing) {
+                      //   existing.confidence = newConfidence;
+                      // } else {
+                      //   confidenceLevels.push({ topic, confidence: newConfidence });
+                      // }
+
+                      canvas.requestRenderAll();
+                    });
+                  }
+                  if (
+                    obj.fill?.replace(/\s/g, '') === 'transparent' &&
+                    obj.stroke === 'gray'
+                  ) {
+                    obj.set({
+                      selectable: false,
+                      evented: false,
+                    });
+                    canvas.requestRenderAll();
+                  }
+                });
+
+                canvas.renderAll();
+
+                console.log('Canvas loaded yes!');
+                setLoading(false);
               });
-            }
-            if (
-              obj.fill?.replace(/\s/g, '') === 'transparent' &&
-              obj.stroke === 'gray'
-            ) {
-              obj.set({
-                selectable: false,
-                evented: false,
-              });
-              canvas.requestRenderAll();
-            }
-          });
 
-          canvas.renderAll();
+              // Debug logging to confirm canvas rendering
+              canvas.renderAll();
+              console.log('Canvasref=', canvasRef.current[index]);
 
-          console.log('Canvas loaded yes!');
-          setLoading(false);
-        });
+              // // Handle canvas click event
+              // const handleClick = () => {
+              //   setActiveCanvasIndex(index);
+              //   console.log(`Canvas ${index} clicked`);
+              // };
 
-        // Debug logging to confirm canvas rendering
-        canvas.renderAll();
-        console.log('Canvasref=', canvasRef.current[index]);
+              // // Set up mouseover event
+              // // canvas.on('mouse:over', handleClick);
+              // // canvas.on('mouse:down', handleClick);
+              // canvas.on('mouse:over', () => handleClick(index));
+              // canvas.on('mouse:down', () => handleClick(index));
 
-        // // Handle canvas click event
-        // const handleClick = () => {
-        //   setActiveCanvasIndex(index);
-        //   console.log(`Canvas ${index} clicked`);
-        // };
-
-        // // Set up mouseover event
-        // // canvas.on('mouse:over', handleClick);
-        // // canvas.on('mouse:down', handleClick);
-        // canvas.on('mouse:over', () => handleClick(index));
-        // canvas.on('mouse:down', () => handleClick(index));
-
-
-        newCanvases.push(canvas);
-
-
-          });
+              newCanvases.push(canvas);
+            });
             setCanvases(newCanvases);
             if (newCanvases.length > 0) {
               setActiveCanvasIndex(0);
@@ -379,7 +391,6 @@ const CanvasEditor = () => {
       setIsNew(false);
     }
 
-
     setCanvases(newCanvases);
     return () => {
       newCanvases.forEach((canvas) => {
@@ -394,8 +405,6 @@ const CanvasEditor = () => {
   }, []);
 
   const [notetitle, setnotetitle] = useState('Notebook 1');
-
-  
 
   useEffect(() => {
     // const averageConfidence = confidenceLevels.reduce((sum, val) => sum + val, 0) / confidenceLevels.length;
@@ -453,30 +462,27 @@ const CanvasEditor = () => {
     });
   });
 
-  
-
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       event.preventDefault();
       event.returnValue = ''; // Some browsers need this to trigger the confirmation
       saveCanvases(); // Save canvases before refresh/close
     };
-  
+
     const handlePopState = (event) => {
       event.preventDefault();
       event.returnValue = ''; // Some browsers need this to trigger the confirmation
       saveCanvases(); // Save canvases when navigating back/forward
     };
-  
+
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('popstate', handlePopState);
-  
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
   }, [canvases]);
-  
 
   const saveCanvases = () => {
     canvases.forEach((canvas) => {
@@ -511,16 +517,16 @@ const CanvasEditor = () => {
     });
 
     const indices = canvases.map((canvas, index) => index);
-    const datas = canvases.map((canvas) =>
-      JSON.stringify(canvas.toJSON())
-        // .replace(/'/g, '`')
-        // .replace(/[\x00-\x1F\x7F]/g, '')
-        // .replace(/\\"(.*?)\\"/g, (_, inner) => `\`${inner}\``)
-        // .replace(/\\n/g, '\\\\n')
+    const datas = canvases.map(
+      (canvas) => JSON.stringify(canvas.toJSON())
+      // .replace(/'/g, '`')
+      // .replace(/[\x00-\x1F\x7F]/g, '')
+      // .replace(/\\"(.*?)\\"/g, (_, inner) => `\`${inner}\``)
+      // .replace(/\\n/g, '\\\\n')
     );
 
-    console.log("HELLOOOOdatasin:",datas);
-    console.log("userkey:",key);
+    console.log('HELLOOOOdatasin:', datas);
+    console.log('userkey:', key);
 
     const canvasesData = canvases.map((canvas, index) => ({
       note: noteID,
@@ -532,7 +538,7 @@ const CanvasEditor = () => {
         .replace(/\\n/g, '\\\\n'),
       use: user,
     }));
-    console.log("noteitle:",notetitle);
+    console.log('noteitle:', notetitle);
 
     const handleSubmit = () => {
       console.log('here saving');
@@ -547,7 +553,7 @@ const CanvasEditor = () => {
           dat: datas,
           user: key, //IMPORTANT
           //user: "5f3fbb27-e377-4344-a805-b9ebd0a93311",
-          conf:notetitle,
+          conf: notetitle,
         }),
       })
         .then((response) => response.json())
@@ -885,10 +891,9 @@ const CanvasEditor = () => {
     // };
 
     // handleSubmit(); // Submit the data to the backend
-    if(showPomodoroRect===true){
+    if (showPomodoroRect === true) {
       setShowPomodoroRect(false);
-    }
-    else{
+    } else {
       setShowPomodoroRect(true);
     }
   };
@@ -1017,23 +1022,23 @@ const CanvasEditor = () => {
           let highlightRect = null;
           console.log('prevstartx=', startX);
 
-            // Save the previous state of all objects (for later restoration)
-  const previousStates = canvas.getObjects().map((obj) => ({
-    obj:obj,
-    lockMovementX: obj.lockMovementX,
-    lockMovementY: obj.lockMovementY,
-    selectable: obj.selectable,
-  }));
+          // Save the previous state of all objects (for later restoration)
+          const previousStates = canvas.getObjects().map((obj) => ({
+            obj: obj,
+            lockMovementX: obj.lockMovementX,
+            lockMovementY: obj.lockMovementY,
+            selectable: obj.selectable,
+          }));
 
-  // Disable movement and selection for all objects
-  canvas.getObjects().forEach((obj) => {
-    if (obj) {
-    obj.lockMovementX = true;
-    obj.lockMovementY = true;
-    obj.selectable = false;
-    }
-  });
-  canvas.renderAll(); // Ensure the canvas reflects these changes
+          // Disable movement and selection for all objects
+          canvas.getObjects().forEach((obj) => {
+            if (obj) {
+              obj.lockMovementX = true;
+              obj.lockMovementY = true;
+              obj.selectable = false;
+            }
+          });
+          canvas.renderAll(); // Ensure the canvas reflects these changes
 
           const onMouseDownsub = (e) => {
             if (highlightRect) {
@@ -1145,17 +1150,17 @@ const CanvasEditor = () => {
             canvas.off('touch:move', onMouseMovesub);
             canvas.off('touch:up', onMouseUpsub);
 
-
-    // Re-enable movement and selection for all objects after the tool is used
-    canvas.getObjects().forEach((obj, index) => {
-      const previousState = previousStates[index];
-      if (previousState && previousState.obj) { // Ensure the object exists
-        previousState.obj.lockMovementX = previousState.lockMovementX;
-        previousState.obj.lockMovementY = previousState.lockMovementY;
-        previousState.obj.selectable = previousState.selectable;
-      }
-    });
-    canvas.renderAll(); // Ensure the canvas reflects these changes
+            // Re-enable movement and selection for all objects after the tool is used
+            canvas.getObjects().forEach((obj, index) => {
+              const previousState = previousStates[index];
+              if (previousState && previousState.obj) {
+                // Ensure the object exists
+                previousState.obj.lockMovementX = previousState.lockMovementX;
+                previousState.obj.lockMovementY = previousState.lockMovementY;
+                previousState.obj.selectable = previousState.selectable;
+              }
+            });
+            canvas.renderAll(); // Ensure the canvas reflects these changes
           };
 
           canvas.on('mouse:down', onMouseDownsub);
@@ -1163,7 +1168,7 @@ const CanvasEditor = () => {
           canvas.on('mouse:up', onMouseUpsub);
           canvas.on('pointerdown', (e) => {
             e.preventDefault();
-            console.log("touchstart triggered");
+            console.log('touchstart triggered');
             registration.showNotification('touchstart!', {
               body: 'Your 25 minute study session is over',
               icon: './logo192.png',
@@ -1173,7 +1178,7 @@ const CanvasEditor = () => {
           });
           canvas.on('pointermove', (e) => {
             e.preventDefault();
-            console.log("touchmove triggered");
+            console.log('touchmove triggered');
             registration.showNotification('touchmove!', {
               body: 'Your 25 minute study session is over',
               icon: './logo192.png',
@@ -1183,7 +1188,7 @@ const CanvasEditor = () => {
           });
           canvas.on('pointerup', (e) => {
             e.preventDefault();
-            console.log("touchend triggered");
+            console.log('touchend triggered');
             registration.showNotification('touchend!', {
               body: 'Your 25 minute study session is over',
               icon: './logo192.png',
@@ -1191,7 +1196,6 @@ const CanvasEditor = () => {
             });
             onMouseUpsub(e);
           });
-
         } else if (activeTool === 'aihl') {
           canvas.off('mouse:down');
           canvas.off('mouse:move');
@@ -1346,7 +1350,6 @@ const CanvasEditor = () => {
     let topics = '';
     setLoadingText('Analyzing with context.');
     setLoading(true);
-
 
     // Highlight bolding
     const objectsInRegion = canvas.getObjects();
@@ -1561,7 +1564,6 @@ const CanvasEditor = () => {
     const topic = fullDataURL.split(',')[1];
     console.log('Base64 image:', topic);
 
-
     // Highlight bolding
     // const objectsInRegion = canvas.getObjects().filter((obj) => {
     //   const bounds = obj.getBoundingRect();
@@ -1740,7 +1742,6 @@ const CanvasEditor = () => {
       selectable: false,
       evented: true,
     });
-    
 
     img.on('mousedown', () => {
       console.log('Image button was pressed with topic', topic);
@@ -1748,10 +1749,9 @@ const CanvasEditor = () => {
       let data = topic;
 
       const loadingGif = document.getElementById('loading-gif');
-      setLoadingText("Crafting your response with neural ink.");
+      setLoadingText('Crafting your response with neural ink.');
       setLoading(true);
       canvas.remove(img);
-
 
       // Handle form submission to backend
       const handleSubmit = () => {
@@ -1785,7 +1785,6 @@ const CanvasEditor = () => {
             setLoading(false);
 
             canvas.renderAll();
-            
           })
           .catch((error) => {
             console.error('Error:', error);
@@ -1816,35 +1815,34 @@ const CanvasEditor = () => {
     });
   };
 
-
   // Handlers for floating icon dragging (touch)
-const handleIconTouchStart = (e) => {
-  e.preventDefault(); // Prevents default touch action (like scrolling)
-  setIsDragging(true);
-  const rect = e.currentTarget.getBoundingClientRect();
-  setDragOffset({
-    x: e.touches[0].clientX - rect.left,
-    y: e.touches[0].clientY - rect.top,
-  });
+  const handleIconTouchStart = (e) => {
+    e.preventDefault(); // Prevents default touch action (like scrolling)
+    setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top,
+    });
 
-  // Add touchmove and touchend listeners for dragging
-  const handleTouchMove = (moveEvent) => {
-    if (!isDragging) return;
-    const newX = moveEvent.touches[0].clientX - dragOffset.x;
-    const newY = moveEvent.touches[0].clientY - dragOffset.y;
+    // Add touchmove and touchend listeners for dragging
+    const handleTouchMove = (moveEvent) => {
+      if (!isDragging) return;
+      const newX = moveEvent.touches[0].clientX - dragOffset.x;
+      const newY = moveEvent.touches[0].clientY - dragOffset.y;
 
-    setFloatingIconPosition({ x: newX, y: newY });
+      setFloatingIconPosition({ x: newX, y: newY });
+    };
+
+    const handleTouchEnd = () => {
+      setIsDragging(false);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
   };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    document.removeEventListener('touchmove', handleTouchMove);
-    document.removeEventListener('touchend', handleTouchEnd);
-  };
-
-  document.addEventListener('touchmove', handleTouchMove);
-  document.addEventListener('touchend', handleTouchEnd);
-};
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -1897,7 +1895,7 @@ const handleIconTouchStart = (e) => {
   const goHome = () => {
     setIsLoading(true); // Start the loading spinner
     saveCanvases();
-  
+
     // Simulate a delay for the loading spinner (e.g., 3 seconds)
     setTimeout(() => {
       navigate('/AccountDashboard'); // Navigate after the delay
@@ -1908,15 +1906,15 @@ const handleIconTouchStart = (e) => {
   const handleUndoRedo = (action) => {
     const canvas = canvases[activeCanvasIndex];
     if (!canvas) return;
-  
+
     if (action === 'undo') {
       if (undoStack.length === 0) return;
       const last = undoStack[undoStack.length - 1];
-      setUndoStack(u => u.slice(0, -1));
-      setRedoStack(r => [...r, last]);
+      setUndoStack((u) => u.slice(0, -1));
+      setRedoStack((r) => [...r, last]);
       // flag so removal listener skips this
       last.__fromUndo = true;
-  
+
       // if it was added → remove; if removed → re-add
       if (last.__lastAction === 'added') {
         canvas.remove(last);
@@ -1924,15 +1922,14 @@ const handleIconTouchStart = (e) => {
         canvas.add(last);
       }
       canvas.renderAll();
-  
     } else if (action === 'redo') {
       if (redoStack.length === 0) return;
       const toRestore = redoStack[redoStack.length - 1];
-      setRedoStack(r => r.slice(0, -1));
-      setUndoStack(u => [...u, toRestore]);
+      setRedoStack((r) => r.slice(0, -1));
+      setUndoStack((u) => [...u, toRestore]);
       // flag so addition listener skips this
       toRestore.__fromRedo = true;
-  
+
       // if it was added → re-add; if removed → remove again
       if (toRestore.__lastAction === 'added') {
         canvas.add(toRestore);
@@ -1943,7 +1940,8 @@ const handleIconTouchStart = (e) => {
     }
   };
 
-  useEffect(() => { //Autosave
+  useEffect(() => {
+    //Autosave
     const intervalId = setInterval(() => {
       saveCanvases();
     }, 5 * 60 * 1000); // 5 minutes
@@ -1960,9 +1958,6 @@ const handleIconTouchStart = (e) => {
     return `hsl(${hue}, 70%, 80%)`; // Light pastel color
   }
 
-
-
-
   return (
     <div
       style={{
@@ -1978,55 +1973,57 @@ const handleIconTouchStart = (e) => {
       }}
     >
       {/* Home Button */}
-      
+
       <div
-  style={{
-    position: 'fixed',
-    top: '20px',
-    right: '20px',
-    backgroundColor: 'rgba(0, 16, 120, 0.9)', // dark gray with transparency
-    padding: '20px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-    color: '#fff',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center', // <--- CENTER everything horizontally
-    gap: '10px', // Space between items
-    minWidth: '150px',
-    textAlign: 'center', // <--- CENTER the text itself too
-  }}
->
-  <button
-    onClick={goHome}
-    style={{
-      width: '100%',
-      padding: '10px',
-      backgroundColor: isLoading ? '#6c757d' : '#007bff', // Gray while saving
-      color: '#fff',
-      border: 'none',
-      borderRadius: '5px',
-      fontSize: '16px',
-      cursor: 'pointer',
-    }}
-    disabled={isLoading} // Prevent clicking multiple times
-  >
-    {isLoading ? 'Saving...' : 'Your Dashboard'}
-  </button>
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: 'rgba(0, 16, 120, 0.9)', // dark gray with transparency
+          padding: '20px',
+          borderRadius: '10px',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+          color: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center', // <--- CENTER everything horizontally
+          gap: '10px', // Space between items
+          minWidth: '150px',
+          textAlign: 'center', // <--- CENTER the text itself too
+        }}
+      >
+        <button
+          onClick={goHome}
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: isLoading ? '#6c757d' : '#007bff', // Gray while saving
+            color: '#fff',
+            border: 'none',
+            borderRadius: '5px',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+          disabled={isLoading} // Prevent clicking multiple times
+        >
+          {isLoading ? 'Saving...' : 'Your Dashboard'}
+        </button>
 
-  <div style={{ fontSize: '14px' }}>
-    <strong><h2>{noteID.split('⚪️')[1] || noteID}</h2></strong>
-    {noteID.split('⚪️')[0] !== "" && (
-  <h4 style={{ color: stringToColor(noteID.split('⚪️')[0]) }}>
-    📂 {noteID.split('⚪️')[0] || noteID}
-  </h4>
-)}
-  </div>
+        <div style={{ fontSize: '14px' }}>
+          <strong>
+            <h2>{noteID.split('⚪️')[1] || noteID}</h2>
+          </strong>
+          {noteID.split('⚪️')[0] !== '' && (
+            <h4 style={{ color: stringToColor(noteID.split('⚪️')[0]) }}>
+              📂 {noteID.split('⚪️')[0] || noteID}
+            </h4>
+          )}
+        </div>
 
-  <div style={{ fontSize: '14px' }}>
-    <strong>{notetitle}</strong>
-  </div>
-</div>
+        <div style={{ fontSize: '14px' }}>
+          <strong>{notetitle}</strong>
+        </div>
+      </div>
 
       {Array.from({ length: numPages }, (_, index) => (
         <div
@@ -2048,7 +2045,6 @@ const handleIconTouchStart = (e) => {
             marginBottom: '5px',
           }}
         >
-          
           <canvas
             ref={(el) => (canvasRef.current[index] = el)}
             width={A4_WIDTH}
@@ -2057,39 +2053,38 @@ const handleIconTouchStart = (e) => {
           ></canvas>
         </div>
       ))}
-{/* Loading GIF overlay */}
-{loading && (
-  <div
-    style={{
-      position: 'fixed',
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
-      textAlign: 'center',
-      zIndex: 1000,
-    }}
-  >
-    <img
-      src="/load.gif"
-      alt="Loading..."
-      style={{
-        display: 'block',
-        margin: '0 auto',
-      }}
-    />
-    <p
-      style={{
-        marginTop: '10px',
-        color: '#333',
-        fontFamily: '"Helvatica", Courier, verdana', // Change font here
-        fontSize: '15px',
-      }}
-    >
-      <b>{loadtext}</b>
-    </p>
-  </div>
-)}
-
+      {/* Loading GIF overlay */}
+      {loading && (
+        <div
+          style={{
+            position: 'fixed',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <img
+            src="/load.gif"
+            alt="Loading..."
+            style={{
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
+          <p
+            style={{
+              marginTop: '10px',
+              color: '#333',
+              fontFamily: '"Helvatica", Courier, verdana', // Change font here
+              fontSize: '15px',
+            }}
+          >
+            <b>{loadtext}</b>
+          </p>
+        </div>
+      )}
 
       {/* Drawing Tools Box with PNG Image Buttons */}
       <div
@@ -2412,7 +2407,7 @@ const handleIconTouchStart = (e) => {
               background: 'none',
               border: 'none',
               padding: 0,
-              cursor: undoStack.length ? 'pointer' : 'not-allowed'
+              cursor: undoStack.length ? 'pointer' : 'not-allowed',
             }}
           >
             <img
@@ -2429,7 +2424,7 @@ const handleIconTouchStart = (e) => {
               background: 'none',
               border: 'none',
               padding: 0,
-              cursor: redoStack.length ? 'pointer' : 'not-allowed'
+              cursor: redoStack.length ? 'pointer' : 'not-allowed',
             }}
           >
             <img
@@ -2494,7 +2489,7 @@ const handleIconTouchStart = (e) => {
           userSelect: 'none',
         }}
         onMouseDown={handleIconMouseDown}
-        onTouchStart={handleIconTouchStart}  // Add touch start listener for tablets
+        onTouchStart={handleIconTouchStart} // Add touch start listener for tablets
         onClick={handleIconClick}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#031b33';
@@ -2511,7 +2506,7 @@ const handleIconTouchStart = (e) => {
             height: '50px',
             borderRadius: '4px',
             objectFit: 'scale-down',
-            pointerEvents: 'none',  // Prevent the image from interfering with the drag
+            pointerEvents: 'none', // Prevent the image from interfering with the drag
           }}
         />
       </div>
