@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const CURRENT_VERSION = '1.7.0-beta';
+const CURRENT_VERSION = '1.8.0-beta';
 
 function UpdatePopup() {
   const [showPopup, setShowPopup] = useState(false);
@@ -20,9 +20,12 @@ function UpdatePopup() {
       <div style={styles.popup}>
         <h2>🥳 What's New in InkQuizly v{CURRENT_VERSION}</h2>
         <ul>
-          <li>🖊️↩️ Undo Redo for pens</li>
+          <li>🖊️↩️ Undo Redo for all objects</li>
           <li>💾 Auto-save every 5 minutes</li>
-          <h3>Stay tuned for more!</h3>
+          <li>🪄 Auto Correction for Lines and Circles</li>
+          <li>😌 UIX updates for smoother experience</li>
+          <li>📂 FOLDERS!! for your convenience</li>
+          <h3>Pilot releasing soon!</h3>
         </ul>
         <button onClick={() => setShowPopup(false)} style={styles.button}>
           Close
