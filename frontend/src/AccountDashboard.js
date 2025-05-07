@@ -435,7 +435,10 @@ function AccountDashboard() {
             <div className={styles.popupButtons}>
               <button
                 className="popupButton popupCreateButton"
-                onClick={() => handleCreate(folderName + "⚪️" + noteName)} // Wrap the function call inside an anonymous function
+                onClick={() => {
+                  handleCreate(folderName + "⚪️" + noteName);
+                  setShowPopup1(false);
+                }} // Wrap the function call inside an anonymous function
                 style={{
                   flex: 1,
                   padding: '0.75rem 1.5rem',
@@ -490,7 +493,10 @@ function AccountDashboard() {
             <div className={styles.popupButtons}>
               <button
                 className="popupButton popupCreateButton"
-                onClick={() => handleCreate(currfolder+"⚪️"+noteName)} // Wrap the function call inside an anonymous function
+                onClick={() => {
+                  handleCreate(currfolder + "⚪️" + noteName);
+                  setShowPopup(false);
+                }} // Wrap the function call inside an anonymous function
                 style={{
                   flex: 1,
                   padding: '0.75rem 1.5rem',
