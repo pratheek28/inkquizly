@@ -484,6 +484,9 @@ const CanvasEditor = () => {
     };
   }, [canvases]);
 
+  const [isSaving, setIsSaving] = useState(false);
+
+
   const saveCanvases = () => {
     canvases.forEach((canvas) => {
       const objectsToRemove = [];
@@ -561,6 +564,7 @@ const CanvasEditor = () => {
           setResponse(data.definition);
           console.log('log is', data.definition);
           console.log('response is', response);
+          setIsSaving(false);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -1940,14 +1944,21 @@ const CanvasEditor = () => {
     }
   };
 
-  useEffect(() => {
-    //Autosave
-    const intervalId = setInterval(() => {
-      saveCanvases();
-    }, 5 * 60 * 1000); // 5 minutes
 
-    return () => clearInterval(intervalId); // Cleanup on unmount
-  }, []);
+  useEffect(() => {
+    // Only run autosave if canvases have data
+    if (canvases.length === 0) {
+      console.log("RETURNING");
+      return;}
+  
+    const intervalId = setInterval(() => {
+      console.log("autosaving now");
+      setIsSaving(true);
+      saveCanvases();
+    }, 5 * 60 * 1000);  // 5 minutes interval
+  
+    return () => clearInterval(intervalId);
+  }, [canvases]);  // Runs whenever canvases state is updated
 
   function stringToColor(str) {
     let hash = 0;
@@ -2022,6 +2033,11 @@ const CanvasEditor = () => {
 
         <div style={{ fontSize: '14px' }}>
           <strong>{notetitle}</strong>
+          {isSaving && (
+            <h5 style={{ color: 'lime' }}>
+              💾  Autosaving..
+            </h5>
+          )}
         </div>
       </div>
 
