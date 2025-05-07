@@ -108,16 +108,16 @@ function AccountDashboard() {
   noteNames.forEach((note, index) => {
     // Split based on ⚪️ or any similar separator
     const split = note.split('⚪️');
-    const groupTitle = split.length > 1 && split[0]!="" ? split[0] : 'Standalone';
+    const groupTitle =
+      split.length > 1 && split[0] != '' ? split[0] : 'Standalone';
     const title = split.length > 1 ? split[1] : note;
-  
+
     if (!groupedNotes[groupTitle]) {
       groupedNotes[groupTitle] = [];
     }
-  
+
     groupedNotes[groupTitle].push({ title, index });
   });
-  
 
   const handleOpen = () => {
     console.log('selected:', selectedOption);
@@ -130,15 +130,14 @@ function AccountDashboard() {
   const [folderName, setfoldername] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [showPopup1, setShowPopup1] = useState(false);
-  const [currfolder, setfolder] = useState("");
-
+  const [currfolder, setfolder] = useState('');
 
   const handleFullNew = () => {
     setShowPopup1(true); // Show the popup to ask for the notebook name
   };
 
   const handleNew = (folder) => {
-    setfolder(folder)
+    setfolder(folder);
     setShowPopup(true); // Show the popup to ask for the notebook name
   };
 
@@ -280,7 +279,6 @@ function AccountDashboard() {
 
   const [expandedStackIndex, setExpandedStackIndex] = useState(null);
 
-
   function stringToColor(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -289,7 +287,6 @@ function AccountDashboard() {
     const hue = Math.abs(hash) % 360; // Keep it in 0–359 range
     return `hsl(${hue}, 70%, 80%)`; // Light pastel color
   }
-  
 
   return (
     <div className={styles.dashboardWrapper}>
@@ -424,19 +421,57 @@ function AccountDashboard() {
               value={noteName}
               onChange={handleNameChange}
               placeholder="Enter note name"
+              style={{
+                width: '80%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                backgroundColor: '#f9f9f9',
+                color: '#333',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4A90E2'; // Change border color on focus
+                e.target.style.backgroundColor = '#fff'; // Change background on focus
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#ccc'; // Reset border color when focus is lost
+                e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
+              }}
             />
             <h3>Enter folder name (Optional)</h3>
             <input
               type="text"
               value={folderName}
               onChange={handleFolderChange}
-              placeholder="Enter folder name"
+              placeholder="Enter note name"
+              style={{
+                width: '80%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                backgroundColor: '#f9f9f9',
+                color: '#333',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4A90E2'; // Change border color on focus
+                e.target.style.backgroundColor = '#fff'; // Change background on focus
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#ccc'; // Reset border color when focus is lost
+                e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
+              }}
             />
             <div className={styles.popupButtons}>
               <button
                 className="popupButton popupCreateButton"
                 onClick={() => {
-                  handleCreate(folderName + "⚪️" + noteName);
+                  handleCreate(folderName + '⚪️' + noteName);
                   setShowPopup1(false);
                 }} // Wrap the function call inside an anonymous function
                 style={{
@@ -489,12 +524,32 @@ function AccountDashboard() {
               value={noteName}
               onChange={handleNameChange}
               placeholder="Enter note name"
+              style={{
+                width: '80%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                backgroundColor: '#f9f9f9',
+                color: '#333',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4A90E2'; // Change border color on focus
+                e.target.style.backgroundColor = '#fff'; // Change background on focus
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#ccc'; // Reset border color when focus is lost
+                e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
+              }}
             />
+
             <div className={styles.popupButtons}>
               <button
                 className="popupButton popupCreateButton"
                 onClick={() => {
-                  handleCreate(currfolder + "⚪️" + noteName);
+                  handleCreate(currfolder + '⚪️' + noteName);
                   setShowPopup(false);
                 }} // Wrap the function call inside an anonymous function
                 style={{
@@ -604,122 +659,136 @@ function AccountDashboard() {
                 <div className={styles.noteTitle}>{title}</div>
                 <div>{conf[index]}</div>
                 <button
-    onClick={(e) => {
-      e.stopPropagation(); // Prevent click from reaching the card
-      handleDelete("⚪️"+title);
-    }}
-    style={{
-      backgroundColor: 'white', /* Red background */
-      color: 'red',              /* White text */
-      border: 'none',              /* No border */
-      fontSize: '16px',            /* Font size */
-      borderRadius: '5px',         /* Rounded corners */
-      cursor: 'pointer',          /* Pointer cursor on hover */
-      transition: 'all 0.3s ease', /* Smooth transition for hover effects */
-      marginTop:50,
-    }}
-    onMouseOver={(e) => {
-        e.target.style.backgroundColor = '#d32f2f'; /* Darker red on hover */
-        e.target.style.color = 'white';              /* White text on hover */
-      }}
-      onMouseOut={(e) => {
-        e.target.style.backgroundColor = 'white'; /* Reset to original red */
-        e.target.style.color = 'red';              /* Keep text white */
-      }}
-  >
-    🗑️
-  </button>
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent click from reaching the card
+                    handleDelete('⚪️' + title);
+                  }}
+                  style={{
+                    backgroundColor: 'white' /* Red background */,
+                    color: 'red' /* White text */,
+                    border: 'none' /* No border */,
+                    fontSize: '16px' /* Font size */,
+                    borderRadius: '5px' /* Rounded corners */,
+                    cursor: 'pointer' /* Pointer cursor on hover */,
+                    transition:
+                      'all 0.3s ease' /* Smooth transition for hover effects */,
+                    marginTop: 50,
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor =
+                      '#d32f2f'; /* Darker red on hover */
+                    e.target.style.color = 'white'; /* White text on hover */
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor =
+                      'white'; /* Reset to original red */
+                    e.target.style.color = 'red'; /* Keep text white */
+                  }}
+                >
+                  🗑️
+                </button>
               </div>
             ));
           }
 
           return (
             <div key={`stack-${stackIndex}`} className={styles.stackRow}>
-  {/* Folder */}
-  <div
-    className={styles.noteCard}
-    style={{ backgroundColor: stringToColor(groupTitle) }}
-    onClick={() =>
-      setExpandedStackIndex(
-        expandedStackIndex === stackIndex ? null : stackIndex
-      )
-    }
-  >
-    <div className={styles.stackLabel} >
-     <b>📁 {groupTitle}</b>
-    </div>
-    <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0' }}>
-  <button   
-      onClick={() => handleNew(groupTitle)} // Use an anonymous function to pass the groupTitle correctly
-    style={{
-      backgroundColor: 'rgba(0, 2, 0, 0)',
-      color: 'black',
-      fontSize: '13px',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-      transition: 'all 0.3s ease',
-      width:'100%',
-      alignItems:'center',
-    }}
-    onMouseOver={(e) => {
-      e.target.style.color = 'grey';
-    }}
-    onMouseOut={(e) => {
-      e.target.style.backgroundColor = 'rgba(0, 2, 0, 0)';
-      e.target.style.color = 'black';
-    }}
-  >
-    ➕ Add Note
-  </button>
-</div>
+              {/* Folder */}
+              <div
+                className={styles.noteCard}
+                style={{ backgroundColor: stringToColor(groupTitle) }}
+                onClick={() =>
+                  setExpandedStackIndex(
+                    expandedStackIndex === stackIndex ? null : stackIndex
+                  )
+                }
+              >
+                <div className={styles.stackLabel}>
+                  <b>📁 {groupTitle}</b>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    margin: '1rem 0',
+                  }}
+                >
+                  <button
+                    onClick={() => handleNew(groupTitle)} // Use an anonymous function to pass the groupTitle correctly
+                    style={{
+                      backgroundColor: 'rgba(0, 2, 0, 0)',
+                      color: 'black',
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+                      transition: 'all 0.3s ease',
+                      width: '100%',
+                      alignItems: 'center',
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.color = 'grey';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = 'rgba(0, 2, 0, 0)';
+                      e.target.style.color = 'black';
+                    }}
+                  >
+                    ➕ Add Note
+                  </button>
+                </div>
+              </div>
 
-  </div>
-
-  {/* Notes shown horizontally */}
-  {expandedStackIndex === stackIndex && (
-    <div className={styles.notesInStack}>
-      {notes.map(({ title, index }) => (
-        <div
-          key={index}
-          className={styles.noteCard}
-          style={{ backgroundColor: stringToColor(groupTitle) }}
-          onClick={() => handleOptionClick(noteNames[index])}
-        >
-          <div className={styles.noteTitle}>{title}</div>
-          <div>{conf[index]}</div>
-          <button
-    onClick={(e) => {
-      e.stopPropagation(); // Prevent click from reaching the card
-      handleDelete(groupTitle+"⚪️"+title);
-    }}
-    style={{
-      backgroundColor:stringToColor(groupTitle) , /* Red background */
-      color: 'red',              /* White text */
-      border: 'none',              /* No border */
-      fontSize: '16px',            /* Font size */
-      borderRadius: '5px',         /* Rounded corners */
-      cursor: 'pointer',          /* Pointer cursor on hover */
-      transition: 'all 0.3s ease', /* Smooth transition for hover effects */
-      marginTop:50,
-    }}
-    onMouseOver={(e) => {
-        e.target.style.backgroundColor = '#d32f2f'; /* Darker red on hover */
-        e.target.style.color = stringToColor(groupTitle);              /* White text on hover */
-      }}
-      onMouseOut={(e) => {
-        e.target.style.backgroundColor = stringToColor(groupTitle); /* Reset to original red */
-        e.target.style.color = 'red';              /* Keep text white */
-      }}
-  >
-    🗑️
-  </button>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-
+              {/* Notes shown horizontally */}
+              {expandedStackIndex === stackIndex && (
+                <div className={styles.notesInStack}>
+                  {notes.map(({ title, index }) => (
+                    <div
+                      key={index}
+                      className={styles.noteCard}
+                      style={{ backgroundColor: stringToColor(groupTitle) }}
+                      onClick={() => handleOptionClick(noteNames[index])}
+                    >
+                      <div className={styles.noteTitle}>{title}</div>
+                      <div>{conf[index]}</div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click from reaching the card
+                          handleDelete(groupTitle + '⚪️' + title);
+                        }}
+                        style={{
+                          backgroundColor:
+                            stringToColor(groupTitle) /* Red background */,
+                          color: 'red' /* White text */,
+                          border: 'none' /* No border */,
+                          fontSize: '16px' /* Font size */,
+                          borderRadius: '5px' /* Rounded corners */,
+                          cursor: 'pointer' /* Pointer cursor on hover */,
+                          transition:
+                            'all 0.3s ease' /* Smooth transition for hover effects */,
+                          marginTop: 50,
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.backgroundColor =
+                            '#d32f2f'; /* Darker red on hover */
+                          e.target.style.color =
+                            stringToColor(groupTitle); /* White text on hover */
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.backgroundColor =
+                            stringToColor(
+                              groupTitle
+                            ); /* Reset to original red */
+                          e.target.style.color = 'red'; /* Keep text white */
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
