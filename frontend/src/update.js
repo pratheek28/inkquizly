@@ -18,7 +18,7 @@ function UpdatePopup() {
   return (
     <div style={styles.overlay}>
       <div style={styles.popup}>
-        <h2>🥳 What's New in InkQuizly v{CURRENT_VERSION}</h2>
+        <h2>🥳 New Stuff in InkQuizly! v{CURRENT_VERSION}</h2>
         <ul>
           <li>🖊️↩️ Undo Redo for all objects</li>
           <li>💾 Auto-save every 5 minutes</li>
