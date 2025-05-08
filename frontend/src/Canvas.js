@@ -5,6 +5,11 @@ import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+
+
 const CanvasEditor = () => {
   const [canvases, setCanvases] = useState([]); // Single canvas
   const [brushColor, setBrushColor] = useState('#000000'); // Default to black marker
@@ -14,6 +19,7 @@ const CanvasEditor = () => {
   const [response, setResponse] = useState(null);
   const [undoStack, setUndoStack] = useState([]); // undo stack
   const [redoStack, setRedoStack] = useState([]); // redo stack
+  const [showToolInfo, setShowToolInfo] = useState(false); // tool info
 
   // New state for floating icon options
   const [showFloatingOptions, setShowFloatingOptions] = useState(false);
@@ -41,8 +47,7 @@ const CanvasEditor = () => {
   //const noteID= "note-1"
   const noteID = location.state?.noteID; // Get the notebook name from state
   const key = location.state?.key; // Get the notebook name from state
-  console.log('noteID=', noteID);
-
+  const file = location.state?.file; // Get the notebook name from state
   const user = '1';
 
   // State for floating icon (draggable)
@@ -100,16 +105,13 @@ const CanvasEditor = () => {
               });
 
               let jsonString = canvasData;
-              console.log('is canvas valid?! ', canvas);
 
               // Load JSON content first and then add your custom objects
               canvas.clear();
               canvas.loadFromJSON(JSON.parse(jsonString)).then(() => {
-                console.log('Callback triggered!'); // this will definitely run after all deserialization is complete
                 canvas.renderAll();
 
                 const objects = canvas.getObjects();
-                console.log('Objects loaded:', objects.length);
 
                 canvas.isDrawingMode = true;
                 canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
@@ -191,7 +193,6 @@ const CanvasEditor = () => {
                   }
                   // Check if the object's color is rgba(255, 169, 78, 0.5)
                   if (e.target.stroke === 'rgba(255, 169, 78, 0.5)') {
-                    console.log('match');
                     return; // Ignore this object if it matches the color
                   }
 
@@ -340,24 +341,14 @@ const CanvasEditor = () => {
               canvas.renderAll();
               console.log('Canvasref=', canvasRef.current[index]);
 
-              // // Handle canvas click event
-              // const handleClick = () => {
-              //   setActiveCanvasIndex(index);
-              //   console.log(`Canvas ${index} clicked`);
-              // };
-
-              // // Set up mouseover event
-              // // canvas.on('mouse:over', handleClick);
-              // // canvas.on('mouse:down', handleClick);
-              // canvas.on('mouse:over', () => handleClick(index));
-              // canvas.on('mouse:down', () => handleClick(index));
-
               newCanvases.push(canvas);
             });
             setCanvases(newCanvases);
+            
             if (newCanvases.length > 0) {
               setActiveCanvasIndex(0);
             }
+          }).then(()=>{
           })
           .catch((error) => {
             console.error('Error:', error);
@@ -392,6 +383,7 @@ const CanvasEditor = () => {
     }
 
     setCanvases(newCanvases);
+    
     return () => {
       newCanvases.forEach((canvas) => {
         // remove the undo‐snapshot listener
@@ -405,6 +397,56 @@ const CanvasEditor = () => {
   }, []);
 
   const [notetitle, setnotetitle] = useState('Notebook 1');
+
+  // useEffect(() => {
+  //   console.log("USE:",canvases," and ",file)
+  //   if (canvases.length > 0 && file) {
+  //     handlePDFUpload(file);
+  //   }
+  // }, [canvases]);
+
+  const handlePDFUpload = async (file) => {
+    console.log("trying pdf");
+    if(file=='') return;
+    if (!file) return;
+  
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+  
+    reader.onload = async () => {
+      const typedarray = new Uint8Array(reader.result);
+  
+      const pdf = await pdfjsLib.getDocument(typedarray).promise;
+  
+      for (let i = 0; i < pdf.numPages; i++) {
+        console.log(`Canvas ${i}:`, canvases[i]);
+console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
+        const page = await pdf.getPage(i + 1);
+        const viewport = page.getViewport({ scale: 2 });
+  
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = viewport.width;
+        tempCanvas.height = viewport.height;
+  
+        const context = tempCanvas.getContext('2d');
+  
+        await page.render({ canvasContext: context, viewport }).promise;
+  
+        const imageData = tempCanvas.toDataURL();
+  
+        // Now apply this imageData as a background image for your Fabric canvas
+        if (canvases[i]) {
+          console.log("going to set");
+          fabric.FabricImage.fromURL(imageData, (img) => {
+            canvases[i].backgroundImage = img;
+            canvases[i].requestRenderAll(); // or renderAll()
+            console.log("img set");
+          });
+        }
+      }
+    };
+  };
+  
 
   useEffect(() => {
     // const averageConfidence = confidenceLevels.reduce((sum, val) => sum + val, 0) / confidenceLevels.length;
@@ -946,9 +988,9 @@ const CanvasEditor = () => {
           canvas.off('mouse:up');
           canvas.isDrawingMode = true;
           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-          let bColor = hexToRgba(brushColor, 0.5);
+          let bColor = (brushColor === "#000000") ? "rgba(255, 255, 0, 0.5)" : hexToRgba(brushColor, 0.5);
           canvas.freeDrawingBrush.color = bColor;
-          canvas.freeDrawingBrush.width = 15;
+          canvas.freeDrawingBrush.width = 25;
         } else if (activeTool === 'eraser') {
           canvas.off('mouse:down');
           canvas.off('mouse:move');
@@ -1945,6 +1987,7 @@ const CanvasEditor = () => {
   };
 
 
+
   useEffect(() => {
     // Only run autosave if canvases have data
     if (canvases.length === 0) {
@@ -2190,39 +2233,209 @@ const CanvasEditor = () => {
               }}
             />
           </button>
-          <button
-            onClick={openColorPallet}
+          <div
+  style={{
+    width: '50px',  // Set the width of the div
+    height: '50px', // Set the height of the div
+    display: 'flex',
+    flexWrap: 'wrap', // Allow wrapping of buttons to the next row
+    gap: '10px', // Spacing between buttons
+    justifyContent: 'center', // Center the buttons horizontally
+    alignItems: 'center', // Center the buttons vertically
+  }}
+>
+  {/* Button 1 */}
+  <button
+onClick={() => {
+  setBrushColor("#5271ff");
+
+  // Loop through all canvases and apply the color
+  canvases.forEach((canvas) => {
+    if (canvas) {
+      const newColorHex = "#5271ff";  // or the color you are updating
+      const newColor =
+        activeTool === 'highlighter'
+          ? hexToRgba(newColorHex, 0.5)
+          : newColorHex;
+
+      canvas.freeDrawingBrush.color = newColor;
+    }
+  });
+}}
+
             style={{
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              transition: 'transform 0.2s',
-              transform:
-                activeTool === 'colorpallet' ? 'scale(1.8)' : 'scale(1)',
-            }}
-            onMouseEnter={(e) => {
-              if (activeTool !== 'colorpallet') {
-                e.currentTarget.style.transform = 'scale(1.8)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTool !== 'colorpallet') {
-                e.currentTarget.style.transform = 'scale(1)';
-              }
-            }}
-          >
-            <img
-              src="/colorpallet_image.png"
-              alt="Color Pallet"
-              style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '4px',
-                objectFit: 'cover',
-              }}
-            />
-          </button>
+      background: 'none',
+      border: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      transition: 'transform 0.2s',
+      transform: activeTool === 'colorpallet1' ? 'scale(1.8)' : 'scale(1)',
+      width: '20px',
+      height: '20px',
+    }}
+    onMouseEnter={(e) => {
+      if (activeTool !== 'colorpallet1') {
+        e.currentTarget.style.transform = 'scale(1.8)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (activeTool !== 'colorpallet1') {
+        e.currentTarget.style.transform = 'scale(1)';
+      }
+    }}
+  >
+    <img
+      src="/blue.png"
+      alt="Color Pallet 1"
+      style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '4px',
+        objectFit: 'cover',
+      }}
+    />
+  </button>
+
+  {/* Button 2 */}
+  <button
+
+onClick={() => {
+  setBrushColor("#00bf63");
+
+  // Loop through all canvases and apply the color
+  canvases.forEach((canvas) => {
+    if (canvas) {
+      const newColorHex = "#00bf63";  // or the color you are updating
+      const newColor =
+        activeTool === 'highlighter'
+          ? hexToRgba(newColorHex, 0.5)
+          : newColorHex;
+
+      canvas.freeDrawingBrush.color = newColor;
+    }
+  });
+}}
+            style={{
+      background: 'none',
+      border: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      transition: 'transform 0.2s',
+      transform: activeTool === 'colorpallet2' ? 'scale(1.8)' : 'scale(1)',
+      width: '20px',
+      height: '20px',
+    }}
+    onMouseEnter={(e) => {
+      if (activeTool !== 'colorpallet2') {
+        e.currentTarget.style.transform = 'scale(1.8)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (activeTool !== 'colorpallet2') {
+        e.currentTarget.style.transform = 'scale(1)';
+      }
+    }}
+  >
+    <img
+      src="/green.png"
+      alt="Color Pallet 2"
+      style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '4px',
+        objectFit: 'cover',
+      }}
+    />
+  </button>
+
+  {/* Button 3 */}
+  <button
+onClick={() => {
+  setBrushColor("#ff3131");
+
+  // Loop through all canvases and apply the color
+  canvases.forEach((canvas) => {
+    if (canvas) {
+      const newColorHex = "#ff3131";  // or the color you are updating
+      const newColor =
+        activeTool === 'highlighter'
+          ? hexToRgba(newColorHex, 0.5)
+          : newColorHex;
+
+      canvas.freeDrawingBrush.color = newColor;
+    }
+  });
+}}
+            style={{
+      background: 'none',
+      border: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      transition: 'transform 0.2s',
+      transform: activeTool === 'colorpallet3' ? 'scale(1.8)' : 'scale(1)',
+      width: '20px',
+      height: '20px',
+    }}
+    onMouseEnter={(e) => {
+      if (activeTool !== 'colorpallet3') {
+        e.currentTarget.style.transform = 'scale(1.8)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (activeTool !== 'colorpallet3') {
+        e.currentTarget.style.transform = 'scale(1)';
+      }
+    }}
+  >
+    <img
+      src="/red.png"
+      alt="Color Pallet 3"
+      style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '4px',
+        objectFit: 'cover',
+      }}
+    />
+  </button>
+
+  {/* Button 4 */}
+  <button
+    onClick={openColorPallet}
+    style={{
+      background: 'none',
+      border: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      transition: 'transform 0.2s',
+      transform: activeTool === 'colorpallet4' ? 'scale(1.8)' : 'scale(1)',
+      width: '20px',
+      height: '20px',
+    }}
+    onMouseEnter={(e) => {
+      if (activeTool !== 'colorpallet4') {
+        e.currentTarget.style.transform = 'scale(1.8)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (activeTool !== 'colorpallet4') {
+        e.currentTarget.style.transform = 'scale(1)';
+      }
+    }}
+  >
+    <img
+      src="/colorpallet_image.png"
+      alt="Color Pallet 4"
+      style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '4px',
+        objectFit: 'cover',
+      }}
+    />
+  </button>
+</div>
+
           <button
             onClick={() => setActiveTool('highlighter')}
             style={{
@@ -2449,14 +2662,53 @@ const CanvasEditor = () => {
               style={{ width: '40px', height: '40px', objectFit: 'contain' }}
             />
           </button>
+          <button
+            title="TOOL INFO"
+            onClick={() => setShowToolInfo(prev => !prev)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer'
+            }}
+          >
+            <img
+              src="/tool_help_icon.png"
+              alt="Tool Info"
+              style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+            />
+          </button>
         </div>
+        {/* ↓ pop-up rendered immediately beneath the toolbar row */}
+        {showToolInfo && (
+          <div
+            style={{
+              marginTop: '20px',
+              backgroundColor: '#f9f9f9',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              padding: '8px 12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              maxWidth: '1000px',
+              color: '#333',
+              fontSize: '10px',
+              fontWeight: 'bold'
+            }}
+          >
+            <p style={{ margin: 0, whiteSpace: 'pre' }}>
+              PEN               MARKER            PALLET              HLTR               ERASER             TEXT            TITLE-HLTR        AI-HLTR           POINTER          UNDO            REDO         
+            </p>
+          </div>
+        )}
       </div>
+
+
 
       {/* Color Picker Popup */}
       {showColorPicker && (
         <div
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: '100px',
             left: '50%',
             transform: 'translateX(-50%)',

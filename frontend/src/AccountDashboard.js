@@ -7,6 +7,8 @@ import UpdatePopup from './update';
 function AccountDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [pdf, setPDF] = useState('');
+
   //const user = location.state?.user;
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -23,8 +25,6 @@ function AccountDashboard() {
       localStorage.setItem('user', JSON.stringify(user));
     }
   }, [user, navigate]);
-
-  console.log('user is:', user);
 
   if (!user) return null;
 
@@ -65,14 +65,16 @@ function AccountDashboard() {
       // Only navigate when selectedOption has been updated
       console.log('Navigating with selected note:', selectedOption);
       navigate('/CanvasEditor', {
-        state: { noteID: selectedOption, key: user.id },
+        state: { noteID: selectedOption, key: user.id ,file:pdf},
       });
     }
   }, [selectedOption, navigate]); // Dependency on selectedOption
 
   const [noteNames, setNoteNames] = useState([]);
   const [conf, setConf] = useState([]);
-
+  const [plan, setPlan] = useState(
+    JSON.parse(localStorage.getItem('plan')) || "🔄"
+  );
   useEffect(() => {
     // Define the function to fetch data
     const fetchNoteNames = async () => {
@@ -94,6 +96,26 @@ function AccountDashboard() {
         setNoteNames(data.note_names); // Assuming the server returns a list of note names
         setConf(data.confidences);
         setCloud('☁️✅');
+
+        const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+        const params = new URLSearchParams({
+          action: "getUser",
+          email: user.email,
+        });
+      
+        try {
+          const response = await fetch(`${baseUrl}?${params.toString()}`);
+          const result = await response.text();
+          console.log("Google Apps Script response:", result);
+          setPlan(result);
+          localStorage.setItem('plan', JSON.stringify(result));
+
+        } catch (error) {
+          console.log("Error:", error);
+        }
+
+
+
       } catch (error) {
         console.error('Error:', error);
       }
@@ -102,6 +124,30 @@ function AccountDashboard() {
     // Call the function when the component mounts
     fetchNoteNames();
   }, []); // Empty dependency array means this will run only once after the initial render
+
+  useEffect(() => {
+    if (!noteNames || noteNames.length === 0) return; // wait until noteNames is available
+  
+    const updateSheet = async () => {
+      try {
+        const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+        const params = new URLSearchParams({
+          action: "updateUser",
+          email: user.email,
+          value: noteNames.length,
+        });
+  
+        const response = await fetch(`${baseUrl}?${params.toString()}`);
+        const result = await response.text();
+        console.log("Google Apps Script response:", result);
+      } catch (error) {
+        console.error("Google update error:", error);
+      }
+    };
+  
+    updateSheet();
+  }, [noteNames]); // runs when noteNames changes
+  
 
   const groupedNotes = {};
 
@@ -122,7 +168,7 @@ function AccountDashboard() {
   const handleOpen = () => {
     console.log('selected:', selectedOption);
     navigate('/CanvasEditor', {
-      state: { noteID: selectedOption, key: user.id },
+      state: { noteID: selectedOption, key: user.id,file:pdf },
     });
   };
 
@@ -130,9 +176,16 @@ function AccountDashboard() {
   const [folderName, setfoldername] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [showPopup1, setShowPopup1] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
   const [currfolder, setfolder] = useState('');
 
+
   const handleFullNew = () => {
+    if(noteNames.length>=15 && plan=="Free"){
+      setShowError(true);
+      return;
+    }
     setShowPopup1(true); // Show the popup to ask for the notebook name
   };
 
@@ -147,6 +200,14 @@ function AccountDashboard() {
 
   const handleFolderChange = (e) => {
     setfoldername(e.target.value); // Update the notebook name
+  };
+
+  const handlePDFUpload = (file) => {
+    if (file && file.type === "application/pdf") {
+      setPDF(file); // Store the PDF file in state
+    } else {
+      alert("Please upload a valid PDF file.");
+    }
   };
 
   const handleCreate = (nameofnote) => {
@@ -205,7 +266,7 @@ function AccountDashboard() {
         .then((response) => response.json())
         .then((data) => {
           navigate('/CanvasEditor', {
-            state: { noteID: nameofnote, key: user.id },
+            state: { noteID: nameofnote, key: user.id, file:pdf},
           });
         })
         .catch((error) => {
@@ -221,6 +282,38 @@ function AccountDashboard() {
     localStorage.removeItem('user'); // Remove user data from local storage
     navigate('/LogIn'); // Redirect to login page
   };
+
+  const sendEmail = async () => {
+    const feedback = prompt("Please enter your feedback/issue:");
+  if (feedback && feedback.trim()) {
+    console.log("Feedback submitted:", feedback);
+    // You can call your sendEmail function here
+    // sendEmail({ subject: "Feedback", body: feedback, ... })
+    alert("Thanks for your feedback!");
+  } else {
+    alert("No feedback submitted.");
+    return;
+  }
+    const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+  
+    const params = new URLSearchParams({
+      action: "sendEmail",
+      to: ["pranavgowrish@gmail.com", "pranavgowrishmovies@gmail.com"],
+      subject: "InkQuizly Feedback from "+user.name,
+      body: feedback,
+      fromName: "InkQuizly App"
+    });
+  
+    try {
+      const response = await fetch(`${baseUrl}?${params.toString()}`);
+      const result = await response.text();
+      console.log("Server response:", result);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  
+
 
   // const handleNew = (e) => {
 
@@ -347,6 +440,31 @@ function AccountDashboard() {
             <button onClick={handleLogout} className={styles.logoutButton}>
               Log Out
             </button>
+            <button
+  onClick={() => {
+    sendEmail();
+  }}
+  style={{
+    backgroundColor: 'rgba(211, 15, 15, 0)', // Alert red
+    color: 'white',
+    border: 'none',
+    borderRadius: '100px',
+    cursor: 'pointer',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    marginLeft:'20px',
+  }}
+  onMouseEnter={(e) => {
+    e.target.style.transform = 'scale(1.5)';
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = 'scale(1)';
+  }}
+>
+  ⚠️
+</button>
+
           </div>
         </div>
         <div
@@ -365,7 +483,11 @@ function AccountDashboard() {
             alignItems: 'center', // Centers items horizontally
           }}
         >
-          <div
+          <div style={{
+            display: 'flex', // 👈 This is required
+            gap: '50px',
+            flexDirection: 'row',
+          }}><div
             style={{
               backgroundColor: 'rgba(36, 240, 0, 0.5)',
               color: 'white',
@@ -380,7 +502,27 @@ function AccountDashboard() {
             }}
           >
             {cloud}
-          </div>
+          </div><div
+            style={{
+              background: plan === "PRO"
+              ? 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))'
+              : 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))',           
+              color: plan === "PRO" ? '#ccefff' : '#e8e0ff',
+              padding: '5px',
+              fontSize: '15px',
+              borderRadius: '5px',
+              fontFamily: 'monospace',
+              display: 'inline-flex',
+              flexDirection: 'column',
+              boxShadow: '0 4px 8px rgba(0, 6, 119, 0.77)',
+              alignItems: 'center', // Centers items horizontally
+              cursor: 'pointer',
+            }}
+            onClick={() => setShowPlans(true)}
+            
+          >
+            {plan} {plan!="🔄" ? (plan === "Free" ? "| " + noteNames.length+"/15" : "| "+noteNames.length+"/♾️"):""}
+          </div></div>
           {splitTime.map((digit, index) => (
             <span
               key={index}
@@ -410,6 +552,246 @@ function AccountDashboard() {
         `}
         </style>
       </div>
+
+      {showPlans && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000, // Add this line for higher stacking
+          }}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(8, 55, 72, 0.96), rgba(1, 3, 20, 0.93))',
+              color:"white",
+              padding: '20px',
+              borderRadius: '8px',
+              width: '600px',
+              textAlign: 'center',
+            }}
+          >
+            <h3>Select a Plan for You</h3>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '20px',
+                marginTop: '10px',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  width: '45%',
+                  textAlign: 'center',
+                }}
+              >
+                <h3>Free Plan</h3>
+                <ul
+  style={{
+    listStyle: 'none',
+    padding: 0,
+    margin: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    fontFamily: 'monospace',
+    fontSize: '13px',
+    color: 'white',
+  }}
+>
+  <li>📄 15 Notes Limit</li>
+  <li>📁 Folders</li>
+  <li>🤖 Gemini 2.0 Flash</li>
+  <li>🧑‍💻 Quick Support</li>
+  <li>🔄 Sync Across Devices</li>
+</ul>
+                <button
+                  onClick={() => setShowPlans(false)}
+                  style={{
+                    padding: '10px 15px',
+                    background: 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))', 
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(252, 138, 8, 0.5)';
+                    e.target.style.backgroundColor = '#e53935';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.2)';
+                    e.target.style.background = 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))';
+                  }}
+                >
+                  Stay Free
+                </button>
+              </div>
+
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  width: '45%',
+                  textAlign: 'center',
+                }}
+              >
+                <h4>Pro Plan</h4>
+                <ul
+  style={{
+    listStyle: 'none',
+    padding: 0,
+    margin: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    fontFamily: 'monospace',
+    fontSize: '13px',
+    color: 'white',
+  }}
+>
+  <li>♾️ No Notes Limit</li>
+  <li>📁 Folders</li>
+  <li>🤖 Gemini 2.5 Flash</li>
+  <li>⚡ Instant Support</li>
+  <li>🔄 Sync Across Devices</li>
+  <li>🧪 Early access to exciting features!</li>
+</ul>
+                <button
+onClick={() => {
+  window.location.href = `mailto:pranavgowrish@gmail.com,pratheek0928@gmail.com,vignesh.tho2006@gmail.com?subject=InkQuizly PRO Upgrade&body=Hi, I’m interested in upgrading to InkQuizly PRO!%0A%0AName: ${encodeURIComponent(user.name)}%0AEmail: ${encodeURIComponent(user.email)}%0A%0APlease list your preferred form of payment below (Cash, Pay, Venmo, Zelle):`;
+}}            style={{
+                    padding: '10px 15px',
+                    background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))',  // Green background
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(8, 36, 252, 0.5)';
+                    e.target.style.backgroundColor = '#45a049';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.2)';
+                    e.target.style.background = 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))';
+                  }}
+                >
+                  Go PRO
+                </button>
+              </div>
+            </div>
+
+            <button
+  onClick={() => setShowPlans(false)}
+  style={{
+                padding: '10px 20px',
+                backgroundColor: 'rgba(249, 136, 136, 0.82)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                marginTop: '20px',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      {showError && (
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+  }}>
+    <div style={{
+      background: "rgba(40, 1, 179, 0.88)",
+      color:"white",
+      padding: "50px",
+      borderRadius: "8px",
+      textAlign: "center",
+      minWidth: "240px",
+    }}>
+      <h3 style={{ margin: "0 0 10px" }}>Limit Reached!</h3>
+      <p style={{ margin: "0 0 15px" }}>Upgrade to PRO for more notes and other exciting features!</p>
+      <div style={{
+        display: "flex",
+        justifyContent: "space-around",
+      }}>
+<button
+                onClick={() => {
+                  setShowPlans(true)
+                  setShowError(false);
+                }}
+  style={{
+    background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))',  // Green background
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    transition: 'background-color 0.3s, transform 0.2s',
+  }}
+  onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
+  onMouseLeave={(e) => e.target.style.background = 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))'}>
+  Upgrade
+</button>
+
+<button
+  onClick={() => setShowError(false)}
+  style={{
+    background: 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))', 
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    transition: 'background-color 0.3s, transform 0.2s',
+  }}
+  onMouseEnter={(e) => e.target.style.backgroundColor = '#e53935'}
+  onMouseLeave={(e) => e.target.style.background = 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))'}>
+  Cancel
+</button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Popup for naming new note */}
       {showPopup1 && (
@@ -467,6 +849,15 @@ function AccountDashboard() {
                 e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
               }}
             />
+            <h3 style={{ marginBottom: '15px' }}>Upload a PDF</h3>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => {
+                handlePDFUpload(e.target.files[0]);
+              }}
+              style={{ marginBottom: '20px' }}
+            />
             <div className={styles.popupButtons}>
               <button
                 className="popupButton popupCreateButton"
@@ -474,6 +865,7 @@ function AccountDashboard() {
                   handleCreate(folderName + '⚪️' + noteName);
                   setShowPopup1(false);
                 }} // Wrap the function call inside an anonymous function
+                disabled={noteName.trim() === ''}
                 style={{
                   flex: 1,
                   padding: '0.75rem 1.5rem',
@@ -481,7 +873,7 @@ function AccountDashboard() {
                   fontWeight: '600',
                   border: 'none',
                   borderRadius: '8px',
-                  backgroundColor: '#4f46e5', // Indigo
+                  backgroundColor: noteName.trim() === '' ? '#ccfc' : '#4f46e5',
                   color: 'white',
                   cursor: 'pointer',
                   transition: 'background 0.3s ease, transform 0.2s ease',
@@ -552,6 +944,7 @@ function AccountDashboard() {
                   handleCreate(currfolder + '⚪️' + noteName);
                   setShowPopup(false);
                 }} // Wrap the function call inside an anonymous function
+                disabled={noteName.trim() === ''}
                 style={{
                   flex: 1,
                   padding: '0.75rem 1.5rem',
@@ -559,7 +952,7 @@ function AccountDashboard() {
                   fontWeight: '600',
                   border: 'none',
                   borderRadius: '8px',
-                  backgroundColor: '#4f46e5', // Indigo
+                  backgroundColor: noteName.trim() === '' ? '#ccfc' : '#4f46e5',
                   color: 'white',
                   cursor: 'pointer',
                   transition: 'background 0.3s ease, transform 0.2s ease',
