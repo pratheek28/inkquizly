@@ -2034,6 +2034,7 @@ const handleIconTouchStart = (e) => {
           {/* Tool buttons (pen, marker, color pallet, etc.) */}
 
           <button
+            title="PEN"
             onClick={() => setActiveTool('pen')}
             style={{
               background: 'none',
@@ -2066,6 +2067,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="MARKER"
             onClick={() => setActiveTool('marker')}
             style={{
               background: 'none',
@@ -2098,6 +2100,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="COLOR PALLET"
             onClick={openColorPallet}
             style={{
               background: 'none',
@@ -2131,6 +2134,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="HIGHLIGHTER"
             onClick={() => setActiveTool('highlighter')}
             style={{
               background: 'none',
@@ -2164,6 +2168,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="ERASER"
             onClick={() => setActiveTool('eraser')}
             style={{
               background: 'none',
@@ -2196,6 +2201,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="ADD TEXT"
             onClick={() => setActiveTool('text')}
             style={{
               background: 'none',
@@ -2228,6 +2234,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="GEMINI SUMMARY HIGHLIGHTER"
             onClick={() => setActiveTool('aihl')}
             style={{
               background: 'none',
@@ -2260,6 +2267,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="GEMINI WORD/PHRASE EXPLAINER"
             onClick={() => setActiveTool('subhl')}
             style={{
               background: 'none',
@@ -2292,6 +2300,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="FINGER POINT"
             onClick={() => setActiveTool('point')}
             style={{
               background: 'none',
@@ -2324,6 +2333,7 @@ const handleIconTouchStart = (e) => {
             />
           </button>
           <button
+            title="UNDO"
             onClick={() => handleUndoRedo('undo')}
             disabled={!undoStack.length}
             style={{
@@ -2341,6 +2351,7 @@ const handleIconTouchStart = (e) => {
           </button>
 
           <button
+            title="REDO"
             onClick={() => handleUndoRedo('redo')}
             disabled={!redoStack.length}
             style={{
