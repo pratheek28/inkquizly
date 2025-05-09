@@ -1698,7 +1698,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       multiplier: 1,
     });
 
-    const topic = fullDataURL.split(',')[1];
+    //const topic = fullDataURL.split(',')[1];
+    const topic = fullDataURL;
     console.log('Base64 image:', topic);
 
     // Highlight bolding
