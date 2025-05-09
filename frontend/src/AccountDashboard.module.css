@@ -46,8 +46,8 @@
     justify-content: center;
     margin-top:15rem;
     /* padding: 1rem; */
-    /* max-height: 300px; Adjust this value to fit your design */
-    /* overflow-y: auto; Enables vertical scrolling */
+    max-height: 300px;
+    overflow-y: auto;
     flex-grow: 1; /*Allow the container to grow*/
   }
 

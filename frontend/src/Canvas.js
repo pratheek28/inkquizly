@@ -4,6 +4,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import * as fabric from 'fabric';
 import { SketchPicker } from 'react-color';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -396,14 +398,44 @@ const CanvasEditor = () => {
     };
   }, []);
 
+  const downloadPDF = () => {
+    setIsLoading2(true); // Start the loading spinner
+    // Simulate a delay for the loading spinner (e.g., 3 seconds)
+    setTimeout(() => {
+      setIsLoading2(false);
+    }, 5000); // 3000ms = 3 seconds
+
+    const doc = new jsPDF(); // Create a new jsPDF document
+
+    // Iterate over each canvas and capture it as an image
+    canvasRef.current.forEach((canvasEl, index) => {
+      if (canvasEl) {
+        html2canvas(canvasEl).then((canvasImage) => {
+          const imageDataUrl = canvasImage.toDataURL('image/png'); // Get image data URL
+
+          // Add the image to the PDF
+          if (index > 0) {
+            doc.addPage(); // Add a new page for each canvas
+          }
+          doc.addImage(imageDataUrl, 'PNG', 0, 0,794 *0.26,1123 *0.26); // Position and size of the image
+
+          // If it's the last canvas, trigger download
+          if (index === canvasRef.current.length - 1) {
+            doc.save('canvases.pdf'); // Download the PDF
+          }
+        });
+      }
+    });
+  };
+
   const [notetitle, setnotetitle] = useState('Notebook 1');
 
-  // useEffect(() => {
-  //   console.log("USE:",canvases," and ",file)
-  //   if (canvases.length > 0 && file) {
-  //     handlePDFUpload(file);
-  //   }
-  // }, [canvases]);
+  useEffect(() => {
+    console.log("USE:",canvases," and ",file)
+    if (canvases.length > 0 && file) {
+      handlePDFUpload(file);
+    }
+  }, [canvases,loading]);
 
   const handlePDFUpload = async (file) => {
     console.log("trying pdf");
@@ -436,12 +468,15 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
   
         // Now apply this imageData as a background image for your Fabric canvas
         if (canvases[i]) {
-          console.log("going to set");
-          fabric.FabricImage.fromURL(imageData, (img) => {
+          console.log("going to set",imageData);
+          const img = await fabric.FabricImage.fromURL(imageData);
             canvases[i].backgroundImage = img;
+            const scaleX = 794 / img.width;
+            const scaleY = 1123 / img.height;
+            img.scaleX = scaleX;
+            img.scaleY = scaleY;
             canvases[i].requestRenderAll(); // or renderAll()
             console.log("img set");
-          });
         }
       }
     };
@@ -503,6 +538,39 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       console.log(`Canvas ${index} clicked`);
     });
   });
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = canvasRef.current.indexOf(entry.target);
+          if (entry.isIntersecting) {
+            setActiveCanvasIndex(index);
+            console.log(`Canvas ${index} is in view`);
+          }
+        });
+      },
+      {
+        threshold: 0.5, // Trigger when 50% of the canvas is visible
+      }
+    );
+  
+    // Observe each canvas element
+    canvasRef.current.forEach((canvasEl) => {
+      if (canvasEl) {
+        observer.observe(canvasEl);
+      }
+    });
+  
+    // Cleanup observer on unmount or when canvasesRef changes
+    return () => {
+      canvasRef.current.forEach((canvasEl) => {
+        if (canvasEl) {
+          observer.unobserve(canvasEl);
+        }
+      });
+    };
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -1185,6 +1253,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
 
             // Capture the highlighted region
             captureHighlightedRegion(highlightRect);
+            setActiveTool('point');
             console.log('sub logged');
 
             // Reset and clean up
@@ -1215,31 +1284,14 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
           canvas.on('pointerdown', (e) => {
             e.preventDefault();
             console.log('touchstart triggered');
-            registration.showNotification('touchstart!', {
-              body: 'Your 25 minute study session is over',
-              icon: './logo192.png',
-              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
-            });
             onMouseDownsub(e);
           });
           canvas.on('pointermove', (e) => {
             e.preventDefault();
-            console.log('touchmove triggered');
-            registration.showNotification('touchmove!', {
-              body: 'Your 25 minute study session is over',
-              icon: './logo192.png',
-              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
-            });
             onMouseMovesub(e);
           });
           canvas.on('pointerup', (e) => {
             e.preventDefault();
-            console.log('touchend triggered');
-            registration.showNotification('touchend!', {
-              body: 'Your 25 minute study session is over',
-              icon: './logo192.png',
-              showTrigger: new TimestampTrigger(timestamp), // Schedule in the future
-            });
             onMouseUpsub(e);
           });
         } else if (activeTool === 'aihl') {
@@ -1299,6 +1351,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
             canvas.off('mouse:down', onMouseDown);
             canvas.off('mouse:move', onMouseMove);
             canvas.off('mouse:up', onMouseUp);
+            setActiveTool('point');
           };
           canvas.on('mouse:down', onMouseDown);
           canvas.on('mouse:move', onMouseMove);
@@ -1313,8 +1366,43 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
   let popupRect = null;
   let popupText = null;
 
+  const checkIfRectIsOnCanvas = (highlightRect) => {
+    for (let i = 0; i < canvases.length; i++) {
+      const canvas = canvases[i];
+  
+      // Get canvas boundaries
+      const canvasLeft = canvas.viewportTransform[4]; // left position of the canvas
+      const canvasTop = canvas.viewportTransform[5];  // top position of the canvas
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+  
+      // Get the bounding box of the highlightRect
+      const rectLeft = highlightRect.left;
+      const rectTop = highlightRect.top;
+      const rectRight = rectLeft + highlightRect.width;
+      const rectBottom = rectTop + highlightRect.height;
+  
+      // Check if the highlightRect is within the canvas bounds
+      if (
+        rectLeft >= canvasLeft &&
+        rectTop >= canvasTop &&
+        rectRight <= canvasLeft + canvasWidth &&
+        rectBottom <= canvasTop + canvasHeight
+      ) {
+        // The rectangle is inside this canvas
+        console.log(`Highlight rect is on canvas ${i}`);
+        return i; // Return the index of the canvas
+      }
+    }
+  
+    return null; // If no canvas contains the highlight rect
+  };
+  
+
   const captureHighlightedRegion = (highlightRect) => {
+    console.log("active index:",activeCanvasIndex);
     const canvas = canvases[activeCanvasIndex];
+
     if (!canvas) return;
 
     // Render the canvas and get full image data
@@ -1589,7 +1677,10 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
 
   const underlineHighlightedRegion = async (rect, confidence = 0.5) => {
     console.log('im here yup');
+    console.log("active index:",activeCanvasIndex);
+
     const canvas = canvases[activeCanvasIndex];
+
     if (!canvas || !rect) return;
 
     // let topic = '';
@@ -1937,6 +2028,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
 
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoading2, setIsLoading2] = useState(false);
+
 
   const goHome = () => {
     setIsLoading(true); // Start the loading spinner
@@ -1993,7 +2086,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
     if (canvases.length === 0) {
       console.log("RETURNING");
       return;}
-  
+      console.log("autosave registered");
     const intervalId = setInterval(() => {
       console.log("autosaving now");
       setIsSaving(true);
@@ -2001,7 +2094,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
     }, 5 * 60 * 1000);  // 5 minutes interval
   
     return () => clearInterval(intervalId);
-  }, [canvases]);  // Runs whenever canvases state is updated
+  }, [canvases,loading]);
 
   function stringToColor(str) {
     let hash = 0;
@@ -2074,6 +2167,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
           )}
         </div>
 
+
         <div style={{ fontSize: '14px' }}>
           <strong>{notetitle}</strong>
           {isSaving && (
@@ -2082,6 +2176,21 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
             </h5>
           )}
         </div>
+        <button
+            onClick={() => downloadPDF()}
+            style={{
+            padding: '5px',
+            backgroundColor: '#20C997', // Gray while saving
+            color: '#fff',
+            border: 'none',
+            borderRadius: '20px',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+          disabled={isLoading2} // Prevent clicking multiple times
+        >
+          {isLoading2 ? 'Downloading..' : '⬇️'}
+        </button>
       </div>
 
       {Array.from({ length: numPages }, (_, index) => (

@@ -671,6 +671,7 @@ function AccountDashboard() {
   <li>🤖 Gemini 2.5 Flash</li>
   <li>⚡ Instant Support</li>
   <li>🔄 Sync Across Devices</li>
+  <li>📑✨ PDF upload</li>
   <li>🧪 Early access to exciting features!</li>
 </ul>
                 <button
@@ -849,15 +850,19 @@ onClick={() => {
                 e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
               }}
             />
-            <h3 style={{ marginBottom: '15px' }}>Upload a PDF</h3>
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={(e) => {
-                handlePDFUpload(e.target.files[0]);
-              }}
-              style={{ marginBottom: '20px' }}
-            />
+{plan=="PRO" && (
+  <>
+    <h3 style={{ marginBottom: '15px' }}>Upload a PDF</h3>
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => {
+        handlePDFUpload(e.target.files[0]);
+      }}
+      style={{ marginBottom: '20px' }}
+    />
+  </>
+)}
             <div className={styles.popupButtons}>
               <button
                 className="popupButton popupCreateButton"
@@ -936,6 +941,19 @@ onClick={() => {
                 e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
               }}
             />
+            {plan=="PRO" && (
+  <>
+    <h3 style={{ marginBottom: '15px' }}>Upload a PDF</h3>
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => {
+        handlePDFUpload(e.target.files[0]);
+      }}
+      style={{ marginBottom: '20px' }}
+    />
+  </>
+)}
 
             <div className={styles.popupButtons}>
               <button
