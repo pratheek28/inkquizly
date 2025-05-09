@@ -474,7 +474,13 @@ def summarize_user_written():
     # Get the subtitle from the incoming request
     subtitle = request.get_json()
 
-    myfile=client.files.upload(file=subtitle['topic'])
+    image_data = base64.b64decode(subtitle['topic'])
+
+    # Create a file-like object
+    image_file = BytesIO(image_data)
+    image_file.name = "image.png"  # Some APIs require a .name attribute
+
+    myfile=client.files.upload(file=image_file)
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
