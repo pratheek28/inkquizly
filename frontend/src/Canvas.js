@@ -421,7 +421,7 @@ const CanvasEditor = () => {
 
           // If it's the last canvas, trigger download
           if (index === canvasRef.current.length - 1) {
-            doc.save('canvases.pdf'); // Download the PDF
+            doc.save(noteID+'.pdf'); // Download the PDF
           }
         });
       }
