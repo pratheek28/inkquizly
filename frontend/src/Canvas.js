@@ -145,7 +145,7 @@ const CanvasEditor = () => {
                   const cv = raw.canvas;
 
                   // STRAIGHT LINES
-                  if (maxDist <= 12) {
+                  if (maxDist <= 8) {
                     cv.remove(raw);
                     cv.add(
                       new fabric.Line([p0.x, p0.y, pN.x, pN.y], {
@@ -1698,8 +1698,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       multiplier: 1,
     });
 
-    //const topic = fullDataURL.split(',')[1];
-    const topic = fullDataURL;
+    const topic = fullDataURL.split(',')[1];
+    //const topic = fullDataURL;
     console.log('Base64 image:', topic);
 
     // Highlight bolding
