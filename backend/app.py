@@ -16,7 +16,7 @@ from google import genai
 import re
 import os
 import requests
-from google import types
+from google.genai import types
 
 
 
