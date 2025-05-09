@@ -480,7 +480,7 @@ def summarize_user_written():
     image_file = BytesIO(image_data)
     image_file.name = "image.png"  # Some APIs require a .name attribute
 
-    myfile=client.files.upload(file=image_file)
+    myfile=client.files.upload(file=image_file,mime_type="image/png")
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
