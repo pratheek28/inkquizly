@@ -41,6 +41,20 @@ function SignUp() {
       setResponse("An error occurred. Please try again later!");
     })
     .finally(() => {
+      const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+      const params = new URLSearchParams({
+        action: "addUser",
+        name: formData.firstName+" "+formData.lastName,
+        email: formData.email,
+      });
+    
+      try {
+        const response =  fetch(`${baseUrl}?${params.toString()}`);
+        const result =  response.text();
+        console.log("Server response:", result);
+      } catch (error) {
+        console.log("Error:", error);
+      }
       setLoading(false);
   });
   };

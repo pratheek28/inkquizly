@@ -7,6 +7,8 @@ import UpdatePopup from './update';
 function AccountDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [pdf, setPDF] = useState('');
+
   //const user = location.state?.user;
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -16,7 +18,6 @@ function AccountDashboard() {
     return location.state?.user || JSON.parse(localStorage.getItem('user'));
   });
 
-
   useEffect(() => {
     if (!user) {
       navigate('/LogIn');
@@ -25,28 +26,31 @@ function AccountDashboard() {
     }
   }, [user, navigate]);
 
-  console.log("user is:",user);
-
   if (!user) return null;
 
   const handleOptionClick = (option) => {
     setSelectedOption(option);
-    console.log("here option:",option);
+    console.log('here option:', option);
   };
 
-  const handleDelete =  async (option) => {
-    const confirmed = window.confirm('Are you sure you want to delete this note?');
+  const handleDelete = async (option) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this note?'
+    );
     if (!confirmed) return; // If user cancels, just stop.
-  
+
     try {
-      const response = await fetch('https://inkquizly.onrender.com/deleteNote', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ note: option, user: user.id }),
-      });
-  
+      const response = await fetch(
+        'https://inkquizly.onrender.com/deleteNote',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ note: option, user: user.id }),
+        }
+      );
+
       if (!response.ok) {
         throw new Error('Failed to delete note');
       }
@@ -55,21 +59,22 @@ function AccountDashboard() {
       console.error('Error:', error);
     }
   };
-  
 
   useEffect(() => {
     if (selectedOption !== null) {
       // Only navigate when selectedOption has been updated
-      console.log("Navigating with selected note:", selectedOption);
-      navigate('/CanvasEditor', { state: { noteID: selectedOption, key:user.id } });
+      console.log('Navigating with selected note:', selectedOption);
+      navigate('/CanvasEditor', {
+        state: { noteID: selectedOption, key: user.id ,file:pdf},
+      });
     }
   }, [selectedOption, navigate]); // Dependency on selectedOption
 
-
   const [noteNames, setNoteNames] = useState([]);
   const [conf, setConf] = useState([]);
-
-
+  const [plan, setPlan] = useState(
+    JSON.parse(localStorage.getItem('plan')) || "🔄"
+  );
   useEffect(() => {
     // Define the function to fetch data
     const fetchNoteNames = async () => {
@@ -90,7 +95,27 @@ function AccountDashboard() {
         const data = await response.json();
         setNoteNames(data.note_names); // Assuming the server returns a list of note names
         setConf(data.confidences);
-        setCloud("☁️✅")
+        setCloud('☁️✅');
+
+        const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+        const params = new URLSearchParams({
+          action: "getUser",
+          email: user.email,
+        });
+      
+        try {
+          const response = await fetch(`${baseUrl}?${params.toString()}`);
+          const result = await response.text();
+          console.log("Google Apps Script response:", result);
+          setPlan(result);
+          localStorage.setItem('plan', JSON.stringify(result));
+
+        } catch (error) {
+          console.log("Error:", error);
+        }
+
+
+
       } catch (error) {
         console.error('Error:', error);
       }
@@ -100,30 +125,96 @@ function AccountDashboard() {
     fetchNoteNames();
   }, []); // Empty dependency array means this will run only once after the initial render
 
+  useEffect(() => {
+    if (!noteNames || noteNames.length === 0) return; // wait until noteNames is available
+  
+    const updateSheet = async () => {
+      try {
+        const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+        const params = new URLSearchParams({
+          action: "updateUser",
+          email: user.email,
+          value: noteNames.length,
+        });
+  
+        const response = await fetch(`${baseUrl}?${params.toString()}`);
+        const result = await response.text();
+        console.log("Google Apps Script response:", result);
+      } catch (error) {
+        console.error("Google update error:", error);
+      }
+    };
+  
+    updateSheet();
+  }, [noteNames]); // runs when noteNames changes
+  
+
+  const groupedNotes = {};
+
+  noteNames.forEach((note, index) => {
+    // Split based on ⚪️ or any similar separator
+    const split = note.split('⚪️');
+    const groupTitle =
+      split.length > 1 && split[0] != '' ? split[0] : 'Standalone';
+    const title = split.length > 1 ? split[1] : note;
+
+    if (!groupedNotes[groupTitle]) {
+      groupedNotes[groupTitle] = [];
+    }
+
+    groupedNotes[groupTitle].push({ title, index });
+  });
 
   const handleOpen = () => {
-    console.log("selected:",selectedOption);
-    navigate('/CanvasEditor', { state: { noteID: selectedOption, key:user.id} });
+    console.log('selected:', selectedOption);
+    navigate('/CanvasEditor', {
+      state: { noteID: selectedOption, key: user.id,file:pdf },
+    });
   };
 
   const [noteName, setNotebookName] = useState('');
+  const [folderName, setfoldername] = useState('');
   const [showPopup, setShowPopup] = useState(false);
+  const [showPopup1, setShowPopup1] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
+  const [currfolder, setfolder] = useState('');
 
-  const handleNew = () => {
-    setShowPopup(true); // Show the popup to ask for the notebook name
+
+  const handleFullNew = () => {
+    if(noteNames.length>=15 && plan=="Free"){
+      setShowError(true);
+      return;
+    }
+    setShowPopup1(true); // Show the popup to ask for the notebook name
   };
 
-
+  const handleNew = (folder) => {
+    setfolder(folder);
+    setShowPopup(true); // Show the popup to ask for the notebook name
+  };
 
   const handleNameChange = (e) => {
     setNotebookName(e.target.value); // Update the notebook name
   };
 
-  const handleCreate = () => {
-    if (noteName.trim() !== '') {
+  const handleFolderChange = (e) => {
+    setfoldername(e.target.value); // Update the notebook name
+  };
+
+  const handlePDFUpload = (file) => {
+    if (file && file.type === "application/pdf") {
+      setPDF(file); // Store the PDF file in state
+    } else {
+      alert("Please upload a valid PDF file.");
+    }
+  };
+
+  const handleCreate = (nameofnote) => {
+    if (nameofnote.trim() !== '') {
       // Navigate to CanvasEditor with the notebook name passed via state
-      console.log('note:', noteName);
-      saveCanvases();
+      console.log('note:', nameofnote);
+      saveCanvases(nameofnote);
       console.log("I'm HERE FORSHO");
       //navigate("/CanvasEditor", { state: { noteID: noteName, isNew: true} });
       setShowPopup(false); // Close the popup
@@ -132,7 +223,7 @@ function AccountDashboard() {
     }
   };
 
-  const saveCanvases = () => {
+  const saveCanvases = (nameofnote) => {
     // Prepare minimal data for saving
 
     //const blankCanvasJSON = "{\"version\":\"6.6.2\",\"objects\":[]}";
@@ -152,30 +243,30 @@ function AccountDashboard() {
     //       .replace(/\\n/g, '\\\\n')
     //   );
     console.log('datasout:', datas);
-    console.log("note:",noteName);
-    console.log("index:",indices);
-    console.log("user:",user.id);
+    console.log('note:', nameofnote);
+    console.log('index:', indices);
+    console.log('user:', user.id);
 
     const handleSubmit = () => {
-      console.log('here saving user is:',user.id);
+      console.log('here saving user is:', user.id);
       fetch('https://inkquizly.onrender.com/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          note: noteName,
+          note: nameofnote,
           index: indices,
           dat: datas,
           user: user.id,
           //user: "5f3fbb27-e377-4344-a805-b9ebd0a93311",
-          conf:"NA",
+          conf: 'NA',
         }),
       })
         .then((response) => response.json())
         .then((data) => {
           navigate('/CanvasEditor', {
-            state: { noteID: noteName, key:user.id },
+            state: { noteID: nameofnote, key: user.id, file:pdf},
           });
         })
         .catch((error) => {
@@ -192,45 +283,85 @@ function AccountDashboard() {
     navigate('/LogIn'); // Redirect to login page
   };
 
+  const sendEmail = async () => {
+    const feedback = prompt("Please enter your feedback/issue:");
+  if (feedback && feedback.trim()) {
+    console.log("Feedback submitted:", feedback);
+    // You can call your sendEmail function here
+    // sendEmail({ subject: "Feedback", body: feedback, ... })
+    alert("Thanks for your feedback!");
+  } else {
+    alert("No feedback submitted.");
+    return;
+  }
+    const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+  
+    const params = new URLSearchParams({
+      action: "sendEmail",
+      to: ["pranavgowrish@gmail.com", "pranavgowrishmovies@gmail.com"],
+      subject: "InkQuizly Feedback from "+user.name,
+      body: feedback,
+      fromName: "InkQuizly App"
+    });
+  
+    try {
+      const response = await fetch(`${baseUrl}?${params.toString()}`);
+      const result = await response.text();
+      console.log("Server response:", result);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  
+
+
   // const handleNew = (e) => {
 
   //     navigate("/CanvasEditor");
   // };
   const splitText = (text) => {
     return text.split('').map((letter, index) => (
-      <span key={index} style={{     opacity: 0,  // <-- Start invisible!
-        animation: `letterAnimation 0.5s ease forwards`, animationDelay: `${index * 0.1}s` ,    animationFillMode: 'forwards', // <-- Important to keep final animation state
-    }}>
+      <span
+        key={index}
+        style={{
+          opacity: 0, // <-- Start invisible!
+          animation: `letterAnimation 0.5s ease forwards`,
+          animationDelay: `${index * 0.1}s`,
+          animationFillMode: 'forwards', // <-- Important to keep final animation state
+        }}
+      >
         {letter}
       </span>
     ));
   };
 
-
   // Function to animate each number separately
-    const [time, setTime] = useState(new Date());
-    const [cloud, setCloud] = useState("☁️ 🔄 Syncing");
+  const [time, setTime] = useState(new Date());
+  const [cloud, setCloud] = useState('☁️ 🔄 Syncing');
 
-  
-    useEffect(() => {
-      const interval = setInterval(() => setTime(new Date()), 60000); // Update every minute
-      return () => clearInterval(interval); // Cleanup on unmount
-    }, []);
-  
-    const formattedTime = time.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  
-    const splitTime = formattedTime.split('  ');
+  useEffect(() => {
+    const interval = setInterval(() => setTime(new Date()), 60000); // Update every minute
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
 
+  const formattedTime = time.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
-    const [currentDate, setCurrentDate] = useState('');
+  const splitTime = formattedTime.split('  ');
+
+  const [currentDate, setCurrentDate] = useState('');
 
   // Function to format the date
   const getFormattedDate = () => {
     const today = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
     return today.toLocaleDateString('en-US', options);
   };
 
@@ -239,36 +370,47 @@ function AccountDashboard() {
     setCurrentDate(getFormattedDate());
   }, []); // Empty dependency array ensures it runs only once on mount
 
+  const [expandedStackIndex, setExpandedStackIndex] = useState(null);
+
+  function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360; // Keep it in 0–359 range
+    return `hsl(${hue}, 70%, 80%)`; // Light pastel color
+  }
+
   return (
     <div className={styles.dashboardWrapper}>
       {/* <NavigationBar /> */}
       <UpdatePopup />
       <div
-  style={{
-    position: 'fixed',    // Fix it at the top
-    top: '0',             // Position it at the top
-    left: '50%',          // Horizontally center it
-    transform: 'translateX(-50%)', // Adjust for true center
-    zIndex: 999,          // Ensure it stays on top of other content
-    display: 'flex',      // Flex to align content
-    alignItems: 'center', // Center logo vertically within the container
-    justifyContent: 'center', // Ensure it's centered in the parent
-    padding: '10px',      // Optional padding for the logo's container
-  }}
->
-  <img
-    src="iq.png"
-    alt="Logo"
-    style={{
-      height: '100px', // Adjust size of the logo
-      width: 'auto',  // Maintain aspect ratio
-    }}
-  />
-</div>
+        style={{
+          position: 'fixed', // Fix it at the top
+          top: '0', // Position it at the top
+          left: '50%', // Horizontally center it
+          transform: 'translateX(-50%)', // Adjust for true center
+          zIndex: 999, // Ensure it stays on top of other content
+          display: 'flex', // Flex to align content
+          alignItems: 'center', // Center logo vertically within the container
+          justifyContent: 'center', // Ensure it's centered in the parent
+          padding: '10px', // Optional padding for the logo's container
+        }}
+      >
+        <img
+          src="iq.png"
+          alt="Logo"
+          style={{
+            height: '100px', // Adjust size of the logo
+            width: 'auto', // Maintain aspect ratio
+          }}
+        />
+      </div>
 
       <div
         style={{
-          position: 'fixed',  // Position it fixed to the screen
+          position: 'fixed', // Position it fixed to the screen
           top: '5',
           left: '5',
           color: 'white',
@@ -276,82 +418,127 @@ function AccountDashboard() {
           backgroundColor: 'rgba(67, 73, 93, 0.99)', // Optional: for better visibility
           borderRadius: '30px', // Optional: rounded corners
           zIndex: 999,
-          display: 'flex',          // <--- Add flex
-          alignItems: 'center',     // <--- Center vertically
-          gap: '10px',              // <--- Add some space between
+          display: 'flex', // <--- Add flex
+          alignItems: 'center', // <--- Center vertically
+          gap: '10px', // <--- Add some space between
           justifyContent: 'space-between', // Space out items to the ends
-          width: '80%',      // Stretch across the full width
-          padding: '30px',  // Add padding around the content
-
-
+          width: '80%', // Stretch across the full width
+          padding: '30px', // Add padding around the content
         }}
       >
- <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
- <div
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div
+            style={{
+              fontFamily: 'SF Pro Display,sans-serif', // Apply the futuristic font
+            }}
+          >
+            {splitText('Welcome, ' + (user?.name || 'Loading...'))}
+          </div>
+          <div></div>
+          {/* Log Out Button */}
+          <div className={styles.logoutWrapper}>
+            <button onClick={handleLogout} className={styles.logoutButton}>
+              Log Out
+            </button>
+            <button
+  onClick={() => {
+    sendEmail();
+  }}
   style={{
-    fontFamily: 'SF Pro Display,sans-serif', // Apply the futuristic font
+    backgroundColor: 'rgba(211, 15, 15, 0)', // Alert red
+    color: 'white',
+    border: 'none',
+    borderRadius: '100px',
+    cursor: 'pointer',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    marginLeft:'20px',
+  }}
+  onMouseEnter={(e) => {
+    e.target.style.transform = 'scale(1.5)';
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = 'scale(1)';
   }}
 >
-  {splitText("Welcome, " + (user?.name || 'Loading...'))}
-</div>
-  <div>
-  </div>
-{/* Log Out Button */}
-<div className={styles.logoutWrapper}>
-        <button onClick={handleLogout} className={styles.logoutButton}>
-          Log Out
-        </button>
-      </div>
-  
-</div>
-  <div
-      style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        color: 'white',
-        padding: '10px 20px',
-        fontSize: '24px',
-        borderRadius: '10px',
-        fontFamily: 'monospace',
-        display: 'inline-flex',
-        gap: '10px',
-        flexDirection: 'column',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-        marginTop: '10px',
-        alignItems: 'center',  // Centers items horizontally
+  ⚠️
+</button>
 
-      }}
-    >
-<div style={{
-        backgroundColor: 'rgba(36, 240, 0, 0.5)',
-        color: 'white',
-        padding: '5px',
-        fontSize: '15px',
-        borderRadius: '10px',
-        fontFamily: 'monospace',
-        display: 'inline-flex',
-        flexDirection: 'column',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.71)',
-        alignItems: 'center',  // Centers items horizontally
-
-      }}>{cloud}</div>
-     {splitTime.map((digit, index) => (
-        <span
-          key={index}
+          </div>
+        </div>
+        <div
           style={{
-            display: 'inline-block',
-            animation: `slideAnimation 1s ease forwards ${index * 0.2}s`,
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            color: 'white',
+            padding: '10px 20px',
+            fontSize: '24px',
+            borderRadius: '10px',
+            fontFamily: 'monospace',
+            display: 'inline-flex',
+            gap: '10px',
+            flexDirection: 'column',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+            marginTop: '10px',
+            alignItems: 'center', // Centers items horizontally
           }}
         >
-          {digit}
-        </span>
-      ))}
+          <div style={{
+            display: 'flex', // 👈 This is required
+            gap: '50px',
+            flexDirection: 'row',
+          }}><div
+            style={{
+              backgroundColor: 'rgba(36, 240, 0, 0.5)',
+              color: 'white',
+              padding: '5px',
+              fontSize: '15px',
+              borderRadius: '10px',
+              fontFamily: 'monospace',
+              display: 'inline-flex',
+              flexDirection: 'column',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.71)',
+              alignItems: 'center', // Centers items horizontally
+            }}
+          >
+            {cloud}
+          </div><div
+            style={{
+              background: plan === "PRO"
+              ? 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))'
+              : 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))',           
+              color: plan === "PRO" ? '#ccefff' : '#e8e0ff',
+              padding: '5px',
+              fontSize: '15px',
+              borderRadius: '5px',
+              fontFamily: 'monospace',
+              display: 'inline-flex',
+              flexDirection: 'column',
+              boxShadow: '0 4px 8px rgba(0, 6, 119, 0.77)',
+              alignItems: 'center', // Centers items horizontally
+              cursor: 'pointer',
+            }}
+            onClick={() => setShowPlans(true)}
+            
+          >
+            {plan} {plan!="🔄" ? (plan === "Free" ? "| " + noteNames.length+"/15" : "| "+noteNames.length+"/♾️"):""}
+          </div></div>
+          {splitTime.map((digit, index) => (
+            <span
+              key={index}
+              style={{
+                display: 'inline-block',
+                animation: `slideAnimation 1s ease forwards ${index * 0.2}s`,
+              }}
+            >
+              {digit}
+            </span>
+          ))}
 
-<div>
-      {currentDate}
-    </div>
-    </div>
-      <style>
-        {`
+          <div>{currentDate}</div>
+        </div>
+        <style>
+          {`
           @keyframes letterAnimation {
             from {
               opacity: 0;
@@ -363,66 +550,252 @@ function AccountDashboard() {
             }
           }
         `}
-      </style>
+        </style>
       </div>
-      
 
-      <div className={styles.notesGrid}>
-        {/* New Note Button */}
-        <div className={styles.noteCardNew} onClick={handleNew}>
-          <div className={styles.plusSign}>+</div>
-          <div className={styles.cardLabel}>New Note</div>
-        </div>
+      {showPlans && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000, // Add this line for higher stacking
+          }}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(8, 55, 72, 0.96), rgba(1, 3, 20, 0.93))',
+              color:"white",
+              padding: '20px',
+              borderRadius: '8px',
+              width: '600px',
+              textAlign: 'center',
+            }}
+          >
+            <h3>Select a Plan for You</h3>
 
-        {/* Existing Notes */}
-        {noteNames &&
-          noteNames.map((note, index) => (
             <div
-              key={index}
-              className={styles.noteCard}
-              onClick={() => {
-                console.log("note=",note);
-                handleOptionClick(note);
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '20px',
+                marginTop: '10px',
               }}
             >
-              <div className={styles.noteTitle}>{note}</div>
-              <div>{conf[index]}</div>
-              <div>
-  <button
-    onClick={(e) => {
-      e.stopPropagation(); // Prevent click from reaching the card
-      handleDelete(note);
-    }}
-    style={{
-      backgroundColor: 'white', /* Red background */
-      color: 'red',              /* White text */
-      border: 'none',              /* No border */
-      fontSize: '16px',            /* Font size */
-      borderRadius: '5px',         /* Rounded corners */
-      cursor: 'pointer',          /* Pointer cursor on hover */
-      transition: 'all 0.3s ease', /* Smooth transition for hover effects */
-      marginTop:50,
-    }}
-    onMouseOver={(e) => {
-        e.target.style.backgroundColor = '#d32f2f'; /* Darker red on hover */
-        e.target.style.color = 'white';              /* White text on hover */
-      }}
-      onMouseOut={(e) => {
-        e.target.style.backgroundColor = 'white'; /* Reset to original red */
-        e.target.style.color = 'red';              /* Keep text white */
-      }}
-  >
-    🗑️
-  </button>
-</div>
-
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  width: '45%',
+                  textAlign: 'center',
+                }}
+              >
+                <h3>Free Plan</h3>
+                <ul
+  style={{
+    listStyle: 'none',
+    padding: 0,
+    margin: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    fontFamily: 'monospace',
+    fontSize: '13px',
+    color: 'white',
+  }}
+>
+  <li>📄 15 Notes Limit</li>
+  <li>📁 Folders</li>
+  <li>🤖 Gemini 2.0 Flash</li>
+  <li>🧑‍💻 Quick Support</li>
+  <li>🔄 Sync Across Devices</li>
+</ul>
+                <button
+                  onClick={() => setShowPlans(false)}
+                  style={{
+                    padding: '10px 15px',
+                    background: 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))', 
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(252, 138, 8, 0.5)';
+                    e.target.style.backgroundColor = '#e53935';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.2)';
+                    e.target.style.background = 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))';
+                  }}
+                >
+                  Stay Free
+                </button>
               </div>
-          ))}
+
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  width: '45%',
+                  textAlign: 'center',
+                }}
+              >
+                <h4>Pro Plan</h4>
+                <ul
+  style={{
+    listStyle: 'none',
+    padding: 0,
+    margin: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    fontFamily: 'monospace',
+    fontSize: '13px',
+    color: 'white',
+  }}
+>
+  <li>♾️ No Notes Limit</li>
+  <li>📁 Folders</li>
+  <li>🤖 Gemini 2.5 Flash</li>
+  <li>⚡ Instant Support</li>
+  <li>🔄 Sync Across Devices</li>
+  <li>📑✨ PDF upload</li>
+  <li>🧪 Early access to exciting features!</li>
+</ul>
+                <button
+onClick={() => {
+  window.location.href = `mailto:pranavgowrish@gmail.com,pratheek0928@gmail.com,vignesh.tho2006@gmail.com?subject=InkQuizly PRO Upgrade&body=Hi, I’m interested in upgrading to InkQuizly PRO!%0A%0AName: ${encodeURIComponent(user.name)}%0AEmail: ${encodeURIComponent(user.email)}%0A%0APlease list your preferred form of payment below (Cash, Pay, Venmo, Zelle):`;
+}}            style={{
+                    padding: '10px 15px',
+                    background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))',  // Green background
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(8, 36, 252, 0.5)';
+                    e.target.style.backgroundColor = '#45a049';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.2)';
+                    e.target.style.background = 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))';
+                  }}
+                >
+                  Go PRO
+                </button>
+              </div>
+            </div>
+
+            <button
+  onClick={() => setShowPlans(false)}
+  style={{
+                padding: '10px 20px',
+                backgroundColor: 'rgba(249, 136, 136, 0.82)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                marginTop: '20px',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      {showError && (
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+  }}>
+    <div style={{
+      background: "rgba(40, 1, 179, 0.88)",
+      color:"white",
+      padding: "50px",
+      borderRadius: "8px",
+      textAlign: "center",
+      minWidth: "240px",
+    }}>
+      <h3 style={{ margin: "0 0 10px" }}>Limit Reached!</h3>
+      <p style={{ margin: "0 0 15px" }}>Upgrade to PRO for more notes and other exciting features!</p>
+      <div style={{
+        display: "flex",
+        justifyContent: "space-around",
+      }}>
+<button
+                onClick={() => {
+                  setShowPlans(true)
+                  setShowError(false);
+                }}
+  style={{
+    background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))',  // Green background
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    transition: 'background-color 0.3s, transform 0.2s',
+  }}
+  onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
+  onMouseLeave={(e) => e.target.style.background = 'linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))'}>
+  Upgrade
+</button>
+
+<button
+  onClick={() => setShowError(false)}
+  style={{
+    background: 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))', 
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    transition: 'background-color 0.3s, transform 0.2s',
+  }}
+  onMouseEnter={(e) => e.target.style.backgroundColor = '#e53935'}
+  onMouseLeave={(e) => e.target.style.background = 'linear-gradient(135deg, rgba(31, 40, 29, 0.5), rgba(255, 208, 0, 0.5))'}>
+  Cancel
+</button>
       </div>
-      
+    </div>
+  </div>
+)}
+
 
       {/* Popup for naming new note */}
-      {showPopup && (
+      {showPopup1 && (
         <div className={styles.popupBackground}>
           <div className={styles.popupContent}>
             <h3>Name your new note</h3>
@@ -431,11 +804,73 @@ function AccountDashboard() {
               value={noteName}
               onChange={handleNameChange}
               placeholder="Enter note name"
+              style={{
+                width: '80%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                backgroundColor: '#f9f9f9',
+                color: '#333',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4A90E2'; // Change border color on focus
+                e.target.style.backgroundColor = '#fff'; // Change background on focus
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#ccc'; // Reset border color when focus is lost
+                e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
+              }}
             />
+            <h3>Enter folder name (Optional)</h3>
+            <input
+              type="text"
+              value={folderName}
+              onChange={handleFolderChange}
+              placeholder="Enter note name"
+              style={{
+                width: '80%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                backgroundColor: '#f9f9f9',
+                color: '#333',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4A90E2'; // Change border color on focus
+                e.target.style.backgroundColor = '#fff'; // Change background on focus
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#ccc'; // Reset border color when focus is lost
+                e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
+              }}
+            />
+{plan=="PRO" && (
+  <>
+    <h3 style={{ marginBottom: '15px' }}>Upload a PDF</h3>
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => {
+        handlePDFUpload(e.target.files[0]);
+      }}
+      style={{ marginBottom: '20px' }}
+    />
+  </>
+)}
             <div className={styles.popupButtons}>
               <button
                 className="popupButton popupCreateButton"
-                onClick={handleCreate}
+                onClick={() => {
+                  handleCreate(folderName + '⚪️' + noteName);
+                  setShowPopup1(false);
+                }} // Wrap the function call inside an anonymous function
+                disabled={noteName.trim() === ''}
                 style={{
                   flex: 1,
                   padding: '0.75rem 1.5rem',
@@ -443,7 +878,99 @@ function AccountDashboard() {
                   fontWeight: '600',
                   border: 'none',
                   borderRadius: '8px',
-                  backgroundColor: '#4f46e5', // Indigo
+                  backgroundColor: noteName.trim() === '' ? '#ccfc' : '#4f46e5',
+                  color: 'white',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s ease, transform 0.2s ease',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Soft shadow
+                }}
+              >
+                Create
+              </button>
+              <button
+                className="popupButton popupCancelButton"
+                onClick={() => setShowPopup1(false)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  border: 'none',
+                  borderRadius: '8px',
+                  backgroundColor: '#e0e0e0',
+                  color: '#333',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s ease, transform 0.2s ease',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Soft shadow
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Popup for naming new note inside folder */}
+      {showPopup && (
+        <div className={styles.popupBackground}>
+          <div className={styles.popupContent}>
+            <h3>Name your new note inside {currfolder}</h3>
+            <input
+              type="text"
+              value={noteName}
+              onChange={handleNameChange}
+              placeholder="Enter note name"
+              style={{
+                width: '80%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                backgroundColor: '#f9f9f9',
+                color: '#333',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4A90E2'; // Change border color on focus
+                e.target.style.backgroundColor = '#fff'; // Change background on focus
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#ccc'; // Reset border color when focus is lost
+                e.target.style.backgroundColor = '#f9f9f9'; // Reset background color
+              }}
+            />
+            {plan=="PRO" && (
+  <>
+    <h3 style={{ marginBottom: '15px' }}>Upload a PDF</h3>
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => {
+        handlePDFUpload(e.target.files[0]);
+      }}
+      style={{ marginBottom: '20px' }}
+    />
+  </>
+)}
+
+            <div className={styles.popupButtons}>
+              <button
+                className="popupButton popupCreateButton"
+                onClick={() => {
+                  handleCreate(currfolder + '⚪️' + noteName);
+                  setShowPopup(false);
+                }} // Wrap the function call inside an anonymous function
+                disabled={noteName.trim() === ''}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  border: 'none',
+                  borderRadius: '8px',
+                  backgroundColor: noteName.trim() === '' ? '#ccfc' : '#4f46e5',
                   color: 'white',
                   cursor: 'pointer',
                   transition: 'background 0.3s ease, transform 0.2s ease',
@@ -472,10 +999,210 @@ function AccountDashboard() {
                 Cancel
               </button>
             </div>
-
           </div>
         </div>
       )}
+
+      <div className={styles.notesGrid}>
+        {/* New Note Button */}
+        <div className={styles.noteCardNew} onClick={handleFullNew}>
+          <div className={styles.plusSign}>+</div>
+          <div className={styles.cardLabel}>New Note</div>
+        </div>
+        {/* Existing Notes
+        {noteNames &&
+          noteNames.map((note, index) => (
+            <div
+              key={index}
+              className={styles.noteCard}
+              onClick={() => {
+                console.log('note=', note);
+                handleOptionClick(note);
+              }}
+            >
+              <div className={styles.noteTitle}>{note}</div>
+              <div>{conf[index]}</div>
+              <div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent click from reaching the card
+                    handleDelete(note);
+                  }}
+                  style={{
+                    backgroundColor: 'white' /* Red background ,
+                    color: 'red' /* White text ,
+                    border: 'none' /* No border ,
+                    fontSize: '16px' /* Font size ,
+                    borderRadius: '5px' /* Rounded corners ,
+                    cursor: 'pointer' /* Pointer cursor on hover ,
+                    transition:
+                      'all 0.3s ease' /* Smooth transition for hover effects ,
+                    marginTop: 50,
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor =
+                      '#d32f2f'; /* Darker red on hover 
+                    e.target.style.color = 'white'; /* White text on hover 
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor =
+                      'white'; /* Reset to original red 
+                    e.target.style.color = 'red'; /* Keep text white 
+                  }}
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))} */}
+        {/* Render stacks and standalone notes */}
+        {Object.entries(groupedNotes).map(([groupTitle, notes], stackIndex) => {
+          const isStandalone = groupTitle === 'Standalone';
+
+          // Standalone notes (not part of any stack)
+          if (isStandalone) {
+            return notes.map(({ title, index }) => (
+              <div
+                key={index}
+                className={styles.noteCard}
+                onClick={() => handleOptionClick(noteNames[index])}
+              >
+                <div className={styles.noteTitle}>{title}</div>
+                <div>{conf[index]}</div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent click from reaching the card
+                    handleDelete('⚪️' + title);
+                  }}
+                  style={{
+                    backgroundColor: 'white' /* Red background */,
+                    color: 'red' /* White text */,
+                    border: 'none' /* No border */,
+                    fontSize: '16px' /* Font size */,
+                    borderRadius: '5px' /* Rounded corners */,
+                    cursor: 'pointer' /* Pointer cursor on hover */,
+                    transition:
+                      'all 0.3s ease' /* Smooth transition for hover effects */,
+                    marginTop: 50,
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor =
+                      '#d32f2f'; /* Darker red on hover */
+                    e.target.style.color = 'white'; /* White text on hover */
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor =
+                      'white'; /* Reset to original red */
+                    e.target.style.color = 'red'; /* Keep text white */
+                  }}
+                >
+                  🗑️
+                </button>
+              </div>
+            ));
+          }
+
+          return (
+            <div key={`stack-${stackIndex}`} className={styles.stackRow}>
+              {/* Folder */}
+              <div
+                className={styles.noteCard}
+                style={{ backgroundColor: stringToColor(groupTitle) }}
+                onClick={() =>
+                  setExpandedStackIndex(
+                    expandedStackIndex === stackIndex ? null : stackIndex
+                  )
+                }
+              >
+                <div className={styles.stackLabel}>
+                  <b>📁 {groupTitle}</b>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    margin: '1rem 0',
+                  }}
+                >
+                  <button
+                    onClick={() => handleNew(groupTitle)} // Use an anonymous function to pass the groupTitle correctly
+                    style={{
+                      backgroundColor: 'rgba(0, 2, 0, 0)',
+                      color: 'black',
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+                      transition: 'all 0.3s ease',
+                      width: '100%',
+                      alignItems: 'center',
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.color = 'grey';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = 'rgba(0, 2, 0, 0)';
+                      e.target.style.color = 'black';
+                    }}
+                  >
+                    ➕ Add Note
+                  </button>
+                </div>
+              </div>
+
+              {/* Notes shown horizontally */}
+              {expandedStackIndex === stackIndex && (
+                <div className={styles.notesInStack}>
+                  {notes.map(({ title, index }) => (
+                    <div
+                      key={index}
+                      className={styles.noteCard}
+                      style={{ backgroundColor: stringToColor(groupTitle) }}
+                      onClick={() => handleOptionClick(noteNames[index])}
+                    >
+                      <div className={styles.noteTitle}>{title}</div>
+                      <div>{conf[index]}</div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click from reaching the card
+                          handleDelete(groupTitle + '⚪️' + title);
+                        }}
+                        style={{
+                          backgroundColor:
+                            stringToColor(groupTitle) /* Red background */,
+                          color: 'red' /* White text */,
+                          border: 'none' /* No border */,
+                          fontSize: '16px' /* Font size */,
+                          borderRadius: '5px' /* Rounded corners */,
+                          cursor: 'pointer' /* Pointer cursor on hover */,
+                          transition:
+                            'all 0.3s ease' /* Smooth transition for hover effects */,
+                          marginTop: 50,
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.backgroundColor =
+                            '#d32f2f'; /* Darker red on hover */
+                          e.target.style.color =
+                            stringToColor(groupTitle); /* White text on hover */
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.backgroundColor =
+                            stringToColor(
+                              groupTitle
+                            ); /* Reset to original red */
+                          e.target.style.color = 'red'; /* Keep text white */
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
