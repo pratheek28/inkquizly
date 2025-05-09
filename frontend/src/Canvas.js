@@ -2839,6 +2839,11 @@ onClick={() => {
                     : newColorHex;
                 canvases[activeCanvasIndex].freeDrawingBrush.color = newColor;
               }
+              canvases.forEach((canvas) => {
+                if (canvas) {
+                  canvas.freeDrawingBrush.color = newColor;
+                }
+              });
             }}
           />
           <button onClick={() => setShowColorPicker(false)}>Apply</button>
