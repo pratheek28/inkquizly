@@ -1912,7 +1912,6 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
               top: rect.top + rect.height + 10,
               width: 600,
               fontSize: 20,
-              selectable: false,
             });
             canvas.add(summ);
             canvas.renderAll();
