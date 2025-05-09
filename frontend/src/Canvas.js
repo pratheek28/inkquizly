@@ -1698,8 +1698,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       multiplier: 1,
     });
 
-    //const topic = fullDataURL.split(',')[1];
-    const topic = fullDataURL;
+    const topic = fullDataURL.split(',')[1];
+    //const topic = fullDataURL;
     console.log('Base64 image:', topic);
 
     // Highlight bolding
@@ -1912,7 +1912,6 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
               top: rect.top + rect.height + 10,
               width: 600,
               fontSize: 20,
-              selectable: false,
             });
             canvas.add(summ);
             canvas.renderAll();
@@ -2840,6 +2839,11 @@ onClick={() => {
                     : newColorHex;
                 canvases[activeCanvasIndex].freeDrawingBrush.color = newColor;
               }
+              canvases.forEach((canvas) => {
+                if (canvas) {
+                  canvas.freeDrawingBrush.color = newColor;
+                }
+              });
             }}
           />
           <button onClick={() => setShowColorPicker(false)}>Apply</button>

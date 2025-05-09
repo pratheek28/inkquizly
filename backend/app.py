@@ -475,12 +475,16 @@ def summarize_user_written():
     # Get the subtitle from the incoming request
     subtitle = request.get_json()
 
-    with open(subtitle['topic'], 'rb') as f:
-        image_bytes = f.read()
+# Decode and load as image file-like object
+    image_data = base64.b64decode(subtitle['topic'])
+    image_file = BytesIO(image_data)
+
+    # with open(subtitle['topic'], 'rb') as f:
+    #     image_bytes = f.read()
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=[types.Part.from_bytes(data=image_bytes,mime_type='image/png',),"Can you generate a response to the photo with max 20 lines and is super understandable to any students like a textbook paragraph? " \
+    model="gemini-2.0-flash", contents=[types.Part.from_bytes(data=image_file.read(),mime_type='image/png',),"Can you generate a response to the photo with max 20 lines and is super understandable to any students like a textbook paragraph? " \
                                       "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
                                       f"and be able to also learn the implications of this and its application"]
     )
