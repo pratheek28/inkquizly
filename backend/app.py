@@ -16,6 +16,7 @@ from google import genai
 import re
 import os
 import requests
+from google import types
 
 
 
@@ -474,19 +475,14 @@ def summarize_user_written():
     # Get the subtitle from the incoming request
     subtitle = request.get_json()
 
-    image_data = base64.b64decode(subtitle['topic'])
-
-    # Create a file-like object
-    image_file = BytesIO(image_data)
-    image_file.name = "image.png"  # Some APIs require a .name attribute
-
-    myfile=client.files.upload(file=image_file,mime_type="image/png")
+    with open(subtitle['topic'], 'rb') as f:
+        image_bytes = f.read()
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=[myfile,"\n\n","Can you generate a response to the photo with max 20 lines and is super understandable to any students like a textbook paragraph? " \
+    model="gemini-2.0-flash", contents=[types.Part.from_bytes(data=image_bytes,mime_type='image/png',),"Can you generate a response to the photo with max 20 lines and is super understandable to any students like a textbook paragraph? " \
                                       "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-                                      f"and be able to also learn the implications of this and its application"],
+                                      f"and be able to also learn the implications of this and its application"]
     )
     
     # Return the AI-generated summary as a JSON response

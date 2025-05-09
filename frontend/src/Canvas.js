@@ -168,7 +168,7 @@ const CanvasEditor = () => {
                   );
 
                   // CIRCLE
-                  const circleTolerance = 4; // max radial dev for a full circle
+                  const circleTolerance = 1; // max radial dev for a full circle
                   if (maxDev <= circleTolerance) {
                     cv.remove(raw);
                     cv.add(
@@ -1698,8 +1698,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       multiplier: 1,
     });
 
-    const topic = fullDataURL.split(',')[1];
-    //const topic = fullDataURL;
+    //const topic = fullDataURL.split(',')[1];
+    const topic = fullDataURL;
     console.log('Base64 image:', topic);
 
     // Highlight bolding
