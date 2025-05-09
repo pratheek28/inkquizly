@@ -454,16 +454,33 @@ def ocr_space_from_base64(base64_str, api_key=OCR_API_KEY):
 
     
 
+# @app.route("/getsummarized", methods=['POST'])
+# def summarize_user_written():
+#     # Get the subtitle from the incoming request
+#     subtitle = request.get_json()
+    
+#     # Assuming you have a model object that can generate content based on the subtitle
+#     response = client.models.generate_content(
+#     model="gemini-2.0-flash", contents="Can you generate a response to the following with max 20 lines and is super understandable to any students like a textbook paragraph? " \
+#                                       "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
+#                                       f"and be able to also learn the implications of this and its application:{ocr_from_base64(subtitle['topic'])}"
+#     )
+    
+#     # Return the AI-generated summary as a JSON response
+#     return jsonify({"summary": response.text})  # Ensure the response is correctly wrapped in a dictionary for jsonify
+
 @app.route("/getsummarized", methods=['POST'])
 def summarize_user_written():
     # Get the subtitle from the incoming request
     subtitle = request.get_json()
+
+    myfile=client.files.upload(file=subtitle['topic'])
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents="Can you generate a response to the following with max 20 lines and is super understandable to any students like a textbook paragraph? " \
+    model="gemini-2.0-flash", contents=[myfile,"\n\n","Can you generate a response to the photo with max 20 lines and is super understandable to any students like a textbook paragraph? " \
                                       "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-                                      f"and be able to also learn the implications of this and its application:{ocr_from_base64(subtitle['topic'])}"
+                                      f"and be able to also learn the implications of this and its application"],
     )
     
     # Return the AI-generated summary as a JSON response
