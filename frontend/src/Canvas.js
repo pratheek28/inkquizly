@@ -168,7 +168,7 @@ const CanvasEditor = () => {
                   );
 
                   // CIRCLE
-                  const circleTolerance = 1; // max radial dev for a full circle
+                  const circleTolerance = 2; // max radial dev for a full circle
                   if (maxDev <= circleTolerance) {
                     cv.remove(raw);
                     cv.add(
