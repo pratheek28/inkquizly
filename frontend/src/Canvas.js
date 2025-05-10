@@ -579,71 +579,109 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
 
   
   canvases.forEach((canvas, index) => {
-    let speed=0;
-    const el = canvas.upperCanvasEl;
-  
-    el.addEventListener('pointerdown', (e) => {
-      // Reset tracking variables when the pointer is pressed
-      lastPos = { x: e.clientX, y: e.clientY };
-      lastTime = e.timeStamp;
+    let lastHoverPoint = null;
+    let lastHoverTime = null;
+    const distanceThreshold = 50; // pixels
+    
+    // Track stylus hover before drawing starts
+    canvas.upperCanvasEl.addEventListener('pointermove', (e) => {
+      // if (e.pointerType === 'pen') {
+        lastHoverPoint = { x: e.offsetX, y: e.offsetY };
+        lastHoverTime = Date.now();
+      // }
     });
-  
-    el.addEventListener('pointermove', (e) => {
-      if (!lastPos) return; // Ignore if no previous pointer position
-  
-      // Calculate distance between current and last position
-      const distance = Math.sqrt(
-        (e.clientX - lastPos.x) ** 2 + (e.clientY - lastPos.y) ** 2
-      );
-  
-      // Calculate time difference between current and last pointermove event
-      const timeDifference = e.timeStamp - lastTime;
-  
-      // If timeDifference is greater than 0 (to avoid division by zero)
-      if (timeDifference > 0) {
-        speed = distance / timeDifference; // Speed in pixels per millisecond (px/ms)
-        console.log(`Drawing speed: ${speed} pixels/ms`);
-
-  
-        // You can add a threshold to detect if the speed is too fast/slow
-        const threshold = 7; // For example, 0.1 px/ms (adjust as needed)
-        if (speed > threshold) {
-          console.log("Drawing too fast!");
-          // You can handle cases of "too fast" drawing here if necessary
+    
+    // On path creation, reject if jump from hover is too big
+    canvas.on('path:created', (e) => {
+      const path = e.path;
+      if (!path.path || path.path.length < 1) return;
+    
+      const startPoint = {
+        x: path.path[0][1],
+        y: path.path[0][2],
+      };
+    
+      if (lastHoverPoint && Date.now() - lastHoverTime < 2) {
+        const dx = startPoint.x - lastHoverPoint.x;
+        const dy = startPoint.y - lastHoverPoint.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+    
+        if (dist > distanceThreshold) {
+          console.log("Rejected palm-induced jump line", dist,lastHoverPoint && Date.now() - lastHoverTime);
+          canvas.remove(path);
+          canvas.renderAll();
+          return;
         }
       }
-  
-      // Update the last position and time for the next move
-      lastPos = { x: e.clientX, y: e.clientY };
-      lastTime = e.timeStamp;
+    
+      // Accept the path
+      console.log("Path accepted",lastHoverPoint && Date.now() - lastHoverTime);
     });
+    
+
+
+
+    // let speed=0;
+    // const el = canvas.upperCanvasEl;
   
-    el.addEventListener('pointerup', () => {
+    // el.addEventListener('pointerdown', (e) => {
+    //   // Reset tracking variables when the pointer is pressed
+    //   lastPos = { x: e.clientX, y: e.clientY };
+    //   lastTime = e.timeStamp;
+    // });
+  
+    // el.addEventListener('pointermove', (e) => {
+    //   if (!lastPos) return; // Ignore if no previous pointer position
+  
+    //   // Calculate distance between current and last position
+    //   const distance = Math.sqrt(
+    //     (e.clientX - lastPos.x) ** 2 + (e.clientY - lastPos.y) ** 2
+    //   );
+  
+    //   // Calculate time difference between current and last pointermove event
+    //   const timeDifference = e.timeStamp - lastTime;
+  
+    //   // If timeDifference is greater than 0 (to avoid division by zero)
+    //   if (timeDifference > 0) {
+    //     speed = distance / timeDifference; // Speed in pixels per millisecond (px/ms)
+    //     console.log(`Drawing speed: ${speed} pixels/ms`);
+
+  
+    //     // You can add a threshold to detect if the speed is too fast/slow
+    //     const threshold = 7; // For example, 0.1 px/ms (adjust as needed)
+    //     if (speed > threshold) {
+    //       console.log("Drawing too fast!");
+    //       shouldUndo.current = true;
+    //       // You can handle cases of "too fast" drawing here if necessary
+    //     }
+    //   }
+  
+    //   // Update the last position and time for the next move
+    //   lastPos = { x: e.clientX, y: e.clientY };
+    //   lastTime = e.timeStamp;
+    // });
+  
+    // el.addEventListener('pointerup', () => {
       
-      // Reset when pointer is released
-      lastPos = null;
-      lastTime = null;
-      console.log("speed here:",speed);
-      if (speed > 7) {
-        console.log("Drawing too fast, undoing line...",lastObject);
-        shouldUndo.current = true;
-        console.log("set as",shouldUndo);
-      }
-    });
+    //   // Reset when pointer is released
+    //   lastPos = null;
+    //   lastTime = null;
+    //   // console.log("speed here:",speed);
+    //   // if (speed > 7) {
+    //   //   console.log("Drawing too fast, undoing line...",lastObject);
+    //   //   shouldUndo.current = true;
+    //   //   console.log("set as",shouldUndo);
+    //   // }
+    // });
   
-    el.addEventListener('pointercancel', () => {
-      // Reset on pointer cancel
-      lastPos = null;
-      lastTime = null;
-    });
+    // el.addEventListener('pointercancel', () => {
+    //   // Reset on pointer cancel
+    //   lastPos = null;
+    //   lastTime = null;
+    // });
   });
   
 
-  // This should be added when creating new objects (like paths, lines, etc.)
-function onObjectAdded(event) {
-  console.log("object added",event.path);
-  setlastobject(event.path);
-}
 
   
   
