@@ -533,10 +533,25 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
   }
 
   canvases.forEach((canvas, index) => {
-    canvas.upperCanvasEl.addEventListener('pointerdown', () => {
+    canvas.upperCanvasEl.addEventListener('pointerdown', (e) => {
+      console.log("radius is:",e.width," and:",e.height);
+      const isPalm =
+      (e.width > 10 || e.height > 10); // Adjust this threshold if needed
+
+    if (isPalm) {
+      e.preventDefault(); // Prevent unwanted behavior
+      e.stopImmediatePropagation(); // <- This is crucial
+      canvas.isDrawingMode = false;
+      console.log(`Palm detected on canvas ${index} — ignoring input.`);
+      return;
+    }
+    if(canvas.isDrawingMode === true){
+    canvas.isDrawingMode = true;
+    }
+
       setActiveCanvasIndex(index);
       console.log(`Canvas ${index} clicked`);
-    });
+    },true);
   });
 
   useEffect(() => {
