@@ -145,7 +145,7 @@ const CanvasEditor = () => {
                   const cv = raw.canvas;
 
                   // STRAIGHT LINES
-                  if (maxDist <= 8) {
+                  if (maxDist <= 5) {
                     cv.remove(raw);
                     cv.add(
                       new fabric.Line([p0.x, p0.y, pN.x, pN.y], {
