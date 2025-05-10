@@ -59,6 +59,8 @@ const CanvasEditor = () => {
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const shouldUndo= useRef(false); // Track the last object added to the canvas
+
 
   const A4_WIDTH = 794;
   const A4_HEIGHT = 1123;
@@ -220,6 +222,22 @@ const CanvasEditor = () => {
                   setUndoStack((u) => [...u, e.target]);
                   setRedoStack([]); // clear redo on a true remove
                 });
+                // Listen for when objects are added to the canvas
+// canvas.on('path:created', onObjectAdded);
+canvas.on('path:created', function(event) {
+  const path = event.path;
+  console.log("Path created",shouldUndo, path);
+
+  if (shouldUndo.current) {
+
+      canvas.remove(path);
+      canvas.renderAll();
+      console.log("Removed fast-drawn path.");
+    shouldUndo.current = false;
+  } else {
+    setlastobject(path); // Track normally if not undoing
+  }
+});
 
                 const handleClick = () => {
                   setActiveCanvasIndex(index);
@@ -533,11 +551,105 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
   }
 
   canvases.forEach((canvas, index) => {
-    canvas.upperCanvasEl.addEventListener('pointerdown', () => {
+    canvas.upperCanvasEl.addEventListener('pointerdown', (e) => {
+      console.log("radius is:",e.width," and:",e.height);
+    //   const isPalm =
+    //   (e.width > 30 || e.height > 30); // Adjust this threshold if needed
+
+    // if (isPalm) {
+    //   e.preventDefault(); // Prevent unwanted behavior
+    //   e.stopImmediatePropagation(); // <- This is crucial
+    //   canvas.isDrawingMode = false;
+    //   console.log(`Palm detected on canvas ${index} — ignoring input.`);
+    //   return;
+    // }
+    // if(canvas.isDrawingMode === true){
+    // canvas.isDrawingMode = true;
+    // }
+
       setActiveCanvasIndex(index);
       console.log(`Canvas ${index} clicked`);
+    },true);
+  });
+
+  let lastPos = null;
+  let lastTime = null;
+  const [lastObject,setlastobject]= useState(null); // Track the last object added to the canvas
+
+
+  
+  canvases.forEach((canvas, index) => {
+    let speed=0;
+    const el = canvas.upperCanvasEl;
+  
+    el.addEventListener('pointerdown', (e) => {
+      // Reset tracking variables when the pointer is pressed
+      lastPos = { x: e.clientX, y: e.clientY };
+      lastTime = e.timeStamp;
+    });
+  
+    el.addEventListener('pointermove', (e) => {
+      if (!lastPos) return; // Ignore if no previous pointer position
+  
+      // Calculate distance between current and last position
+      const distance = Math.sqrt(
+        (e.clientX - lastPos.x) ** 2 + (e.clientY - lastPos.y) ** 2
+      );
+  
+      // Calculate time difference between current and last pointermove event
+      const timeDifference = e.timeStamp - lastTime;
+  
+      // If timeDifference is greater than 0 (to avoid division by zero)
+      if (timeDifference > 0) {
+        speed = distance / timeDifference; // Speed in pixels per millisecond (px/ms)
+        console.log(`Drawing speed: ${speed} pixels/ms`);
+
+  
+        // You can add a threshold to detect if the speed is too fast/slow
+        const threshold = 7; // For example, 0.1 px/ms (adjust as needed)
+        if (speed > threshold) {
+          console.log("Drawing too fast!");
+          // You can handle cases of "too fast" drawing here if necessary
+        }
+      }
+  
+      // Update the last position and time for the next move
+      lastPos = { x: e.clientX, y: e.clientY };
+      lastTime = e.timeStamp;
+    });
+  
+    el.addEventListener('pointerup', () => {
+      
+      // Reset when pointer is released
+      lastPos = null;
+      lastTime = null;
+      console.log("speed here:",speed);
+      if (speed > 7) {
+        console.log("Drawing too fast, undoing line...",lastObject);
+        shouldUndo.current = true;
+        console.log("set as",shouldUndo);
+      }
+    });
+  
+    el.addEventListener('pointercancel', () => {
+      // Reset on pointer cancel
+      lastPos = null;
+      lastTime = null;
     });
   });
+  
+
+  // This should be added when creating new objects (like paths, lines, etc.)
+function onObjectAdded(event) {
+  console.log("object added",event.path);
+  setlastobject(event.path);
+}
+
+  
+  
+  
+  
+  
 
   useEffect(() => {
     const observer = new IntersectionObserver(
