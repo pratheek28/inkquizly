@@ -449,13 +449,8 @@ canvas.on('path:created', function(event) {
   const downloadPDF = async () => {
     setIsLoading2(true);
   
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = 210;
-    const pageHeight = 297;
-    const margin = 10;
-    const maxWidth = pageWidth - margin * 2;
-    const maxHeight = pageHeight - margin * 2;
-    const scale = isTab ? 0.1 : 1;
+    const doc = new jsPDF();
+    const scale = isPhone ? 0.5 : 1; // Scale down for phones
   
     for (let index = 0; index < canvasRef.current.length; index++) {
       const canvasEl = canvasRef.current[index];
@@ -465,21 +460,12 @@ canvas.on('path:created', function(event) {
             scale: scale,
             useCORS: true,
           });
-  
           const imageDataUrl = canvasImage.toDataURL('image/png');
-          const imgWidth = canvasImage.width;
-          const imgHeight = canvasImage.height;
-  
-          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
-          const renderWidth = imgWidth * ratio;
-          const renderHeight = imgHeight * ratio;
-          const x = (pageWidth - renderWidth) / 2;
-          const y = (pageHeight - renderHeight) / 2;
   
           if (index > 0) doc.addPage();
-          doc.addImage(imageDataUrl, 'PNG', x, y, renderWidth, renderHeight);
+          doc.addImage(imageDataUrl, 'PNG', 0, 0, 794 * 0.26 * scale, 1123 * 0.26 * scale);
         } catch (error) {
-          console.error(`Error processing canvas ${index}:`, error);
+          console.error('Error processing canvas ${index}:', error);
         }
       }
     }
