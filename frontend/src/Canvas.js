@@ -450,7 +450,7 @@ canvas.on('path:created', function(event) {
     setIsLoading2(true);
   
     const doc = new jsPDF();
-    const scale = isPhone ? 0.2 : 1; // Scale down for phones
+    const scale = isPhone ? 0.5 : 1; // Scale down for phones
   
     for (let index = 0; index < canvasRef.current.length; index++) {
       const canvasEl = canvasRef.current[index];
@@ -2318,8 +2318,32 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       : {}
   }
 >
-{isPhone && !isLandscape ?"Use landscape mode for best experience📱🔄":""}
-{!(isPhone && !isLandscape) && (
+{/* {isPhone && !isLandscape ?"Use landscape mode for best experience📱🔄":""} */}
+{isPhone && !isLandscape && (
+  <div
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)', // Dark overlay
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: '#fff',
+      fontSize: '20px',
+      fontWeight: 'bold',
+      textAlign: 'center',
+      zIndex: 9999,
+      padding: '20px',
+    }}
+  >
+    Please rotate your device to landscape for best experience📱🔄
+  </div>
+)}
+
+{true && (
     <div
       style={{
         display: 'flex',
