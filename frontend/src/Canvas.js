@@ -450,7 +450,7 @@ canvas.on('path:created', function(event) {
     setIsLoading2(true);
   
     const doc = new jsPDF();
-    const scale = isPhone ? 1 : 1; // Scale down for phones
+    const scale = isPhone ? 0.2 : 1; // Scale down for phones
   
     for (let index = 0; index < canvasRef.current.length; index++) {
       const canvasEl = canvasRef.current[index];
@@ -2287,16 +2287,22 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
   const isPhone = /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent);
   console.log('isPhone:', isPhone);
   const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+
   useEffect(() => {
     const handleResize = () => {
       setIsLandscape(window.innerWidth > window.innerHeight);
     };
 
+    // Listen to both resize and orientationchange events
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
 
-    // Cleanup on unmount
-    return () => window.removeEventListener('resize', handleResize);
-  }, []); // Empty dependency array ensures the effect only runs once
+    // Cleanup event listeners on unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []); // Empty dependency array ensures the effect runs only once
 
 
   return (
