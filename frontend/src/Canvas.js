@@ -455,7 +455,7 @@ canvas.on('path:created', function(event) {
     const margin = 10;
     const maxWidth = pageWidth - margin * 2;
     const maxHeight = pageHeight - margin * 2;
-    const scale = isTab ? 0.3 : 1;
+    const scale = isTab ? 0.1 : 1;
   
     for (let index = 0; index < canvasRef.current.length; index++) {
       const canvasEl = canvasRef.current[index];
@@ -2342,8 +2342,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       position: 'fixed',
       top: 0,
       left: 0,
-      width: '80%',
-      height: '80%',
+      width: '100%',
+      height: '100%',
       backgroundColor: 'rgba(0, 0, 0, 0.85)', // Dark overlay
       display: 'flex',
       justifyContent: 'center',
@@ -2356,7 +2356,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       padding: '20px',
     }}
   >
-    Please rotate your device to landscape for best experience📱🔄
+    Use landscape for best experience📱🔄
   </div>
 )}
 
