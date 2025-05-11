@@ -416,35 +416,64 @@ canvas.on('path:created', function(event) {
     };
   }, []);
 
-  const downloadPDF = () => {
-    setIsLoading2(true); // Start the loading spinner
-    // Simulate a delay for the loading spinner (e.g., 3 seconds)
-    setTimeout(() => {
-      setIsLoading2(false);
-    }, 5000); // 3000ms = 3 seconds
+  // const downloadPDF = async() => {
+  //   setIsLoading2(true); // Start the loading spinner
+  //   // Simulate a delay for the loading spinner (e.g., 3 seconds)
+  //   setTimeout(() => {
+  //     setIsLoading2(false);
+  //   }, 5000); // 3000ms = 3 seconds
 
-    const doc = new jsPDF(); // Create a new jsPDF document
+  //   const doc = new jsPDF(); // Create a new jsPDF document
 
-    // Iterate over each canvas and capture it as an image
-    canvasRef.current.forEach((canvasEl, index) => {
+  //   // Iterate over each canvas and capture it as an image
+  //   canvasRef.current.forEach((canvasEl, index) => {
+  //     if (canvasEl) {
+  //       html2canvas(canvasEl).then((canvasImage) => {
+  //         const imageDataUrl = canvasImage.toDataURL('image/png'); // Get image data URL
+
+  //         // Add the image to the PDF
+  //         if (index > 0) {
+  //           doc.addPage(); // Add a new page for each canvas
+  //         }
+  //         doc.addImage(imageDataUrl, 'PNG', 0, 0,794 *0.26,1123 *0.26); // Position and size of the image
+
+  //         // If it's the last canvas, trigger download
+  //         if (index === canvasRef.current.length - 1) {
+  //           doc.save(noteID+'.pdf'); // Download the PDF
+  //         }
+  //       });
+  //     }
+  //   });
+  // };
+
+  const downloadPDF = async () => {
+    setIsLoading2(true);
+  
+    const doc = new jsPDF();
+    const scale = isPhone ? 1 : 1; // Scale down for phones
+  
+    for (let index = 0; index < canvasRef.current.length; index++) {
+      const canvasEl = canvasRef.current[index];
       if (canvasEl) {
-        html2canvas(canvasEl).then((canvasImage) => {
-          const imageDataUrl = canvasImage.toDataURL('image/png'); // Get image data URL
-
-          // Add the image to the PDF
-          if (index > 0) {
-            doc.addPage(); // Add a new page for each canvas
-          }
-          doc.addImage(imageDataUrl, 'PNG', 0, 0,794 *0.26,1123 *0.26); // Position and size of the image
-
-          // If it's the last canvas, trigger download
-          if (index === canvasRef.current.length - 1) {
-            doc.save(noteID+'.pdf'); // Download the PDF
-          }
-        });
+        try {
+          const canvasImage = await html2canvas(canvasEl, {
+            scale: scale,
+            useCORS: true,
+          });
+          const imageDataUrl = canvasImage.toDataURL('image/png');
+  
+          if (index > 0) doc.addPage();
+          doc.addImage(imageDataUrl, 'PNG', 0, 0, 794 * 0.26 * scale, 1123 * 0.26 * scale);
+        } catch (error) {
+          console.error(`Error processing canvas ${index}:`, error);
+        }
       }
-    });
+    }
+  
+    doc.save(noteID + '.pdf');
+    setIsLoading2(false);
   };
+  
 
   const [notetitle, setnotetitle] = useState('Notebook 1');
 
@@ -2255,7 +2284,36 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
     return `hsl(${hue}, 70%, 80%)`; // Light pastel color
   }
 
+  const isPhone = /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent);
+  console.log('isPhone:', isPhone);
+  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup on unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Empty dependency array ensures the effect only runs once
+
+
   return (
+    <div
+  style={
+    isPhone
+      ? {
+        display: 'flex',
+        flexDirection: 'column',
+        fontSize: '16px',
+        color: '#fff',
+        }
+      : {}
+  }
+>
+{isPhone && !isLandscape ?"Use landscape mode for best experience📱🔄":""}
+{!(isPhone && !isLandscape) && (
     <div
       style={{
         display: 'flex',
@@ -2274,7 +2332,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       <div
         style={{
           position: 'fixed',
-          top: '20px',
+          top: '100px',
           right: '20px',
           backgroundColor: 'rgba(0, 16, 120, 0.9)', // dark gray with transparency
           padding: '20px',
@@ -2287,6 +2345,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
           gap: '10px', // Space between items
           minWidth: '150px',
           textAlign: 'center', // <--- CENTER the text itself too
+          zIndex:1000,
         }}
       >
         <button
@@ -2350,10 +2409,13 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            width: '95%',
-            height: 'auto',
-            overflowY: 'auto',
+            // width: '95%',
+            // height: 'auto',
+            // overflowY: 'auto',
             maxWidth: '794px',
+            //maxWidth: isPhone ? '300px' : '794px',
+            //maxHeight: isPhone ? '424.2px' : '1123px',
+            maxHeight:'1123px',
             border: '1px solid #ddd',
             backgroundColor: '#fff',
             //transform: `scale(${1.1})`,
@@ -2368,6 +2430,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
             width={A4_WIDTH}
             height={A4_HEIGHT}
             onClick={() => handleCanvasClick(index)}
+            
           ></canvas>
         </div>
       ))}
@@ -2427,7 +2490,6 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
           }}
         >
           {/* Tool buttons (pen, marker, color pallet, etc.) */}
-
           <button
             onClick={() => setActiveTool('pen')}
             style={{
@@ -2460,6 +2522,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('marker')}
             style={{
@@ -2760,6 +2823,7 @@ onClick={() => {
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('text')}
             style={{
@@ -2824,6 +2888,7 @@ onClick={() => {
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('subhl')}
             style={{
@@ -2856,6 +2921,7 @@ onClick={() => {
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('point')}
             style={{
@@ -2921,6 +2987,7 @@ onClick={() => {
               style={{ width: '40px', height: '40px', objectFit: 'contain' }}
             />
           </button>
+          {!isPhone && (
           <button
             title="TOOL INFO"
             onClick={() => setShowToolInfo(prev => !prev)}
@@ -2936,7 +3003,7 @@ onClick={() => {
               alt="Tool Info"
               style={{ width: '40px', height: '40px', objectFit: 'contain' }}
             />
-          </button>
+          </button>)}
         </div>
         {/* ↓ pop-up rendered immediately beneath the toolbar row */}
         {showToolInfo && (
@@ -3369,6 +3436,7 @@ onClick={() => {
           </button>
         </div>
       )}
+    </div>)}
     </div>
   );
 };
