@@ -2342,8 +2342,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       position: 'fixed',
       top: 0,
       left: 0,
-      width: '100vh',
-      height: '100vh',
+      width: '80%',
+      height: '80%',
       backgroundColor: 'rgba(0, 0, 0, 0.85)', // Dark overlay
       display: 'flex',
       justifyContent: 'center',
