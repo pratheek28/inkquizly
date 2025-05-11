@@ -10,8 +10,6 @@ import html2canvas from 'html2canvas';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-
-
 const CanvasEditor = () => {
   const [canvases, setCanvases] = useState([]); // Single canvas
   const [brushColor, setBrushColor] = useState('#000000'); // Default to black marker
