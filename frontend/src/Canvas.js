@@ -2419,7 +2419,10 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
           )}
         </div>
         <button
-            onClick={() => downloadPDF()}
+                        onClick={() => {
+                          setIsLoading2(true)
+                          downloadPDF();
+                        }}
             style={{
             padding: '5px',
             backgroundColor: '#20C997', // Gray while saving
