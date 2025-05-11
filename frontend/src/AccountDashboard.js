@@ -381,7 +381,29 @@ function AccountDashboard() {
     return `hsl(${hue}, 70%, 80%)`; // Light pastel color
   }
 
+//   function useIsPhone() {
+//     const isPhone = useMediaQuery({ query: '(max-width: 1000px)' });
+//     return isPhone
+//  }
+
+  //const isPhone = useIsPhone();
+  const isPhone = window.innerWidth <= 768;
+  console.log('isPhone:', isPhone);
+
+
   return (
+    <div
+  style={
+    isPhone
+      ? {
+        display: 'flex',
+        flexDirection: 'column',
+        fontSize: '16px',
+        }
+      : {}
+  }
+>
+    
     <div className={styles.dashboardWrapper}>
       {/* <NavigationBar /> */}
       <UpdatePopup />
@@ -531,11 +553,12 @@ function AccountDashboard() {
                 animation: `slideAnimation 1s ease forwards ${index * 0.2}s`,
               }}
             >
-              {digit}
+              {isPhone?"":digit}
             </span>
           ))}
 
-          <div>{currentDate}</div>
+          <div>
+          {isPhone?"":currentDate}</div>
         </div>
         <style>
           {`
@@ -1203,6 +1226,7 @@ onClick={() => {
           );
         })}
       </div>
+    </div>
     </div>
   );
 }

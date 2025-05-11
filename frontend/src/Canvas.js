@@ -414,35 +414,66 @@ canvas.on('path:created', function(event) {
     };
   }, []);
 
-  const downloadPDF = () => {
-    setIsLoading2(true); // Start the loading spinner
-    // Simulate a delay for the loading spinner (e.g., 3 seconds)
-    setTimeout(() => {
-      setIsLoading2(false);
-    }, 5000); // 3000ms = 3 seconds
+  // const downloadPDF = async() => {
+  //   setIsLoading2(true); // Start the loading spinner
+  //   // Simulate a delay for the loading spinner (e.g., 3 seconds)
+  //   setTimeout(() => {
+  //     setIsLoading2(false);
+  //   }, 5000); // 3000ms = 3 seconds
 
-    const doc = new jsPDF(); // Create a new jsPDF document
+  //   const doc = new jsPDF(); // Create a new jsPDF document
 
-    // Iterate over each canvas and capture it as an image
-    canvasRef.current.forEach((canvasEl, index) => {
+  //   // Iterate over each canvas and capture it as an image
+  //   canvasRef.current.forEach((canvasEl, index) => {
+  //     if (canvasEl) {
+  //       html2canvas(canvasEl).then((canvasImage) => {
+  //         const imageDataUrl = canvasImage.toDataURL('image/png'); // Get image data URL
+
+  //         // Add the image to the PDF
+  //         if (index > 0) {
+  //           doc.addPage(); // Add a new page for each canvas
+  //         }
+  //         doc.addImage(imageDataUrl, 'PNG', 0, 0,794 *0.26,1123 *0.26); // Position and size of the image
+
+  //         // If it's the last canvas, trigger download
+  //         if (index === canvasRef.current.length - 1) {
+  //           doc.save(noteID+'.pdf'); // Download the PDF
+  //         }
+  //       });
+  //     }
+  //   });
+  // };
+
+  const downloadPDF = async () => {
+    setIsLoading2(true);
+  
+    const doc = new jsPDF();
+    const scale = isTab ? 0.5 : 1; // Scale down for phones
+  
+    for (let index = 0; index < canvasRef.current.length; index++) {
+      const canvasEl = canvasRef.current[index];
       if (canvasEl) {
-        html2canvas(canvasEl).then((canvasImage) => {
-          const imageDataUrl = canvasImage.toDataURL('image/png'); // Get image data URL
-
-          // Add the image to the PDF
-          if (index > 0) {
-            doc.addPage(); // Add a new page for each canvas
-          }
-          doc.addImage(imageDataUrl, 'PNG', 0, 0,794 *0.26,1123 *0.26); // Position and size of the image
-
-          // If it's the last canvas, trigger download
-          if (index === canvasRef.current.length - 1) {
-            doc.save(noteID+'.pdf'); // Download the PDF
-          }
-        });
+        try {
+          const canvasImage = await html2canvas(canvasEl, {
+            scale: scale,
+            useCORS: true,
+          });
+          const imageDataUrl = canvasImage.toDataURL('image/png');
+  
+          if (index > 0) doc.addPage();
+          doc.addImage(imageDataUrl, 'PNG', 0, 0, 794 * 0.26 * scale, 1123 * 0.26 * scale);
+        } catch (error) {
+          console.error('Error processing canvas ${index}:', error);
+        }
       }
-    });
+    }
+  
+    doc.save(noteID + '.pdf');
+    setIsLoading2(false);
   };
+  
+  
+  
 
   const [notetitle, setnotetitle] = useState('Notebook 1');
 
@@ -577,71 +608,109 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
 
   
   canvases.forEach((canvas, index) => {
-    let speed=0;
-    const el = canvas.upperCanvasEl;
-  
-    el.addEventListener('pointerdown', (e) => {
-      // Reset tracking variables when the pointer is pressed
-      lastPos = { x: e.clientX, y: e.clientY };
-      lastTime = e.timeStamp;
+    let lastHoverPoint = null;
+    let lastHoverTime = null;
+    const distanceThreshold = 50; // pixels
+    
+    // Track stylus hover before drawing starts
+    canvas.upperCanvasEl.addEventListener('pointermove', (e) => {
+      // if (e.pointerType === 'pen') {
+        lastHoverPoint = { x: e.offsetX, y: e.offsetY };
+        lastHoverTime = Date.now();
+      // }
     });
-  
-    el.addEventListener('pointermove', (e) => {
-      if (!lastPos) return; // Ignore if no previous pointer position
-  
-      // Calculate distance between current and last position
-      const distance = Math.sqrt(
-        (e.clientX - lastPos.x) ** 2 + (e.clientY - lastPos.y) ** 2
-      );
-  
-      // Calculate time difference between current and last pointermove event
-      const timeDifference = e.timeStamp - lastTime;
-  
-      // If timeDifference is greater than 0 (to avoid division by zero)
-      if (timeDifference > 0) {
-        speed = distance / timeDifference; // Speed in pixels per millisecond (px/ms)
-        console.log(`Drawing speed: ${speed} pixels/ms`);
-
-  
-        // You can add a threshold to detect if the speed is too fast/slow
-        const threshold = 7; // For example, 0.1 px/ms (adjust as needed)
-        if (speed > threshold) {
-          console.log("Drawing too fast!");
-          // You can handle cases of "too fast" drawing here if necessary
+    
+    // On path creation, reject if jump from hover is too big
+    canvas.on('path:created', (e) => {
+      const path = e.path;
+      if (!path.path || path.path.length < 1) return;
+    
+      const startPoint = {
+        x: path.path[0][1],
+        y: path.path[0][2],
+      };
+    
+      if (lastHoverPoint && Date.now() - lastHoverTime < 2) {
+        const dx = startPoint.x - lastHoverPoint.x;
+        const dy = startPoint.y - lastHoverPoint.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+    
+        if (dist > distanceThreshold) {
+          console.log("Rejected palm-induced jump line", dist,lastHoverPoint && Date.now() - lastHoverTime);
+          canvas.remove(path);
+          canvas.renderAll();
+          return;
         }
       }
-  
-      // Update the last position and time for the next move
-      lastPos = { x: e.clientX, y: e.clientY };
-      lastTime = e.timeStamp;
+    
+      // Accept the path
+      console.log("Path accepted",lastHoverPoint && Date.now() - lastHoverTime);
     });
+    
+
+
+
+    // let speed=0;
+    // const el = canvas.upperCanvasEl;
   
-    el.addEventListener('pointerup', () => {
+    // el.addEventListener('pointerdown', (e) => {
+    //   // Reset tracking variables when the pointer is pressed
+    //   lastPos = { x: e.clientX, y: e.clientY };
+    //   lastTime = e.timeStamp;
+    // });
+  
+    // el.addEventListener('pointermove', (e) => {
+    //   if (!lastPos) return; // Ignore if no previous pointer position
+  
+    //   // Calculate distance between current and last position
+    //   const distance = Math.sqrt(
+    //     (e.clientX - lastPos.x) ** 2 + (e.clientY - lastPos.y) ** 2
+    //   );
+  
+    //   // Calculate time difference between current and last pointermove event
+    //   const timeDifference = e.timeStamp - lastTime;
+  
+    //   // If timeDifference is greater than 0 (to avoid division by zero)
+    //   if (timeDifference > 0) {
+    //     speed = distance / timeDifference; // Speed in pixels per millisecond (px/ms)
+    //     console.log(`Drawing speed: ${speed} pixels/ms`);
+
+  
+    //     // You can add a threshold to detect if the speed is too fast/slow
+    //     const threshold = 7; // For example, 0.1 px/ms (adjust as needed)
+    //     if (speed > threshold) {
+    //       console.log("Drawing too fast!");
+    //       shouldUndo.current = true;
+    //       // You can handle cases of "too fast" drawing here if necessary
+    //     }
+    //   }
+  
+    //   // Update the last position and time for the next move
+    //   lastPos = { x: e.clientX, y: e.clientY };
+    //   lastTime = e.timeStamp;
+    // });
+  
+    // el.addEventListener('pointerup', () => {
       
-      // Reset when pointer is released
-      lastPos = null;
-      lastTime = null;
-      console.log("speed here:",speed);
-      if (speed > 7) {
-        console.log("Drawing too fast, undoing line...",lastObject);
-        shouldUndo.current = true;
-        console.log("set as",shouldUndo);
-      }
-    });
+    //   // Reset when pointer is released
+    //   lastPos = null;
+    //   lastTime = null;
+    //   // console.log("speed here:",speed);
+    //   // if (speed > 7) {
+    //   //   console.log("Drawing too fast, undoing line...",lastObject);
+    //   //   shouldUndo.current = true;
+    //   //   console.log("set as",shouldUndo);
+    //   // }
+    // });
   
-    el.addEventListener('pointercancel', () => {
-      // Reset on pointer cancel
-      lastPos = null;
-      lastTime = null;
-    });
+    // el.addEventListener('pointercancel', () => {
+    //   // Reset on pointer cancel
+    //   lastPos = null;
+    //   lastTime = null;
+    // });
   });
   
 
-  // This should be added when creating new objects (like paths, lines, etc.)
-function onObjectAdded(event) {
-  console.log("object added",event.path);
-  setlastobject(event.path);
-}
 
   
   
@@ -2215,7 +2284,67 @@ function onObjectAdded(event) {
     return `hsl(${hue}, 70%, 80%)`; // Light pastel color
   }
 
+  const isPhone = /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent);
+  const isTab = /Mobi|Android|iPhone|iPad|Tablet|Mobile/i.test(navigator.userAgent);
+  console.log('isPhone:', isPhone);
+  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+
+    // Listen to both resize and orientationchange events
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    // Cleanup event listeners on unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []); // Empty dependency array ensures the effect runs only once
+
+
   return (
+    <div
+  style={
+    isPhone
+      ? {
+        display: 'flex',
+        flexDirection: 'column',
+        fontSize: '16px',
+        color: '#fff',
+        }
+      : {}
+  }
+>
+{/* {isPhone && !isLandscape ?"Use landscape mode for best experience📱🔄":""} */}
+{isPhone && !isLandscape && (
+  <div
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)', // Dark overlay
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: '#fff',
+      fontSize: '20px',
+      fontWeight: 'bold',
+      textAlign: 'center',
+      zIndex: 9999,
+      padding: '20px',
+    }}
+  >
+    Use landscape for best experience📱🔄
+  </div>
+)}
+
+{true && (
     <div
       style={{
         display: 'flex',
@@ -2234,7 +2363,7 @@ function onObjectAdded(event) {
       <div
         style={{
           position: 'fixed',
-          top: '20px',
+          top: '100px',
           right: '20px',
           backgroundColor: 'rgba(0, 16, 120, 0.9)', // dark gray with transparency
           padding: '20px',
@@ -2247,6 +2376,7 @@ function onObjectAdded(event) {
           gap: '10px', // Space between items
           minWidth: '150px',
           textAlign: 'center', // <--- CENTER the text itself too
+          zIndex:1000,
         }}
       >
         <button
@@ -2287,7 +2417,10 @@ function onObjectAdded(event) {
           )}
         </div>
         <button
-            onClick={() => downloadPDF()}
+                        onClick={() => {
+                          setIsLoading2(true)
+                          downloadPDF();
+                        }}
             style={{
             padding: '5px',
             backgroundColor: '#20C997', // Gray while saving
@@ -2301,6 +2434,22 @@ function onObjectAdded(event) {
         >
           {isLoading2 ? 'Downloading..' : '⬇️'}
         </button>
+        {(isTab && isLoading2) && (
+  <div
+    style={{
+      backgroundColor: '#fff3cd',
+      color: '#856404',
+      padding: '10px 20px',
+      borderRadius: '8px',
+      border: '1px solid #ffeeba',
+      marginBottom: '15px',
+      textAlign: 'center',
+      maxWidth: '500px',
+    }}
+  >
+    ⚠️ For faster performance and better quality pdf, download on desktop.
+  </div>
+)}
       </div>
 
       {Array.from({ length: numPages }, (_, index) => (
@@ -2310,10 +2459,13 @@ function onObjectAdded(event) {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            width: '95%',
-            height: 'auto',
-            overflowY: 'auto',
+            // width: '95%',
+            // height: 'auto',
+            // overflowY: 'auto',
             maxWidth: '794px',
+            //maxWidth: isPhone ? '300px' : '794px',
+            //maxHeight: isPhone ? '424.2px' : '1123px',
+            maxHeight:'1123px',
             border: '1px solid #ddd',
             backgroundColor: '#fff',
             //transform: `scale(${1.1})`,
@@ -2328,6 +2480,7 @@ function onObjectAdded(event) {
             width={A4_WIDTH}
             height={A4_HEIGHT}
             onClick={() => handleCanvasClick(index)}
+            
           ></canvas>
         </div>
       ))}
@@ -2387,7 +2540,6 @@ function onObjectAdded(event) {
           }}
         >
           {/* Tool buttons (pen, marker, color pallet, etc.) */}
-
           <button
             onClick={() => setActiveTool('pen')}
             style={{
@@ -2420,6 +2572,7 @@ function onObjectAdded(event) {
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('marker')}
             style={{
@@ -2720,6 +2873,7 @@ onClick={() => {
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('text')}
             style={{
@@ -2784,6 +2938,7 @@ onClick={() => {
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('subhl')}
             style={{
@@ -2816,6 +2971,7 @@ onClick={() => {
               }}
             />
           </button>
+
           <button
             onClick={() => setActiveTool('point')}
             style={{
@@ -2881,6 +3037,7 @@ onClick={() => {
               style={{ width: '40px', height: '40px', objectFit: 'contain' }}
             />
           </button>
+          {!isPhone && (
           <button
             title="TOOL INFO"
             onClick={() => setShowToolInfo(prev => !prev)}
@@ -2896,7 +3053,7 @@ onClick={() => {
               alt="Tool Info"
               style={{ width: '40px', height: '40px', objectFit: 'contain' }}
             />
-          </button>
+          </button>)}
         </div>
         {/* ↓ pop-up rendered immediately beneath the toolbar row */}
         {showToolInfo && (
@@ -3329,6 +3486,7 @@ onClick={() => {
           </button>
         </div>
       )}
+    </div>)}
     </div>
   );
 };
