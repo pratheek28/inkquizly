@@ -450,7 +450,7 @@ canvas.on('path:created', function(event) {
     setIsLoading2(true);
   
     const doc = new jsPDF();
-    const scale = isPhone ? 0.5 : 1; // Scale down for phones
+    const scale = isTab ? 0.5 : 1; // Scale down for phones
   
     for (let index = 0; index < canvasRef.current.length; index++) {
       const canvasEl = canvasRef.current[index];
