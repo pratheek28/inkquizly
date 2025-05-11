@@ -449,8 +449,13 @@ canvas.on('path:created', function(event) {
   const downloadPDF = async () => {
     setIsLoading2(true);
   
-    const doc = new jsPDF();
-    const scale = isPhone ? 0.5 : 1; // Scale down for phones
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 10;
+    const maxWidth = pageWidth - margin * 2;
+    const maxHeight = pageHeight - margin * 2;
+    const scale = isPhone ? 0.3 : 1;
   
     for (let index = 0; index < canvasRef.current.length; index++) {
       const canvasEl = canvasRef.current[index];
@@ -460,10 +465,19 @@ canvas.on('path:created', function(event) {
             scale: scale,
             useCORS: true,
           });
+  
           const imageDataUrl = canvasImage.toDataURL('image/png');
+          const imgWidth = canvasImage.width;
+          const imgHeight = canvasImage.height;
+  
+          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+          const renderWidth = imgWidth * ratio;
+          const renderHeight = imgHeight * ratio;
+          const x = (pageWidth - renderWidth) / 2;
+          const y = (pageHeight - renderHeight) / 2;
   
           if (index > 0) doc.addPage();
-          doc.addImage(imageDataUrl, 'PNG', 0, 0, 794 * 0.26 * scale, 1123 * 0.26 * scale);
+          doc.addImage(imageDataUrl, 'PNG', x, y, renderWidth, renderHeight);
         } catch (error) {
           console.error(`Error processing canvas ${index}:`, error);
         }
@@ -473,6 +487,8 @@ canvas.on('path:created', function(event) {
     doc.save(noteID + '.pdf');
     setIsLoading2(false);
   };
+  
+  
   
 
   const [notetitle, setnotetitle] = useState('Notebook 1');
@@ -2325,8 +2341,8 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
       position: 'fixed',
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
+      width: '100vh',
+      height: '100vh',
       backgroundColor: 'rgba(0, 0, 0, 0.85)', // Dark overlay
       display: 'flex',
       justifyContent: 'center',
@@ -2430,6 +2446,22 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
         >
           {isLoading2 ? 'Downloading..' : '⬇️'}
         </button>
+        {(isPhone && isLoading2) && (
+  <div
+    style={{
+      backgroundColor: '#fff3cd',
+      color: '#856404',
+      padding: '10px 20px',
+      borderRadius: '8px',
+      border: '1px solid #ffeeba',
+      marginBottom: '15px',
+      textAlign: 'center',
+      maxWidth: '500px',
+    }}
+  >
+    ⚠️ For faster performance and better quality pdf, download on desktop.
+  </div>
+)}
       </div>
 
       {Array.from({ length: numPages }, (_, index) => (
