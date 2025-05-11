@@ -455,7 +455,7 @@ canvas.on('path:created', function(event) {
     const margin = 10;
     const maxWidth = pageWidth - margin * 2;
     const maxHeight = pageHeight - margin * 2;
-    const scale = isPhone ? 0.3 : 1;
+    const scale = isTab ? 0.3 : 1;
   
     for (let index = 0; index < canvasRef.current.length; index++) {
       const canvasEl = canvasRef.current[index];
@@ -2301,6 +2301,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
   }
 
   const isPhone = /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent);
+  const isTab = /Mobi|Android|iPhone|iPad|Tablet|Mobile/i.test(navigator.userAgent);
   console.log('isPhone:', isPhone);
   const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
 
@@ -2446,7 +2447,7 @@ console.log('Is fabric.Canvas now?', canvases[i] instanceof fabric.Canvas);
         >
           {isLoading2 ? 'Downloading..' : '⬇️'}
         </button>
-        {(isPhone && isLoading2) && (
+        {(isTab && isLoading2) && (
   <div
     style={{
       backgroundColor: '#fff3cd',
