@@ -715,7 +715,27 @@ def CanvasLoad():
         return jsonify({"message": "So an Error occurred during load operation", "error": str(e)}), 500
 
 
+# import your DLM class at the top of the file
+from DLM import DLM
 
+# instantiate a single bot
+bot = DLM()
+
+# add this new route
+@app.route("/api/chat", methods=["POST"])
+def dlm_chat():
+    """
+    Receives {"message": "..."} JSON from the frontend,
+    calls DLM.ask(False, message) and returns {"reply": "..."}.
+    """
+    data = request.get_json() or {}
+    user_msg = data.get("message", "").strip()
+    if not user_msg:
+        return jsonify({"reply": "⚠️ Please send a non-empty message."})
+
+    # call your ask() method (make sure ask() signature was updated to accept user_input)
+    bot_reply = bot.ask(user_msg)
+    return jsonify({"reply": bot_reply})
 
 
 if __name__ == "__main__":
