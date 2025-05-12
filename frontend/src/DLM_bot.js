@@ -7,7 +7,7 @@ const DLMBot = () => {
   const [input, setInput] = useState("");
   const endRef = useRef(null);
 
-  const API_BASE = process.env.REACT_APP_API_URL || "";
+  const API_BASE = process.env.REACT_APP_API_URL || "https://inkquizly.onrender.com";
 
   // auto-scroll on new messages
   useEffect(() => {
