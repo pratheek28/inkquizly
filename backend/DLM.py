@@ -136,7 +136,7 @@ class DLM:
     def ask(self, user_input=None):
         """
         If user_input is given, use that instead of prompting via input().
-        Always return the bot’s response as a string.
+        Always return the bot's response as a string.
         """
         # 1) capture the query
         if user_input is not None:
