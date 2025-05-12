@@ -1,5 +1,5 @@
 .form_container {
-    background: rgb(255, 255, 255);
+    background: /* form background */ rgba(255, 255, 255, 0.75);
     padding: 2rem;
     border-radius: 1rem;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);

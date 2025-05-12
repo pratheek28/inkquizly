@@ -451,7 +451,11 @@ function AccountDashboard() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div
             style={{
-              fontFamily: 'SF Pro Display,sans-serif', // Apply the futuristic font
+              fontFamily: '"Poppins", sans-serif',  // ← swap in a nicer font
+              fontSize: '1.5rem',                      // ← make it larger
+              fontWeight: 600,                       // ← semi-bold
+              letterSpacing: '1px',                  // ← a little breathing room
+              color: '#fff',                         // ← ensure it pops on dark bg
             }}
           >
             {splitText('Welcome, ' + (user?.name || 'Loading...'))}

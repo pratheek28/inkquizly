@@ -146,50 +146,104 @@ const DLMBot = () => {
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
   });
 
+  const infoIconStyle = {
+    marginLeft: "0.5rem",
+    cursor: "default",
+    fontSize: "1rem",
+    lineHeight: 1,
+    position: "relative",
+    userSelect: "none",
+  };
+
+  const tooltipTextStyle = {
+    visibility: "hidden",
+    width: "200px",
+    backgroundColor: "#333",
+    color: "#fff",
+    textAlign: "center",
+    borderRadius: "4px",
+    padding: "8px",
+    position: "fixed",       
+    top: "50%",              
+    left: "50%",               
+    transform: "translate(-50%, -50%)",
+    zIndex: 1001,
+    opacity: 0,
+    transition: "opacity 0.2s",
+    fontSize: "0.85rem",
+  };
+
   return (
-    <>
-      {/* Chat bubble toggle */}
-      <div style={circle} onClick={handleToggle}>
-        <img
-          src="/chatbot_icon.png"
-          alt="Chat"
-          style={{ width: "24px", height: "24px" }}
-        />
+  <>
+    {/* Chat bubble toggle */}
+    <div style={circle} onClick={handleToggle}>
+      <img
+        src="/chatbot_icon.png"
+        alt="Chat"
+        style={{ width: "24px", height: "24px" }}
+      />
+    </div>
+
+    {/* Chat window */}
+    <div
+      style={{
+        ...windowStyle,
+        opacity: open ? 1 : 0,
+        transform: open ? "scale(1)" : "scale(0.8)",
+        pointerEvents: open ? "auto" : "none",
+      }}
+    >
+      {/* Header with info icon */}
+      <div style={headerBar}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <span>InkQuizly Bot</span>
+          <div
+            style={infoIconStyle}
+            onMouseEnter={(e) => {
+              const tip = e.currentTarget.querySelector(".tooltip-text");
+              tip.style.visibility = "visible";
+              tip.style.opacity = "1";
+            }}
+            onMouseLeave={(e) => {
+              const tip = e.currentTarget.querySelector(".tooltip-text");
+              tip.style.visibility = "hidden";
+              tip.style.opacity = "0";
+            }}
+          >
+            ℹ️
+            <div className="tooltip-text" style={tooltipTextStyle}>
+              {/* ← Edit this text */}
+              Please note that the InkQuizly Bot may occasionally provide incorrect responses or misinterpret your inquiries. 
+              If you require clarification or additional support, please contact our team using the email address at the bottom of this page
+            </div>
+          </div>
+        </div>
+        <button style={closeBtn} onClick={handleToggle}>
+          &times;
+        </button>
       </div>
 
-      {/* Chat window always mounted, but fades */}
-      <div
-        style={{
-          ...windowStyle,
-          opacity: open ? 1 : 0,
-          transform: open ? "scale(1)" : "scale(0.8)",
-          pointerEvents: open ? "auto" : "none",
-        }}
-      >
-        <div style={headerBar}>
-          <span>InkQuizly Bot</span>
-          <button style={closeBtn} onClick={handleToggle}>
-            &times;
-          </button>
-        </div>
-        <div style={msgs}>
-          {messages.map((m, i) => (
-            <div key={i} style={bubble(m.sender)}>
-              {m.text}
-            </div>
-          ))}
-          <div ref={endRef} />
-        </div>
-        <textarea
-          style={inputStyle}
-          rows={1}
-          placeholder="Type your question…"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={onKey}
-        />
+      {/* Messages */}
+      <div style={msgs}>
+        {messages.map((m, i) => (
+          <div key={i} style={bubble(m.sender)}>
+            {m.text}
+          </div>
+        ))}
+        <div ref={endRef} />
       </div>
-    </>
+
+      {/* Input */}
+      <textarea
+        style={inputStyle}
+        rows={1}
+        placeholder="Type your question…"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyPress={onKey}
+      />
+    </div>
+  </>
   );
 };
 

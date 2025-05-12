@@ -31,10 +31,10 @@ export default function LandingPage() {
         <section className={styles.section}>
           <h2>What is InkQuizly?</h2>
           <p>
-            AI-powered note taking PWA that meets proven study methods, from Pomodoro to Spaced Repetition.
+            AI-powered note taking PWA that meets proven study methods, from Pomodoro to Spaced Repetition
           </p>
           <p>
-            Utilizes Google Gemini for Summarizing, Explaining, and adding more to Written and Typed Notes.
+            Utilizes Google Gemini for Summarizing, Explaining, and adding more to Written and Typed Notes
           </p>
         </section>
 
@@ -52,13 +52,13 @@ export default function LandingPage() {
           <h2>Get Started</h2>
           <ul>
             <li>
-              Click “Sign Up” in the navbar to create an account and start your revolutionized note-taking journey.
+              Click “Sign Up” in the navbar to create an account and start your revolutionized note-taking journey
             </li>
             <li>
-              Install as a PWA for seamless access, performance improvement, and device integration.
+              Install as a PWA for seamless access, performance improvement, and device integration
             </li>
             <li>
-              Have questions? Ask our custom ChatBot via the bottom-left icon for instant support.
+              Have questions? Ask our custom ChatBot via the bottom-left icon for instant support
             </li>
           </ul>
         </section>
