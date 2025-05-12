@@ -7,6 +7,8 @@ const DLMBot = () => {
   const [input, setInput] = useState("");
   const endRef = useRef(null);
 
+  const API_BASE = process.env.REACT_APP_API_URL || "";
+
   // auto-scroll on new messages
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,7 +33,7 @@ const DLMBot = () => {
     setMessages((m) => [...m, { sender: "user", text }]);
     setInput("");
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
