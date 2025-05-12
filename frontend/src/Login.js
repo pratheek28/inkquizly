@@ -84,7 +84,33 @@ function Login() {
                 </button>
                 </div>
                 {response && <p style= {{ marginTop: "1rem", color: response.includes("Error") ? "red" : "green"}}>{response}</p>}
+                <div
+  style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    marginTop: '20px',
+    fontSize: '16px',
+    fontFamily: 'Arial, sans-serif',
+    color: '#333',
+  }}
+>
+<span
+        onClick={() => navigate('/SignUp')}
+        style={{
+          marginLeft: '5px',
+          textDecoration: 'none',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+        }}
+      >
+  Create an account?
+  </span>
+</div>
+
             </form>
+            
         </div>
     );
 }

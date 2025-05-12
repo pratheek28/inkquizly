@@ -1,8 +1,11 @@
 import { useState } from "react";
 import styles from './SignUp.module.css';
+import { useNavigate } from 'react-router-dom';
 import NavigationBar from "./NavigationBar"
 
 function SignUp() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -127,6 +130,30 @@ function SignUp() {
           {/* <button type="submit">Create Account</button> */}
         </div>
         {response && <p style={{ marginTop: "1rem", color: response.includes("Successfully") ? "green" : "red"}}>{response}</p>}
+        <div
+  style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    marginTop: '20px',
+    fontSize: '16px',
+    fontFamily: 'Arial, sans-serif',
+    color: '#333',
+  }}
+>
+<span
+        onClick={() => navigate('/LogIn')}
+        style={{
+          marginLeft: '5px',
+          textDecoration: 'none',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+        }}
+      >
+  Already have an account?
+  </span>
+</div>
       </form>
     </div>
   );
