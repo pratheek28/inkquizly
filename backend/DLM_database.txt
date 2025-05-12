@@ -1,0 +1,45 @@
+hi>>Hello! I am a DLM Bot that is ready to answer any questions you have regarding InkQuizly. Ask away!
+hello>>Hi! I am a DLM Bot that is ready to answer any questions you have regarding InkQuizly. Ask away!
+thanks>>You are very welcome! If you have further questions, ask me or email the creators!
+difference pro free>>Upgrade to Pro and get unlimited notes with PDF uploads, instant priority support, and next-gen Gemini Flash 2.5—free users are limited to 15 notes, Gemini Flash 2.0, and standard support
+creators>>We're Pratheek, Vignesh, Pranav, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
+creators name>>We're Pratheek, Vignesh, Pranav, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
+name creators>>We're Pratheek, Vignesh, Pranav, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
+about>>InkQuizly blends freehand drawing with AI-powered subtitle detection, smart summarization, and on-demand diagram generation, all built around proven study methods like Pomodoro, active recall, and spaced repetition to make note-taking faster and more effective
+compatibility>>InkQuizly is compatible with iOS, Andriod, Windows, and can be downloaded in your Laptop, Tablet, iPad, Phone, or whichever device you use for note taking!
+offline notes>>Unfortunetly, due to heavy relience on Gemini AI and other smart features, this app cannot currently be used offline. We are working hard to get around this issue!
+no internet offline>>Unfortunetly, due to heavy relience on Gemini AI and other smart features, this app cannot currently be used offline. We are working hard to get around this issue!
+pdf download>>InkQuizly offers PDF features such as the ability to take notes and convert it to PDF, or if you are a PRO member, you can also upload a PDF as a template in any note and write on top of it!
+pdf>>InkQuizly offers PDF features such as the ability to take notes and convert it to PDF, or if you are a PRO member, you can also upload a PDF as a template in any note and write on top of it!
+file type import>>As of now, InkQuizly can only allow you to import PDF files if you are a PRO member
+file type export>>As of now, InkQuizly can only allow you to export PDF files, regardless of if you are PRO or Free member
+subtitle detection>>Using Gemini Flash 2.0, or Gemini Flash 2.5 if you are PRO member, once you highlight a written or typed phrase or word, you can click on the InkQuizly icon to have Gemini summarize the phrase/word in a understandable mannner that you can use as a supplement while note-taking!
+smart summarization>>Smart Summarization uses Gemini AI to look at a phrase/word and give key details the user should know about it to better understand it. If the user is confused with a word or phrase from the generated text, they can use the context highlighter tool to see the contextual meaning of an unfamiliar word
+pomodoro>>InkQuizly uses Pomodoro and Spaced-Repetition features in each note where the user can start a 25-minute timer in app and type four goals to complete before the 25-minute. Once the timer has reached, it will send the user a notification to their respective device(s)
+share notes>>We are working hard to release this feature where you can share notes amongst other people and have multiple people work on them at the same time. For now, you can download your notes as PDF and share it with anyone you like!
+co editing>>Unfortunetly, InkQuizly currently doesn't support co-editing ability. However, please keep an eye out for a future update as we might add it soon!
+pro>>InkQuizly PRO members can enjoy unlimited notes, Gemini Flash 2.5 instead of 2.0, custom template in notes, Gemini Image recognition, instant support, early access to new features and more!
+free>>InkQuizly Free members can create 15 notes max, use Gemini Flash 2.0 instead of 2.5, standard support, and basic features
+cancel pro>>To cancel the PRO subscription, you can email vignesh.tho2006@gmail.com, pranav.gowrish@gmail.com, or pratheek0928@gmail.com
+cancel subscription>> concerns and actions regarding your InkQuizly subscription can be dealt through emailing vignesh.tho2006@gmail.com, pranav.gowrish@gmail.com, or pratheek0928@gmail.com
+discount>>Currently, there are no discounts, but you can get the PRO version for just $15 upfront for lifetime PRO, with money back guarentee if you are unsatisfied 24 hours after purchase. There is also a 7-day free trail for everyone to test all the features before switching to PRO
+cost>>The PRO version costs $15, which is a one-time fee. All new users will get a 7-day free trail to try everything before they decide to switch to PRO
+price>>The PRO version costs $15, which is a one-time fee. All new users will get a 7-day free trail to try everything before they decide to switch to PRO
+data security>>We take your data extremely seriously, implementing robust safeguards and continuous monitoring to ensure your personal notes, payment information, and login credentials remain fully protected against any vulnerabilities
+data protection>>We take your data extremely seriously, implementing robust safeguards and continuous monitoring to ensure your personal notes, payment information, and login credentials remain fully protected against any vulnerabilities
+storage free>>As a Free member of InkQuizly, you can only store 15 notes, each notes have up to 10 pages that can be used. You can upgrade to PRO version to store unlimited notes at once!
+notes sync>>Your notes are autosaved and synced every 5 minutes across all your devices, so even if you lose internet connection, your written notes are still saved!
+categorize notes>>Notes can be categorized into different folders that have different colors and custom name for convenient access to specific notes!
+dropbox>>Once you export your current notes as a PDF, you can store that in any platform that support PDF storage, including DropBox and Google Drive 
+google drive>>Once you export your current notes as a PDF, you can store that in any platform that support PDF storage, including Google Drive and DropBox
+undo notes>>As a standard feature, you can Undo and Redo changes made in the notes, including deleted objects!
+recover deleted>>Unfortunetly, once you delete a note, you cannot recover it yet. However, if you accidentally click the trash icon, we’ll prompt you to confirm before the note is deleted
+track study metric>>We do not collect or track study metric information, however, InkQuizly encourgages user to use the Pomodoro mode to develop a self-motivated study tracker that the user can use to write goals and study for a certain period of time
+track study>>We do not collect or track study metric information, however, InkQuizly encourgages user to use the Pomodoro mode to develop a self-motivated study tracker that the user can use to write goals and study for a certain period of time
+custom templates>>If you switch to the PRO version, you can upload your own custom PDF templates to any note and edit PDFs, use the AI summary features, and more!
+data storage location>>All user data is stored within our Render server, however, the user can download notes as PDFs to have it be stored locally instead
+two factor authentication>>Currently, there are not two factor authentication, but we are working hard to implement one soon so keep an eye out!
+2fa>>Currently, there are not two factor authentication, but we are working hard to implement one soon so keep an eye out!
+play store app>>InkQuizly can only be downloaded as a PWA, and is not currently available in Google Play Store or Apple App Store
+app store app>>InkQuizly can only be downloaded as a PWA, and is not currently available in Google Play Store or Apple App Store
+report bug>>If you experience any converns or bugs while using InkQuizly, there is a report button next to the "Log Out" button on the Account Dashboard that you can use to submit any feedback!

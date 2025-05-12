@@ -1,23 +1,115 @@
-.pRow {
-    position: relative;
-    height: 100vh;
-    width: 100vw; /* FULL WIDTH! */
-    background-image: url("/public/images/bgLanding.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+/* LandingPage.module.css */
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Import a professional font */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 
-    overflow: hidden;
+/* 1) Landing page wrapper: full-screen, scrollable, scrollbar hidden */
+.landingPage {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+
+  /* hide scrollbar in Firefox */
+  scrollbar-width: none;
+  /* hide scrollbar in IE/Edge */
+  -ms-overflow-style: none;
+  /* apply our font */
+  font-family: "Roboto", sans-serif;
+}
+.landingPage::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
 }
 
-.pRow p {
-    color: white;
-    font-size: 2rem;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 1rem 2rem;
-    border-radius: 8px;
+/* 2) Hero/banner at the top */
+.landingHero {
+  flex: 0 0 50vh;              /* half-screen height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background-image: url("/images/bgLanding.jpg"); */
+  background-size: cover;
+  background-position: center;
+}
+.landingHero h1 {
+  margin: 0;
+  font-size: 3.5rem;
+  color: #ffffff;
+  text-align: center;
+}
+
+/* 3) Scrollable content area */
+.landingContent {
+  flex: 1;                     /* fill remaining space */
+  background: #2e3192;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;                   /* space between sections */
+}
+
+/* 4) Section styles */
+.section {
+  margin-bottom: 2rem;
+  text-align: center;          /* center all inline content */
+  color: #ffffff;
+}
+
+/* Gradient headings */
+.section h2 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Paragraphs */
+.section p {
+  font-size: 1.5rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+  color: #f0f0f0;
+}
+
+/* Centered list container with left-aligned items */
+.section ul {
+  display: inline-block;       /* shrink-wrap so it can center */
+  text-align: left;            /* items flush left */
+  list-style: none;            /* remove default bullets */
+  margin: 0;
+  padding: 0;
+}
+.section Link {
+  position: relative;
+  padding-left: 1.5em;
+  margin: 0.7rem 0;
+  font-size: 1.8rem;
+  color: #f0f0f0;
+}
+.section li {
+  position: relative;
+  padding-left: 1.5em;
+  margin: 0.7rem 0;
+  font-size: 1.8rem;
+  color: #f0f0f0;
+}
+/* Custom check-mark bullets */
+.section li::before {
+  content: "✔";
+  position: absolute;
+  left: 0;
+  color: #e52e71;
+}
+
+.contactLink {
+  color: inherit;           /* use same color as surrounding text */
+  text-decoration: none;    /* remove underline */
+}
+
+.contactLink:hover {
+  text-decoration: underline; /* optional: give a hover cue */
 }
