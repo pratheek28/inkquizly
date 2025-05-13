@@ -1,103 +1,107 @@
 /* LandingPage.module.css */
 
-/* Import a professional font */
+/* 0) Global reset + hide page-level scrollbars */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: scroll;    /* no window-level scrolling or scrollbars */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Import professional font */
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 
-/* 1) Landing page wrapper: full-screen, scrollable, scrollbar hidden */
+/* 1) LandingPage: full-screen fixed container that scrolls vertically */
 .landingPage {
+  top: 0; left: 0; right: 0; bottom: 0;
+
   display: flex;
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-  overflow-y: auto;
 
-  /* hide scrollbar in Firefox */
+  overflow-y: auto;   /* allow vertical scrolling */
+  overflow-x: hidden; /* prevent horizontal scrolling */
+
+  /* hide its scrollbars in Firefox */
   scrollbar-width: none;
-  /* hide scrollbar in IE/Edge */
+  /* hide in IE/Edge */
   -ms-overflow-style: none;
-  /* apply our font */
+
   font-family: "Roboto", sans-serif;
 }
+
+/* hide in WebKit (Chrome, Safari, Opera) */
 .landingPage::-webkit-scrollbar {
   width: 0;
   height: 0;
-  background: transparent;
 }
 
-/* 2) Hero/banner at the top */
+/* 2) Hero/banner */
 .landingHero {
-  flex: 0 0 100vh;              /* half-screen height */
+  flex: 0 0 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* background-image: url("/images/bgLanding.jpg"); */
   background-size: cover;
   background-position: center;
 }
 .landingHero h1 {
   margin: 0;
   font-size: 3.5rem;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
 }
 
-/* 3) Scrollable content area */
+/* 3) Content area */
 .landingContent {
-  flex: 1;                     /* fill remaining space */
+  flex: 1;
   background: #000239;
-  padding: 2rem;
+  padding: 8rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;                   /* space between sections */
+  gap: 2rem;
 }
 
-/* 4) Section styles */
+/* 4) Sections */
 .section {
   margin-bottom: 2rem;
-  text-align: center;          /* center all inline content */
-  color: #ffffff;
+  text-align: center;
+  color: #fff;
 }
-
-/* Gradient headings */
 .section h2 {
   font-size: 3rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: .5rem;
   background: linear-gradient(90deg, #2893fe, #e52e71);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
-/* Paragraphs */
 .section p {
   font-size: 1.5rem;
   line-height: 1.5;
-  margin: 0.5rem 0;
+  margin: .5rem 0;
   color: #f0f0f0;
 }
-
-/* Centered list container with left-aligned items */
 .section ul {
-  display: inline-block;       /* shrink-wrap so it can center */
-  text-align: left;            /* items flush left */
-  list-style: none;            /* remove default bullets */
+  display: inline-block;
+  text-align: left;
+  list-style: none;
   margin: 0;
   padding: 0;
-}
-.section Link {
-  position: relative;
-  padding-left: 1.5em;
-  margin: 0.7rem 0;
-  font-size: 1.8rem;
-  color: #f0f0f0;
 }
 .section li {
   position: relative;
   padding-left: 1.5em;
-  margin: 0.7rem 0;
+  margin: .7rem 0;
   font-size: 1.8rem;
   color: #f0f0f0;
 }
-/* Custom check-mark bullets */
 .section li::before {
   content: "✔";
   position: absolute;
@@ -106,10 +110,9 @@
 }
 
 .contactLink {
-  color: inherit;           /* use same color as surrounding text */
-  text-decoration: none;    /* remove underline */
+  color: inherit;
+  text-decoration: none;
 }
-
 .contactLink:hover {
-  text-decoration: underline; /* optional: give a hover cue */
+  text-decoration: underline;
 }
