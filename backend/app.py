@@ -553,11 +553,18 @@ def get_top_image_URL():
 
 
 # returns response from gemini that creates a 5 question MCQ based on a specific subtitle and returns a parsable dictionary
-@app.route("/get", methods=['POST'])
+@app.route("/getmcq", methods=['POST'])
 def AI_MCQ():
     resp = request.get_json()
-    response = model.generate_content(f"Create 5 multiple choice questions with 3 options each about {resp.data}. Please generate in the following format => Q1: (first question)\nA: (first choice for first question)\nB (second choice for first question)\nC (third choice for first question)\nCheck: (correct option A, B, or C)." \
-                                      "PLEASE DON'T SAY ANYTHING ELSE BUT JUST GIVE WHAT I ASK. Also, go to the next line for every single new line")
+
+    image_data = base64.b64decode(resp['topic'])
+    image_file = BytesIO(image_data)
+
+    response = client.models.generate_content(
+    model="gemini-2.0-flash", contents=[types.Part.from_bytes(data=image_file.read(),mime_type='image/png',),"Create 5 multiple choice questions with 3 options each about the information in this image. Please generate in the following format => Q1: (first question)\nA: (first choice for first question)\nB (second choice for first question)\nC (third choice for first question)\nCheck: (correct option A, B, or C)." \
+                                      "PLEASE DON'T SAY ANYTHING ELSE BUT JUST GIVE WHAT I ASK. Also, go to the next line for every single new line"]
+    )
+
     pattern = (
         r"Q\d+:\s*(.+?)\n"   # Capture the question text (non-greedy)
         r"A:\s*(.+?)\n"      # Capture option A
@@ -578,6 +585,8 @@ def AI_MCQ():
             'C': option_c.strip(),
             'Check': correct.strip()
         })
+    return jsonify(mcq_list)
+
 
 
 
