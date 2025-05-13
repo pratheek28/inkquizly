@@ -172,7 +172,7 @@ export default function LandingPage() {
           position: "absolute",
           height: "200vh",
           width: "100%",
-          overflowX: "hidden",
+          overflowX: "auto",
           zIndex: 0,
         }}
       >
