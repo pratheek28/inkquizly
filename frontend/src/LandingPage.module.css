@@ -63,7 +63,7 @@ body::-webkit-scrollbar {
 .landingContent {
   flex: 1;
   background: #000239;
-  padding: 8rem;
+  padding: 6.5rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
