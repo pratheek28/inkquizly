@@ -870,6 +870,168 @@ const CanvasEditor = () => {
     console.log(canvasesData);
   };
 
+  const [showquiz, setshowquiz] = useState(false);
+  const [mcqs, setMcqs] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const current = mcqs[currentIndex];
+  const question = current ? current.Q : null;
+  const options = current
+    ? [`A. ${current.A}`, `B. ${current.B}`, `C. ${current.C}`]
+    : [];
+
+
+    const handleNext = () => {
+      if (currentIndex < mcqs.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        setSelectedOption(null);
+      }
+    };
+  
+    const handleBack = () => {
+      if (currentIndex > 0) {
+        setCurrentIndex(currentIndex - 1);
+        setSelectedOption(null);
+      }
+    };
+  const [selectedOption, setSelectedOption] = useState(null);
+
+
+  const handleMCQ = () => {
+    setshowquiz(true);
+    const canvas = canvases[activeCanvasIndex];
+    canvas.off("mouse:down");
+    canvas.off("mouse:move");
+    canvas.off("mouse:up");
+    // Special Highlighter tool handler
+    canvas.isDrawingMode = false;
+    let startX, startY;
+    let highlightRect = null;
+    console.log("prevstartx=", startX);
+
+    const onMouseDown = (e) => {
+      const pointer = canvas.getPointer(e.e);
+      startX = pointer.x;
+      console.log("startx=", startX);
+      startY = pointer.y;
+      console.log("starty=", startY);
+
+      highlightRect = new fabric.Rect({
+        left: startX,
+        top: startY,
+        width: 0,
+        height: 0,
+        fill: "rgba(0, 255, 217, 0.3)",
+        stroke: "purple",
+        strokeWidth: 1,
+        selectable: false,
+        evented: false,
+      });
+
+      canvas.add(highlightRect);
+    };
+
+    const onMouseMove = (e) => {
+      if (!highlightRect) return;
+
+      const pointer = canvas.getPointer(e.e);
+      const width = pointer.x - startX;
+      const height = pointer.y - startY;
+
+      highlightRect.set({
+        width: Math.abs(width),
+        height: Math.abs(height),
+        left: width < 0 ? pointer.x : startX,
+        top: height < 0 ? pointer.y : startY,
+      });
+
+      canvas.renderAll();
+    };
+
+    const onMouseUp = () => {
+      const finalRect = highlightRect;
+      createmcq(finalRect);
+      console.log("logged higlight");
+      highlightRect = null;
+      canvas.off("mouse:down", onMouseDown);
+      canvas.off("mouse:move", onMouseMove);
+      canvas.off("mouse:up", onMouseUp);
+      setActiveTool("point");
+    };
+    canvas.on("mouse:down", onMouseDown);
+    canvas.on("mouse:move", onMouseMove);
+    canvas.on("mouse:up", onMouseUp);
+
+  };
+
+
+  const createmcq = async (rect) => {
+    const canvas = canvases[activeCanvasIndex];
+
+    if (!canvas || !rect) return;
+
+
+    canvas.renderAll();
+
+    const Rect = rect.getBoundingRect(true);
+
+    const fullDataURL = canvas.toDataURL({
+      format: "png",
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      multiplier: 1,
+    });
+
+    const topic = fullDataURL.split(",")[1];
+    //const topic = fullDataURL;
+    console.log("Base64 image:", topic);
+
+    canvas.remove(rect);
+
+
+      console.log("mcq button was pressed with topic", topic);
+      // Send topic to Python code here for summary
+      let data = topic;
+
+      const loadingGif = document.getElementById("loading-gif");
+      setLoadingText("Crafting quiz to test your knowledge.");
+      setLoading(true);
+
+      // Handle form submission to backend
+      const handleSubmit = () => {
+        fetch("https://inkquizly.onrender.com/getmcq", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ topic: data }), // Send data as an object with topic
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setResponse(data.summary);
+            console.log("log is", data);
+
+            // Display the text summary after submission
+            setMcqs(data);
+            setCurrentIndex(0);
+            setSelectedOption(null);
+      
+            setLoading(false);
+
+            canvas.renderAll();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            setResponse("An Error occurred while submitting the form.");
+          });
+      };
+
+      handleSubmit(); // Submit the data to the backend
+
+  };
+
   const handleMCQButtonClick = () => {
     const canvas = canvases[activeCanvasIndex];
     if (canvas) {
@@ -3180,6 +3342,120 @@ const CanvasEditor = () => {
             />
           </div>
 
+          {showquiz && (
+  <div
+    style={{
+      position: "fixed",
+      top: question?"400px":"650px",
+      width: '400px',
+      padding: '20px',
+      border: '2px solid #333',
+      borderRadius: '8px',
+      backgroundColor: 'black',
+      margin: '20px auto',
+      boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
+      fontFamily: 'Arial, sans-serif',
+      zIndex: 10000,
+    }}
+  >
+{question ? (
+        <div
+        style={{
+          width: '400px',
+          padding: '20px',
+          border: '2px solid #333',
+          borderRadius: '8px',
+          backgroundColor: '#f9f9f9',
+          margin: '20px auto',
+          boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
+          fontFamily: 'Arial, sans-serif'
+        }}
+      >
+        <h3
+          style={{
+            marginBottom: '15px',
+            fontSize: '18px',
+            fontWeight: 'bold'
+          }}
+        >
+            {question}
+          </h3>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {options.map((option, index) => (
+              <li
+                key={index}
+                style={{
+                  padding: '10px 15px',
+                  marginBottom: '8px',
+                  border: '1px solid',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  backgroundColor: selectedOption === index ? '#cce5ff' : 'grey',
+                  borderColor: selectedOption === index ? '#3399ff' : '#aaa',
+                  transition: 'background-color 0.2s'
+                }}
+                onClick={() => setSelectedOption(index)}
+              >
+                {option}
+              </li>
+            ))}
+          </ul>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: '20px'
+            }}
+          >
+            <button
+              onClick={handleBack}
+              disabled={currentIndex === 0}
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+                backgroundColor: currentIndex === 0 ? '#ccc' : '#007bff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px'
+              }}
+            >
+              Back
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={currentIndex === mcqs.length - 1}
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                cursor: currentIndex === mcqs.length - 1 ? 'not-allowed' : 'pointer',
+                backgroundColor: currentIndex === mcqs.length - 1 ? '#ccc' : '#007bff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px'
+              }}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      ) : (
+      <p
+        style={{
+          fontSize: '16px',
+          textAlign: 'center',
+          color: '#666',
+          margin: 0
+        }}
+      >
+        Draw a box on the canvas to get quiz questions for the selected area!
+      </p>
+    )}
+  </div>
+)}
+
+
           {/* Fixed-position Pomodoro Rectangle with Timer and 6 inner rectangles */}
           {showPomodoroRect && (
             <div
@@ -3484,7 +3760,7 @@ const CanvasEditor = () => {
                 </div>
               )}
 
-              {/* <button onClick={ handleMCQButtonClick}>
+              {/* <button onClick={handleMCQ}>
             <img
               src="/mcq_image.png"
               alt="MCQ Button"

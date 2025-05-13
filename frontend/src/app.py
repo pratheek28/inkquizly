@@ -260,7 +260,7 @@ def get_top_image_URL():
 
 
 # returns response from gemini that creates a 5 question MCQ based on a specific subtitle and returns a parsable dictionary
-@app.route("/get", methods=['POST'])
+@app.route("/getmcq", methods=['POST'])
 def AI_MCQ():
     resp = request.get_json()
     response = model.generate_content(f"Create 5 multiple choice questions with 3 options each about {resp.data}. Please generate in the following format => Q1: (first question)\nA: (first choice for first question)\nB (second choice for first question)\nC (third choice for first question)\nCheck: (correct option A, B, or C)." \
@@ -285,6 +285,8 @@ def AI_MCQ():
             'C': option_c.strip(),
             'Check': correct.strip()
         })
+    return jsonify(mcq_list)
+
 
 
 
