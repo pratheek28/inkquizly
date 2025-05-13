@@ -89,6 +89,29 @@ export default function LandingPage() {
     window.addEventListener("scroll", () => requestAnimationFrame(anim));
     return () => window.removeEventListener("scroll", anim);
   }, [dimensions]);
+
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const fadeOutStart = 100;
+  const fadeOutEnd = 1200;
+
+  // Calculate opacity based on scroll
+  const titleOpacity =
+    scrollY < fadeOutStart
+      ? 1
+      : scrollY > fadeOutEnd
+      ? 0
+      : 1 - (scrollY - fadeOutStart) / (fadeOutEnd - fadeOutStart);
+
+  const showGif = scrollY > fadeOutEnd + 0;
+
+
   return (
     <div className={styles.landingPage}>
       <NavigationBar />
@@ -145,15 +168,55 @@ export default function LandingPage() {
           position: "absolute",
           height: "200vh",
           width: "100%",
-          overflowX: "auto",
+          overflowX: "hidden",
           zIndex: 0,
         }}
       >
+        {/* <div
+        style={{
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          opacity: titleOpacity,
+          transition: "opacity 0.3s ease-out",
+          fontSize: "3rem",
+          zIndex: 0,
+          background: "white",
+        }}
+      >
+        Welcome to My Experience
+      </div>
+
+      {/* GIF }
+      {showGif && (
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            background: "white",
+            zIndex: 0,
+          }}
+        >
+          <img
+            src="/load.gif"
+            alt="Scroll GIF"
+            style={{ width: "600px", height: "auto" }}
+          />
+        </div>)} */}
       <div className={styles.landingContent}>
         <PWAInstallPrompt />
         <iOSInstallPopup />
         <DLMBot />
 
+
+ 
         <section className={styles.section}>
           <h2>What is InkQuizly?</h2>
           <p>
@@ -224,7 +287,7 @@ export default function LandingPage() {
     Pranav Gowrishankar, Vignesh Thondikulam, Pratheek Sunilkumar, Sathvik Kumar
   </p>
 </div>
-</section>
+</section> 
 
 
         {/* …add more sections here… */}
