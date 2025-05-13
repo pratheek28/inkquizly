@@ -259,12 +259,6 @@ const CanvasEditor = () => {
                   console.log("Stylus input detected");
                 });
 
-                //canvas.on('mouse:over', () => handleClick(index));
-                // canvas.on('mouse:down', () => handleClick(index));
-                //canvas.on('pointer:down', () => handleClick(index));
-
-                // canvas.on('touchstart', handleClick);
-
                 objects.forEach((obj) => {
                   console.log("object:", obj);
                   if (obj.fill?.replace(/\s/g, "") === "rgb(23,225,23)") {
@@ -324,14 +318,6 @@ const CanvasEditor = () => {
                         return updated;
                       });
 
-                      // // Store confidence for the current topic
-                      // const existing = confidenceLevels.find(entry => entry.topic === topic);
-                      // if (existing) {
-                      //   existing.confidence = newConfidence;
-                      // } else {
-                      //   confidenceLevels.push({ topic, confidence: newConfidence });
-                      // }
-
                       canvas.requestRenderAll();
                     });
                   }
@@ -374,7 +360,6 @@ const CanvasEditor = () => {
 
       handleSubmitload(); // Submit the data to the backend
 
-      // handleSubmit(); // Submit the data to the backend
     } else {
       for (let i = 0; i < numPages; i++) {
         const canvas = new fabric.Canvas(canvasRef.current[i], {
@@ -411,36 +396,6 @@ const CanvasEditor = () => {
       });
     };
   }, []);
-
-  // const downloadPDF = async() => {
-  //   setIsLoading2(true); // Start the loading spinner
-  //   // Simulate a delay for the loading spinner (e.g., 3 seconds)
-  //   setTimeout(() => {
-  //     setIsLoading2(false);
-  //   }, 5000); // 3000ms = 3 seconds
-
-  //   const doc = new jsPDF(); // Create a new jsPDF document
-
-  //   // Iterate over each canvas and capture it as an image
-  //   canvasRef.current.forEach((canvasEl, index) => {
-  //     if (canvasEl) {
-  //       html2canvas(canvasEl).then((canvasImage) => {
-  //         const imageDataUrl = canvasImage.toDataURL('image/png'); // Get image data URL
-
-  //         // Add the image to the PDF
-  //         if (index > 0) {
-  //           doc.addPage(); // Add a new page for each canvas
-  //         }
-  //         doc.addImage(imageDataUrl, 'PNG', 0, 0,794 *0.26,1123 *0.26); // Position and size of the image
-
-  //         // If it's the last canvas, trigger download
-  //         if (index === canvasRef.current.length - 1) {
-  //           doc.save(noteID+'.pdf'); // Download the PDF
-  //         }
-  //       });
-  //     }
-  //   });
-  // };
 
   const downloadPDF = async () => {
     setIsLoading2(true);
@@ -588,20 +543,6 @@ const CanvasEditor = () => {
       "pointerdown",
       (e) => {
         console.log("radius is:", e.width, " and:", e.height);
-        //   const isPalm =
-        //   (e.width > 30 || e.height > 30); // Adjust this threshold if needed
-
-        // if (isPalm) {
-        //   e.preventDefault(); // Prevent unwanted behavior
-        //   e.stopImmediatePropagation(); // <- This is crucial
-        //   canvas.isDrawingMode = false;
-        //   console.log(`Palm detected on canvas ${index} — ignoring input.`);
-        //   return;
-        // }
-        // if(canvas.isDrawingMode === true){
-        // canvas.isDrawingMode = true;
-        // }
-
         setActiveCanvasIndex(index);
         console.log(`Canvas ${index} clicked`);
       },
@@ -659,64 +600,6 @@ const CanvasEditor = () => {
         lastHoverPoint && Date.now() - lastHoverTime,
       );
     });
-
-    // let speed=0;
-    // const el = canvas.upperCanvasEl;
-
-    // el.addEventListener('pointerdown', (e) => {
-    //   // Reset tracking variables when the pointer is pressed
-    //   lastPos = { x: e.clientX, y: e.clientY };
-    //   lastTime = e.timeStamp;
-    // });
-
-    // el.addEventListener('pointermove', (e) => {
-    //   if (!lastPos) return; // Ignore if no previous pointer position
-
-    //   // Calculate distance between current and last position
-    //   const distance = Math.sqrt(
-    //     (e.clientX - lastPos.x) ** 2 + (e.clientY - lastPos.y) ** 2
-    //   );
-
-    //   // Calculate time difference between current and last pointermove event
-    //   const timeDifference = e.timeStamp - lastTime;
-
-    //   // If timeDifference is greater than 0 (to avoid division by zero)
-    //   if (timeDifference > 0) {
-    //     speed = distance / timeDifference; // Speed in pixels per millisecond (px/ms)
-    //     console.log(`Drawing speed: ${speed} pixels/ms`);
-
-    //     // You can add a threshold to detect if the speed is too fast/slow
-    //     const threshold = 7; // For example, 0.1 px/ms (adjust as needed)
-    //     if (speed > threshold) {
-    //       console.log("Drawing too fast!");
-    //       shouldUndo.current = true;
-    //       // You can handle cases of "too fast" drawing here if necessary
-    //     }
-    //   }
-
-    //   // Update the last position and time for the next move
-    //   lastPos = { x: e.clientX, y: e.clientY };
-    //   lastTime = e.timeStamp;
-    // });
-
-    // el.addEventListener('pointerup', () => {
-
-    //   // Reset when pointer is released
-    //   lastPos = null;
-    //   lastTime = null;
-    //   // console.log("speed here:",speed);
-    //   // if (speed > 7) {
-    //   //   console.log("Drawing too fast, undoing line...",lastObject);
-    //   //   shouldUndo.current = true;
-    //   //   console.log("set as",shouldUndo);
-    //   // }
-    // });
-
-    // el.addEventListener('pointercancel', () => {
-    //   // Reset on pointer cancel
-    //   lastPos = null;
-    //   lastTime = null;
-    // });
   });
 
   useEffect(() => {
@@ -811,10 +694,6 @@ const CanvasEditor = () => {
     const indices = canvases.map((canvas, index) => index);
     const datas = canvases.map(
       (canvas) => JSON.stringify(canvas.toJSON()),
-      // .replace(/'/g, '`')
-      // .replace(/[\x00-\x1F\x7F]/g, '')
-      // .replace(/\\"(.*?)\\"/g, (_, inner) => `\`${inner}\``)
-      // .replace(/\\n/g, '\\\\n')
     );
 
     console.log("HELLOOOOdatasin:", datas);
@@ -1192,37 +1071,6 @@ const CanvasEditor = () => {
   };
 
   const handlePomodoroClick = () => {
-    // const canvas = canvases[activeCanvasIndex];
-
-    // const handleSubmit = () => {
-    //   console.log("here");
-    //   fetch('http://127.0.0.1:5000/getschedule', {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json"
-    //     },
-    //     body: JSON.stringify({ days: numDays ,confidence: conf})
-    //   })
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     setResponse(data.definition);
-    //     console.log("log is",data.definition);
-    //     console.log("response is",response);
-
-    //     setfirst(data.one);
-    //     setsecond(data.two);
-    //     setthird(data.three);
-    //     setfourth(data.four);
-
-    // canvas.renderAll();
-    //   })
-    //   .catch(error => {
-    //     console.error("Error:", error);
-    //     setResponse("An Error occurred while submitting the form.");
-    //   });
-    // };
-
-    // handleSubmit(); // Submit the data to the backend
     if (showPomodoroRect === true) {
       setShowPomodoroRect(false);
     } else {
@@ -1750,14 +1598,6 @@ const CanvasEditor = () => {
     };
 
     handleSubmit(); // Submit the data to the backend
-
-    // //Download the image
-    // const link = document.createElement('a');
-    // link.href = fullDataURL;
-    // link.download = 'highlighted_region.png';
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
   };
 
   const captureHighlightedRegio = (highlightRect) => {
@@ -1839,14 +1679,6 @@ const CanvasEditor = () => {
       }
       isPopupOpen = !isPopupOpen;
     });
-
-    // // Create a download link
-    // const link = document.createElement('a');
-    // link.href = fullDataURL;
-    // link.download = 'highlighted_region.png';
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
   };
 
   const openImage = async (url) => {
@@ -1854,15 +1686,6 @@ const CanvasEditor = () => {
     try {
       // Wait until the image is loaded and create an image object
       const img = await fabric.FabricImage.fromURL(url);
-      // img.set({
-      //   left: 100, // Adjust as needed
-      //   top: 100, // Adjust as needed
-      //   angle: 0, // Optionally, you can set an initial angle
-      //   selectable: true,
-      //   evented: true,
-      //   scaleX: scale,
-      //   scaleY: scale,
-      // });
       img.set({ crossOrigin: "anonymous" });
 
       const canvasWidth = canvas.width;
@@ -1903,8 +1726,6 @@ const CanvasEditor = () => {
 
     if (!canvas || !rect) return;
 
-    // let topic = '';
-
     canvas.renderAll();
 
     const Rect = rect.getBoundingRect(true);
@@ -1921,32 +1742,8 @@ const CanvasEditor = () => {
     const topic = fullDataURL.split(",")[1];
     //const topic = fullDataURL;
     console.log("Base64 image:", topic);
-
-    // Highlight bolding
-    // const objectsInRegion = canvas.getObjects().filter((obj) => {
-    //   const bounds = obj.getBoundingRect();
-    //   return (
-    //     bounds.left + bounds.width > rect.left &&
-    //     bounds.top + bounds.height > rect.top &&
-    //     bounds.left < rect.left + rect.width &&
-    //     bounds.top < rect.top + rect.height
-    //   );
-    // });
-
     const topicindex = topicsindexes.current;
     topicsindexes.current++; // persists across re-renders
-
-    // objectsInRegion.forEach((obj) => {
-    //   if (obj instanceof fabric.Text || obj instanceof fabric.Textbox) {
-    //     obj.set('fontWeight', 'bold');
-    //     obj.setCoords(); // Force update of bounding box after setting font weight
-    //     topic += obj.text; // Collect text from text objects
-    //     // topicindex=topicsindexes;
-    //     // topicsindexes++;
-    //   } else {
-    //     obj.set('strokeWidth', (obj.strokeWidth || 1) * 1.5);
-    //   }
-    // });
 
     // Underline
     const underline = new fabric.Line(
@@ -2027,45 +1824,6 @@ const CanvasEditor = () => {
       updated[topicindex] = newConfidence;
       return updated;
     });
-
-    // // Confidence % text
-    // const confidenceText = new fabric.Text(`${Math.round(confidence * 100)}%`, {
-    //   left: sliderLeft + slider.width + 10,
-    //   top: sliderTop + slider.height / 2,
-    //   fontSize: 12,
-    //   originY: 'center',
-    //   selectable: false,
-    //   evented: false,
-    //   customType: 'confidence',
-    // });
-
-    // Scaling behavior
-    // slider.on('scaling', function () {
-    //   const scaledWidth = slider.width * slider.scaleX;
-
-    //   const newWidth = Math.min(sliderMaxWidth, Math.max(1, scaledWidth));
-    //   slider.set({
-    //     scaleX: 1,
-    //     width: newWidth,
-    //     left: sliderLeft // lock left position
-    //   });
-
-    //   const newConfidence = newWidth / sliderMaxWidth;
-    //   confidenceText.set({
-    //     text: `${Math.round(newConfidence * 100)}%`,
-    //     left: slider.left + newWidth + 10
-    //   });
-
-    //   // Store confidence for the current topic
-    //   const existing = confidenceLevels.find(entry => entry.topic === topic);
-    //   if (existing) {
-    //     existing.confidence = newConfidence;
-    //   } else {
-    //     confidenceLevels.push({ topic, confidence: newConfidence });
-    //   }
-
-    //   canvas.requestRenderAll();
-    // });
 
     slider.on("scaling", function () {
       const scaledWidth = slider.width * slider.scaleX;
@@ -3223,7 +2981,7 @@ const CanvasEditor = () => {
   <div
     style={{
       position: "fixed",
-      top: question ? "40vh" : "70vh",
+      top: question ? "45vh" : "85vh",
       width: '400px',
       padding: '20px',
       border: '2px solid #333',

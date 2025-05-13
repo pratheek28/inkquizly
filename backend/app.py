@@ -150,15 +150,6 @@ def getLoginDetails():
         }
         return jsonify(response)
     
-
-
-# @app.route("/getNote", methods=['POST', 'OPTIONS'])
-# def getNote():
-#     if request.method == "OPTIONS":
-#         return jsonify({}), 204
-#     data = request.get_json()
-#     #FROM DATA GET NOTE DATA FROM DATABASE AND RETURN IT WITH JSNOFINY
-
 @app.route("/getNote", methods=['POST', 'OPTIONS'])
 def getNote():
     if request.method == "OPTIONS":
@@ -182,16 +173,6 @@ def getNote():
         # Fetch records based on UID
         notes_data = table.find({"uid": user_uid})
 
-        # # Create a set to store unique note names
-        # unique_note_names = set()
-
-        # # Iterate through the records and add each unique 'note' to the set
-        # for note in notes_data:
-        #     note_name = note.get("note")  # Extract the note name
-        #     if note_name:  # Ensure that there is a note_name value
-        #         unique_note_names.add(note_name)  # Add it to the set (duplicates are automatically ignored)
-
-                # Create dictionaries to store unique note names and corresponding confidence values
         note_confidence_dict = {}
 
         # Iterate through the records and add each unique 'note' to the dictionary
@@ -266,113 +247,13 @@ def after_request(response):
 # api_key = "AIzaSyBJw3b2gdm1iaRUScBMnA5bHCPE209lM2U"
 CX_VAR = os.environ.get("CX_VAR")
 current_cx = CX_VAR
-# genai.configure(api_key=api_key)
-# model = genai.GenerativeModel("gemini-2.0-flash")
-# chat_history = []  # stores the chat history (session-based)
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 
-#genai.configure(api_key=GOOGLE_API_KEY)
-
 client = genai.Client(api_key=GOOGLE_API_KEY) #IMPORTANT FIX
-
-#client = genai.Client(api_key="AIzaSyBJw3b2gdm1iaRUScBMnA5bHCPE209lM2U")
-
-
-#client = genai.GenerativeModel("gemini-2.0-flash")
-#client = genai.Client()
-
 
 # client = genai.Client(api_key=GOOGLE_API_KEY)
 print("Connected!")
-
-# response = client.models.generate_content(
-#     model="gemini-2.0-flash", contents="Explain how AI works in a few words"
-# )
-# print(response.text)
-
-
-
-# converts base64 type to readable text for general use
-# def ocr_from_base64(b64_str):
-#     # Decode the base-64 string into bytes
-#     # Add padding if necessary
-#     # The padding logic is correct, adding padding if it's not a multiple of 4
-#     b64_str += "=" * ((4 - len(b64_str) % 4) % 4)  
-    
-#     try:
-#         # The likely issue is with the image data itself. So, wrap it in a try-except
-#         image_data = base64.b64decode(b64_str)
-#         image = Image.open(BytesIO(image_data)).convert('RGB')
-#         image_np = np.array(image)
-#         reader = easyocr.Reader(['en'])
-#         results = reader.readtext(image_np, detail=0)
-#         return " ".join(results)
-#     except UnidentifiedImageError:
-#         # Handle the specific exception that PIL throws
-#         # print out this helpful debugging message
-#         print(f"Error: Could not identify image format from base64 string.")
-#         # If you want, you can add more error handling or logging
-#         return ""  # Or raise a custom exception
-
-# Initialize EasyOCR reader
-# reader = easyocr.Reader(['en'])
-
-# def ocr_from_base64(b64_str, max_width=800, max_height=800, crop_area=None):
-#     # Ensure the base64 string has proper padding
-#     b64_str += "=" * ((4 - len(b64_str) % 4) % 4)  # Fix padding if missing
-
-#     try:
-#         # Decode the base64 string into bytes
-#         image_data = base64.b64decode(b64_str)
-        
-#         # Open the image from bytes and convert to RGB mode
-#         image = Image.open(BytesIO(image_data)).convert('RGB')
-
-#         # Resize the image for better OCR performance (optional)
-#         image = resize_image(image, max_width, max_height)
-
-#         # Crop the image if a crop area is specified (optional)
-#         if crop_area:
-#             image = image.crop(crop_area)
-
-#         # Convert the image to a numpy array (for EasyOCR processing)
-#         image_np = np.array(image)
-        
-#         # # Initialize EasyOCR reader
-#         # reader = easyocr.Reader(['en'])
-
-#         # Perform OCR on the image
-#         results = reader.readtext(image_np, detail=0)  # detail=0 returns only the text
-
-#         # Join all recognized text into a single string and return it
-#         return " ".join(results)
-    
-#     except UnidentifiedImageError:
-#         # Handle the case where the image is invalid or cannot be identified
-#         print(f"Error: Could not identify image format from base64 string.")
-#         return "Invalid image format."
-    
-#     except Exception as e:
-#         # Catch any other general errors
-#         print(f"Error during OCR processing: {e}")
-#         return "An error occurred during OCR processing."
-
-
-# def resize_image(image, max_width, max_height):
-#     # Get the current size of the image
-#     width, height = image.size
-    
-#     # Calculate the scaling factor for width and height
-#     scale_factor = min(max_width / width, max_height / height)
-
-#     # If the image is smaller than the max dimensions, don't resize it
-#     if scale_factor < 1:
-#         new_width = int(width * scale_factor)
-#         new_height = int(height * scale_factor)
-#         image = image.resize((new_width, new_height), Image.ANTIALIAS)
-
-#     return image
     
 OCR_API_KEY = os.environ.get("OCR_API_KEY")
 
@@ -451,25 +332,6 @@ def ocr_space_from_base64(base64_str, api_key=OCR_API_KEY):
         print(f"Error: {response.status_code} - {response.text}")
         return f"Error during OCR API call: {response.status_code}"
 
-    
-
-    
-
-# @app.route("/getsummarized", methods=['POST'])
-# def summarize_user_written():
-#     # Get the subtitle from the incoming request
-#     subtitle = request.get_json()
-    
-#     # Assuming you have a model object that can generate content based on the subtitle
-#     response = client.models.generate_content(
-#     model="gemini-2.0-flash", contents="Can you generate a response to the following with max 20 lines and is super understandable to any students like a textbook paragraph? " \
-#                                       "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-#                                       f"and be able to also learn the implications of this and its application:{ocr_from_base64(subtitle['topic'])}"
-#     )
-    
-#     # Return the AI-generated summary as a JSON response
-#     return jsonify({"summary": response.text})  # Ensure the response is correctly wrapped in a dictionary for jsonify
-
 @app.route("/getsummarized", methods=['POST'])
 def summarize_user_written():
     # Get the subtitle from the incoming request
@@ -511,18 +373,6 @@ def active():
 
     # Return the AI-generated summary as a JSON response
     return jsonify("activated")  # Ensure the response is correctly wrapped in a dictionary for jsonify
-
-
-# # returns response by taking 'subtitle' and generates a concise AI summary of that given 'subtitle'
-# @app.route("/getsummarized", methods=['POST'])
-# def summarize_user_written():
-#     subtitle=request.get_json()
-#     response = model.generate_content("Can you generate a response to this that max 20 lines and is super understandable to any students? " \
-#     "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-#     f"and be able also to learn the implications of this and its application: {subtitle.topic}")
-#     return jsonify.response
-
-
 
 # returns a list of 4 image URL links that is taylored to the 'subtitle' and 'specific' inputs
 @app.route("/getimages", methods=['POST'])
@@ -617,35 +467,6 @@ def AI_study_schedule():
     sceds = {key: value for key, value in matches}
     return jsonify({"one": sceds[0], "two": sceds[1], "three": sceds[2], "four": sceds[3]})
 
-
-
-# @app.route("/save", methods=['POST'])
-# def CanvasSave():
-#     res=request.get_json()
-
-#     #client = DataAPIClient(DATA_API_CLIENT) #FIX ME: USE ENV VAR ON VERCEL
-#     client = DataAPIClient("AstraCS:SJhgQhsNgggKxufCHncCCXoe:4afbec1c9ea56f024aa1ce249855ef1b7001817640de6832e2883308ced7d6d0")
-#     db = client.get_database_by_api_endpoint(
-#     #API_KEY #ENV VAR #Important 2 things
-#     "https://d48eb3bc-cf69-4655-baca-a381b7ee3136-us-east-2.apps.astra.datastax.com"
-#     )
-#     print("Connected!")
-#     table=db.get_table("notes")
-
-
-#     for index, values in zip(res['index'], res['dat']):
-#         canvas_data={
-#             "id":uuid.uuid4(),
-#             "data":values,
-#             "indx":index,
-#             "note":res['note'],
-#             "uid":uuid.uuid4(),
-#         }
-#         table.insert_one(canvas_data)
-
-#     return jsonify({"message": "SUCCESS"})  # ✅ Add this
-
-
 @app.route("/save", methods=['POST'])
 def CanvasSave():
     try:
@@ -653,8 +474,6 @@ def CanvasSave():
         res = request.get_json()
 
         # Connect to the database
-        # client = DataAPIClient(DATA_API_CLIENT)
-        # db = client.get_database_by_api_endpoint(API_KEY)
         print("Connected!") #Important change 4 times
         table = db.get_table("notes")
 
@@ -702,9 +521,7 @@ def CanvasLoad():
         res = request.get_json()
         note_name = res['note']  # The note name to load
 
-        # Connect to the database
-        # client = DataAPIClient(DATA_API_CLIENT)
-        # db = client.get_database_by_api_endpoint(API_KEY)
+        # Connect to the database)
         print("Connected!")
         table = db.get_table("notes")
 
