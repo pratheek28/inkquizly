@@ -573,7 +573,7 @@ def AI_MCQ():
         r"Check:\s*([ABC])"  # Capture the correct option (A, B, or C)
     )
     
-    matches = re.findall(pattern, response, re.DOTALL)
+    matches = re.findall(pattern, response.text, re.DOTALL)
 
     # Build a list of dictionaries, one for each question
     mcq_list = []

@@ -898,6 +898,15 @@ const CanvasEditor = () => {
 
 
   const handleMCQ = () => {
+    if(showquiz === true){
+      setshowquiz(false);
+      const canvas = canvases[activeCanvasIndex];
+      canvas.off("mouse:down");
+      canvas.off("mouse:move");
+      canvas.off("mouse:up");
+      setActiveTool("point");
+      return;
+    }
     setshowquiz(true);
     const canvas = canvases[activeCanvasIndex];
     canvas.off("mouse:down");
@@ -988,7 +997,7 @@ const CanvasEditor = () => {
     //const topic = fullDataURL;
     console.log("Base64 image:", topic);
 
-    canvas.remove(rect);
+    //canvas.remove(rect);
 
 
       console.log("mcq button was pressed with topic", topic);
@@ -1019,6 +1028,7 @@ const CanvasEditor = () => {
             setSelectedOption(null);
       
             setLoading(false);
+            canvas.remove(rect);
 
             canvas.renderAll();
           })
@@ -3351,11 +3361,12 @@ const CanvasEditor = () => {
       padding: '20px',
       border: '2px solid #333',
       borderRadius: '8px',
-      backgroundColor: 'black',
+      backgroundColor: 'rgb(4, 8, 75)',
       margin: '20px auto',
-      boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
+      boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.85)',
       fontFamily: 'Arial, sans-serif',
       zIndex: 10000,
+      color:"white"
     }}
   >
 {question ? (
@@ -3445,7 +3456,7 @@ const CanvasEditor = () => {
         style={{
           fontSize: '16px',
           textAlign: 'center',
-          color: '#666',
+          color: 'lightgrey',
           margin: 0
         }}
       >
