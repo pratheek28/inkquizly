@@ -53,7 +53,7 @@ const CanvasEditor = () => {
   // State for floating icon (draggable)
   const [floatingIconPosition, setFloatingIconPosition] = useState({
     x: 150,
-    y: window.innerHeight / 2,
+    y: (window.innerHeight / 2)+20,
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });

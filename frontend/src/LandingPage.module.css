@@ -26,7 +26,7 @@
 
 /* 2) Hero/banner at the top */
 .landingHero {
-  flex: 0 0 50vh;              /* half-screen height */
+  flex: 0 0 100vh;              /* half-screen height */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -44,7 +44,7 @@
 /* 3) Scrollable content area */
 .landingContent {
   flex: 1;                     /* fill remaining space */
-  background: #2e3192;
+  background: #000239;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -62,7 +62,7 @@
 .section h2 {
   font-size: 3rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  background: linear-gradient(90deg, #2893fe, #e52e71);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

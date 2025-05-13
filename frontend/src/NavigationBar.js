@@ -28,8 +28,8 @@ function NavigationBar() {
     <div>
       <header className={styles.header}>
         <div className={styles.h1Row}>
-          <img src="/images/logo.png" alt="Logo" className={styles.logo} />
-          <button onClick={handleClickLanding}>About</button>
+          <img src="/iq.png" alt="Logo" className={styles.logo} />
+          <button onClick={handleClickLanding}>Home</button>
           <button onClick={handleClickSignUp}>Sign Up</button>
           <button onClick={handleClickLogIn}>Log In</button>
           <button onClick={handleClickAccountDash}>Account Dashboard</button>

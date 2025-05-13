@@ -2,9 +2,9 @@ hi>>Hello! I am a DLM Bot that is ready to answer any questions you have regardi
 hello>>Hi! I am a DLM Bot that is ready to answer any questions you have regarding InkQuizly. Ask away!
 thanks>>You are very welcome! If you have further questions, ask me or email the creators!
 difference pro free>>Upgrade to Pro and get unlimited notes with PDF uploads, instant priority support, and next-gen Gemini Flash 2.5—free users are limited to 15 notes, Gemini Flash 2.0, and standard support
-creators>>We're Pratheek, Vignesh, Pranav, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
-creators name>>We're Pratheek, Vignesh, Pranav, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
-name creators>>We're Pratheek, Vignesh, Pranav, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
+creators>>We're Pranav, Vignesh, Pratheek, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
+creators name>>We're Pranav, Vignesh, Pratheek, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
+name creators>>We're Pranav, Vignesh, Pratheek, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
 about>>InkQuizly blends freehand drawing with AI-powered subtitle detection, smart summarization, and on-demand diagram generation, all built around proven study methods like Pomodoro, active recall, and spaced repetition to make note-taking faster and more effective
 compatibility>>InkQuizly is compatible with iOS, Andriod, Windows, and can be downloaded in your Laptop, Tablet, iPad, Phone, or whichever device you use for note taking!
 offline notes>>Unfortunetly, due to heavy relience on Gemini AI and other smart features, this app cannot currently be used offline. We are working hard to get around this issue!
