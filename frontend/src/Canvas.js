@@ -879,6 +879,8 @@ const CanvasEditor = () => {
   const options = current
     ? [`A. ${current.A}`, `B. ${current.B}`, `C. ${current.C}`]
     : [];
+  const choiceIndex = current? { A: 0, B: 1, C: 2 }[current.Check] : null;
+  console.log("choiceIndex", choiceIndex);
 
 
     const handleNext = () => {
@@ -897,8 +899,8 @@ const CanvasEditor = () => {
   const [selectedOption, setSelectedOption] = useState(null);
 
 
-  const handleMCQ = () => {
-    if(showquiz === true){
+  const handleMCQ = (state=false) => {
+    if(showquiz === true && state === false){
       setshowquiz(false);
       const canvas = canvases[activeCanvasIndex];
       canvas.off("mouse:down");
@@ -3356,32 +3358,67 @@ const CanvasEditor = () => {
   <div
     style={{
       position: "fixed",
-      top: question?"400px":"650px",
+      top: question?"300px":"650px",
       width: '400px',
       padding: '20px',
       border: '2px solid #333',
-      borderRadius: '8px',
-      backgroundColor: 'rgb(4, 8, 75)',
+      borderRadius: '10px',
+      backgroundColor: 'rgba(4, 8, 75, 0.87)',
       margin: '20px auto',
       boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.85)',
       fontFamily: 'Arial, sans-serif',
       zIndex: 10000,
-      color:"white"
+      color:"white",
     }}
   >
 {question ? (
         <div
-        style={{
-          width: '400px',
-          padding: '20px',
-          border: '2px solid #333',
-          borderRadius: '8px',
-          backgroundColor: '#f9f9f9',
-          margin: '20px auto',
-          boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-          fontFamily: 'Arial, sans-serif'
-        }}
+        // style={{
+        //   width: '400px',
+        //   padding: '20px',
+        //   border: '2px solid #333',
+        //   borderRadius: '8px',
+        //   backgroundColor: '#f9f9f9',
+        //   margin: '20px auto',
+        //   boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
+        //   fontFamily: 'Arial, sans-serif'
+        // }}
       >
+        <div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center", // Optional: use this if you want vertical centering too
+  }}
+>
+        <button
+                  onClick={() => {
+                    setMcqs([]);
+                    handleMCQ(true);
+                  }}
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(0, 47, 255, 0.5), rgba(8, 252, 114, 0.5))", // Green background
+                    color: "white",
+                    padding: "5px 10px",
+                    border: "none",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    transition: "background-color 0.3s, transform 0.2s",
+                    
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.target.style.backgroundColor = "#45a049")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.target.style.background =
+                      "linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))")
+                  }
+                >
+                  New Quiz
+                </button></div>
         <h3
           style={{
             marginBottom: '15px',
@@ -3401,11 +3438,23 @@ const CanvasEditor = () => {
                   border: '1px solid',
                   borderRadius: '5px',
                   cursor: 'pointer',
-                  backgroundColor: selectedOption === index ? '#cce5ff' : 'grey',
+                  backgroundColor:
+  selectedOption === null
+    ? 'grey'
+    : index === selectedOption
+    ? index === choiceIndex
+      ? '#b4fab7' // correct (green)
+      : '#ff9999' // incorrect (red)
+    : 'grey',
                   borderColor: selectedOption === index ? '#3399ff' : '#aaa',
-                  transition: 'background-color 0.2s'
+                  transition: 'background-color 0.2s',
+                  color:'black'
                 }}
-                onClick={() => setSelectedOption(index)}
+                onClick={(e) => {
+                  setSelectedOption(index);
+                  console.log('Selected option:', index);
+                  e.target.style.backgroundColor = (choiceIndex==index) ? 'lightgreen' : '#ff9999';
+                }}
               >
                 {option}
               </li>
@@ -3771,13 +3820,16 @@ const CanvasEditor = () => {
                 </div>
               )}
 
-              {/* <button onClick={handleMCQ}>
+              <button onClick={() => {
+                handleMCQ(false)
+              }}>
+              
             <img
               src="/mcq_image.png"
               alt="MCQ Button"
               style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
             />
-          </button> */}
+          </button>
 
               <button
                 onClick={handlePomodoroClick}
