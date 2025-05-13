@@ -3223,7 +3223,7 @@ const CanvasEditor = () => {
   <div
     style={{
       position: "fixed",
-      top: question ? "45vh" : "85vh",
+      top: question ? "40vh" : "70vh",
       width: '400px',
       padding: '20px',
       border: '2px solid #333',

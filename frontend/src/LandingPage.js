@@ -90,27 +90,31 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", anim);
   }, [dimensions]);
 
-  const [scrollY, setScrollY] = useState(0);
-
+  const scrollRef = useRef();
+  const [scrollProgress, setScrollProgress] = useState(0);
+  
   useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => {
+      const section = scrollRef.current;
+      if (!section) return;
+  
+      const rect = section.getBoundingClientRect();
+      const totalHeight = window.innerHeight + section.offsetHeight;
+      const progress = 1 - (rect.bottom - window.innerHeight) / totalHeight;
+  
+      setScrollProgress(Math.min(Math.max(progress, 0), 1));
+    };
+  
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const fadeOutStart = 100;
-  const fadeOutEnd = 1200;
-
   // Calculate opacity based on scroll
-  const titleOpacity =
-    scrollY < fadeOutStart
-      ? 1
-      : scrollY > fadeOutEnd
-      ? 0
-      : 1 - (scrollY - fadeOutStart) / (fadeOutEnd - fadeOutStart);
-
-  const showGif = scrollY > fadeOutEnd + 0;
-
+  const titleOpacity = scrollProgress < 0.9
+  ? 1
+  : scrollProgress > 0.5
+  ? 0
+  : 1 - (scrollProgress - 0.08) / 0.2;
 
   return (
     <div className={styles.landingPage}>
@@ -172,50 +176,58 @@ export default function LandingPage() {
           zIndex: 0,
         }}
       >
-        {/* <div
-        style={{
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          opacity: titleOpacity,
-          transition: "opacity 0.3s ease-out",
-          fontSize: "3rem",
-          zIndex: 0,
-          background: "white",
-        }}
-      >
-        Welcome to My Experience
-      </div>
+<div
+  ref={scrollRef}
+  style={{
+    position: "relative",
+    height: "100vh", // ensures enough scroll room
+    width: "100%",
+    overflowX: "hidden",
+    zIndex: 0,
+  }}
+>
+  <div
+    style={{
+      position: "sticky",
 
-      {/* GIF }
-      {showGif && (
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            background: "white",
-            zIndex: 0,
-          }}
-        >
-          <img
-            src="/load.gif"
-            alt="Scroll GIF"
-            style={{ width: "600px", height: "auto" }}
-          />
-        </div>)} */}
+       height: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      fontSize: "3rem",
+      background: "white",
+      opacity: titleOpacity,
+      transition: "opacity 0.3s ease-out",
+    }}
+  >
+   <div
+  style={{
+    fontFamily: "'Poppins', sans-serif",
+    fontSize: "4rem",
+    fontWeight: "600", // Bold and impactful
+    color: "#333", // Dark text for contrast
+    textAlign: "center",
+    textTransform: "uppercase", // Optional: makes it all caps
+    letterSpacing: "4px", // Adds spacing between letters for a more modern feel
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)", // Light shadow for depth
+    transition: "transform 0.3s ease-in-out",
+  }}
+>
+  Note-taking Revolutionized
+</div>
+  </div>
+
+  
+
+  {/* Spacer */}
+</div>
+
+
+
       <div className={styles.landingContent}>
         <PWAInstallPrompt />
         <iOSInstallPopup />
         <DLMBot />
-
-
  
         <section className={styles.section}>
           <h2>What is InkQuizly?</h2>
