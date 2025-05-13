@@ -909,6 +909,15 @@ const CanvasEditor = () => {
       setActiveTool("point");
       return;
     }
+    if(question!=null && state === false){
+      setshowquiz(true);
+      const canvas = canvases[activeCanvasIndex];
+      canvas.off("mouse:down");
+      canvas.off("mouse:move");
+      canvas.off("mouse:up");
+      setActiveTool("point");
+      return;
+    }
     setshowquiz(true);
     const canvas = canvases[activeCanvasIndex];
     canvas.off("mouse:down");
@@ -1044,150 +1053,6 @@ const CanvasEditor = () => {
 
   };
 
-  const handleMCQButtonClick = () => {
-    const canvas = canvases[activeCanvasIndex];
-    if (canvas) {
-      const mcqrect = new fabric.Rect({
-        left: 100,
-        top: 100,
-        width: 500,
-        height: 300,
-        fill: "blue",
-        stroke: "black",
-        strokeWidth: 2,
-        selectable: false,
-      });
-      canvas.add(mcqrect);
-
-      const qtxt = new fabric.Textbox("Q.", {
-        left: mcqrect.left + 10,
-        top: mcqrect.top + 10,
-        width: mcqrect.width - 20,
-        fontSize: 16,
-        fill: "black",
-        editable: true,
-        backgroundColor: "transparent",
-      });
-      canvas.add(qtxt);
-
-      const ch1 = new fabric.Rect({
-        left: mcqrect.left + 20,
-        top: mcqrect.top + 50,
-        width: 460,
-        height: 40,
-        fill: "grey",
-        stroke: "black",
-        strokeWidth: 2,
-        selectable: true,
-      });
-      canvas.add(ch1);
-
-      const ch1text = new fabric.Textbox("A.", {
-        left: ch1.left + 10,
-        top: ch1.top + 10,
-        width: ch1.width - 20,
-        fontSize: 16,
-        fill: "black",
-        editable: true,
-        backgroundColor: "transparent",
-      });
-      canvas.add(ch1text);
-
-      const ch2 = new fabric.Rect({
-        left: mcqrect.left + 20,
-        top: mcqrect.top + 100,
-        width: 460,
-        height: 40,
-        fill: "grey",
-        stroke: "black",
-        strokeWidth: 2,
-        selectable: true,
-      });
-      canvas.add(ch2);
-      const ch2text = new fabric.Textbox("B.", {
-        left: ch2.left + 10,
-        top: ch2.top + 10,
-        width: ch2.width - 20,
-        fontSize: 16,
-        fill: "black",
-        editable: true,
-        backgroundColor: "transparent",
-      });
-      canvas.add(ch2text);
-
-      const ch3 = new fabric.Rect({
-        left: mcqrect.left + 20,
-        top: mcqrect.top + 150,
-        width: 460,
-        height: 40,
-        fill: "grey",
-        stroke: "black",
-        strokeWidth: 2,
-        selectable: true,
-      });
-      canvas.add(ch3);
-      const ch3text = new fabric.Textbox("C.", {
-        left: ch3.left + 10,
-        top: ch3.top + 10,
-        width: ch3.width - 20,
-        fontSize: 16,
-        fill: "black",
-        editable: true,
-        backgroundColor: "transparent",
-      });
-      canvas.add(ch3text);
-      canvas.renderAll();
-
-      const next = new fabric.Rect({
-        left: mcqrect.left + 420,
-        top: mcqrect.top + 210,
-        width: 50,
-        height: 20,
-        fill: "grey",
-        stroke: "black",
-        strokeWidth: 2,
-        selectable: true,
-      });
-      canvas.add(next);
-
-      const prev = new fabric.Rect({
-        left: mcqrect.left + 20,
-        top: mcqrect.top + 210,
-        width: 50,
-        height: 20,
-        fill: "grey",
-        stroke: "black",
-        strokeWidth: 2,
-        selectable: true,
-      });
-      canvas.add(prev);
-
-      // const handleSubmit = () => {
-      //   fetch('http://127.0.0.1:5000/getmcq', {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json"
-      //     },
-      //     body: JSON.stringify({ topic: data }) // Send data as an object with topic
-      //   })
-      //   .then(response => response.json())
-      //   .then(data => {
-      //     setResponse(data.summary);
-      //     console.log("log is",data.item1);
-      //     console.log("response is",data.item2);
-
-      //   })
-      //   .catch(error => {
-      //     console.error("Error:", error);
-      //     setResponse("An Error occurred while submitting the form.");
-      //   });
-      // };
-
-      // handleSubmit(); // Submit the data to the backend
-    } else {
-      console.log("No active canvas available to add rectangles.");
-    }
-  };
 
   //let img1='';
   const [img1, setimg1] = useState(null);
@@ -2489,6 +2354,7 @@ const CanvasEditor = () => {
   }, []); // Empty dependency array ensures the effect runs only once
 
   return (
+    
     <div
       style={
         isPhone
