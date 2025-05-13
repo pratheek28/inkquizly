@@ -176,7 +176,7 @@ export default function LandingPage() {
           zIndex: 0,
         }}
       >
-<div
+{/* <div
   ref={scrollRef}
   style={{
     position: "relative",
@@ -185,8 +185,8 @@ export default function LandingPage() {
     overflowX: "hidden",
     zIndex: 0,
   }}
->
-  <div
+> */}
+  {/* <div
     style={{
       position: "sticky",
 
@@ -220,7 +220,7 @@ export default function LandingPage() {
   
 
   {/* Spacer */}
-</div>
+{/* </div> */} */}
 
 
 
