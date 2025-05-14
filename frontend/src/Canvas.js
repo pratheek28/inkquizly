@@ -6,6 +6,8 @@ import { SketchPicker } from "react-color";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -1241,7 +1243,7 @@ const CanvasEditor = () => {
               top: pointer.y,
               width: 0,
               height: 0,
-              fill: "rgba(255, 255, 0, 0.3)",
+              fill: "rgba(157, 0, 255, 0.3)",
               stroke: "yellow",
               strokeWidth: 1,
               selectable: true,
@@ -1498,60 +1500,65 @@ const CanvasEditor = () => {
     const base64Image = fullDataURL.split(",")[1];
     console.log("Base64 image:", base64Image);
 
-    function createPopup(message) {
-      // Only create new ones if they don’t exist
-      if (!popupRect && !popupText) {
-        popupRect = new fabric.Rect({
-          left: rect.left + 5,
-          top: rect.top - 105,
-          width: 200,
-          height: 100,
-          fill: "rgba(0, 0, 0, 0.7)",
-          rx: 20,
-          ry: 20,
-          selectable: false,
-          evented: false,
-        });
+    // function createPopup(message) {
+    //   // Only create new ones if they don’t exist
+    //   if (!popupRect && !popupText) {
+    //     popupRect = new fabric.Rect({
+    //       left: rect.left + 5,
+    //       top: rect.top - 105,
+    //       width: 200,
+    //       height: 100,
+    //       fill: "rgba(0, 0, 0, 0.7)",
+    //       rx: 20,
+    //       ry: 20,
+    //       selectable: false,
+    //       evented: false,
+    //     });
 
-        popupText = new fabric.Textbox(message || "sample message", {
-          left: popupRect.left + 10,
-          top: popupRect.top + 10,
-          width: 200 - 10,
-          fontSize: 10,
-          fill: "white",
-          editable: false,
-          selectable: false,
-          evented: false,
-        });
+    //     popupText = new fabric.Textbox(message || "sample message", {
+    //       left: popupRect.left + 10,
+    //       top: popupRect.top + 10,
+    //       width: 200 - 10,
+    //       fontSize: 10,
+    //       fill: "white",
+    //       editable: false,
+    //       selectable: false,
+    //       evented: false,
+    //     });
 
-        canvas.add(popupRect, popupText);
-        canvas.renderAll();
-      }
-    }
+    //     canvas.add(popupRect, popupText);
+    //     canvas.renderAll();
+    //   }
+    // }
 
-    function openPopup(message) {
-      if (!isPopupOpen) {
-        createPopup(message);
-        isPopupOpen = true;
-      }
-    }
+    // function openPopup(message) {
+    //   if (!isPopupOpen) {
+    //     createPopup(message);
+    //     isPopupOpen = true;
+    //   }
+    // }
 
-    function closePopup() {
-      if (isPopupOpen && popupRect && popupText) {
-        canvas.remove(popupRect);
-        canvas.remove(popupText);
-        popupRect = null;
-        popupText = null;
-        isPopupOpen = false;
-        canvas.renderAll();
-      }
-    }
+    // function closePopup() {
+    //   if (isPopupOpen && popupRect && popupText) {
+    //     canvas.remove(popupRect);
+    //     canvas.remove(popupText);
+    //     popupRect = null;
+    //     popupText = null;
+    //     isPopupOpen = false;
+    //     canvas.renderAll();
+    //   }
+    // }
 
     console.log("rect=", highlightRect);
+    setUserInput('');
+    setuserdone(false);
+    setResponse2(null);
+    setIsOpen(true);
 
     let topics = "";
     setLoadingText("Analyzing with context.");
     setLoading(true);
+    canvas.remove(highlightRect);
 
     // Highlight bolding
     const objectsInRegion = canvas.getObjects();
@@ -1562,42 +1569,15 @@ const CanvasEditor = () => {
       } else {
       }
     });
+    setTopicsforai(topics);
 
-    let data = base64Image;
+    //let data = base64Image;
+    setdataforai(base64Image);
+    setshowAI(true);
+    //setLoading2(true);
     // Handle form submission to backend
-    const handleSubmit = () => {
-      fetch("https://inkquizly.onrender.com/getdefinition", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ topic: topics, img: data }), // Send data as an object with topic
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setResponse(data.definition);
-          console.log("log is", data.definition);
-          console.log("response is", response);
 
-          // Display the text summary after submission
-          highlightRect.on("mousedown", () => {
-            console.log("rect is pressed");
-            if (!isPopupOpen) {
-              openPopup(data.definition);
-            } else {
-              closePopup();
-            }
-          });
-          setLoading(false);
-          canvas.renderAll();
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          setResponse("An Error occurred while submitting the form.");
-        });
-    };
-
-    handleSubmit(); // Submit the data to the backend
+    //handleSubmit(); // Submit the data to the backend
   };
 
   const captureHighlightedRegio = (highlightRect) => {
@@ -2111,6 +2091,71 @@ const CanvasEditor = () => {
     };
   }, []); // Empty dependency array ensures the effect runs only once
 
+
+  const [userInput, setUserInput] = useState('');
+  const [response2, setResponse2] = useState(null);
+  const [loading2, setLoading2] = useState(false);
+  const [userdone, setuserdone] = useState(false);
+  const [topicsforai, setTopicsforai] = useState(null);
+  const [dataforai, setdataforai] = useState(null);
+
+  const handleSubmit = () => {
+    setLoading2(true);
+    fetch("https://inkquizly.onrender.com/getdefinition", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ topic: topicsforai, img: dataforai, extra:userInput }), // Send data as an object with topic
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setResponse(data.definition);
+        console.log("log is", data.definition);
+        console.log("response is", response);
+        setResponse2(data.definition+"When to avoid long sentences:Clarity:If a sentence becomes too long, it can become difficult to follow, leading to confusion for the reader. Overuse:Overusing long sentences can lead to a monotonous reading experience and can make the writing sound overly complex. Lack of Emphasis:If a long sentence doesn't have a clear main point, it can lose its effectiveness and become just a long, rambling thought. Run-on Sentences:Avoid incorrectly formed run-on sentences where multiple independent clauses are strung together without proper punctuation. ");
+        setLoading2(false);
+        setLoading(false);
+        
+
+        // // Display the text summary after submission
+        // highlightRect.on("mousedown", () => {
+        //   console.log("rect is pressed");
+        //   if (!isPopupOpen) {
+        //     openPopup(data.definition);
+        //   } else {
+        //     closePopup();
+        //   }
+        // });
+        // setLoading(false);
+        //canvas.renderAll();
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setResponse("An Error occurred while submitting the form.");
+      });
+  };
+
+
+  // const handleSubmit = async () => {
+  //   setLoading2(true);
+
+  //   // Simulating a backend call
+  //   setTimeout(() => {
+  //     setResponse2(`Received input: ${userInput}. This is a simulated response. You can replace this with actual backend logic. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`);
+  //     setLoading2(false);
+  //   }, 10000); // Simulate backend loading time (2 seconds)
+  // };
+
+    // State to control whether the accordion is open or closed
+    const [isOpen, setIsOpen] = useState(true);
+    const [showAI, setshowAI] = useState(false);
+
+    // Toggle function to open/close the accordion
+    const toggleAccordion = () => {
+      setIsOpen(prevState => !prevState);
+    };
+
   return (
     
     <div
@@ -2149,6 +2194,9 @@ const CanvasEditor = () => {
           Use landscape for best experience📱🔄
         </div>
       )}
+
+      
+      
 
       {true && (
         <div
@@ -2976,6 +3024,234 @@ const CanvasEditor = () => {
               }}
             />
           </div>
+
+          {showAI &&(<motion.div
+      style={{
+        position: "fixed",
+        top: "10vh",
+        margin: 20,
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        background: "linear-gradient(135deg, rgba(9, 102, 141), rgba(69, 3, 139))",
+        borderRadius: 16,
+        boxShadow: "0 0 20px rgba(0,0,0,0.2)",
+        fontFamily: "sans-serif",
+        width: "400px",
+        height: isOpen ? "500px" : "60px", // Changes height when opened
+        overflowY:  "hidden",
+        transition: "height 0.5s ease-in-out" // Smooth height transition
+      }}
+    >
+      {/* Header for Accordion */}
+      <motion.div
+        onClick={toggleAccordion}
+        style={{
+          padding: "15px",
+          color: "white",
+          borderRadius: "16px 16px 0 0",
+          cursor: "pointer",
+          textAlign: "center",
+          display: "flex",
+          justifyContent: "space-between", // Space between the toggle and button
+          alignItems: "center", // Align items in the center vertically
+        }}
+        whileTap={{ scale: 0.9 }}  // Tap effect
+      >
+        <div>{isOpen ? "﹣" : "＋"}</div> {/* Toggle Icon */}
+
+       {!isOpen &&( <img
+    src="inkai-removebg-preview.png" // Replace with actual logo URL
+    alt="Logo"
+    style={{ height: '30px', width: '30px' }}
+  />)}
+
+        {/* Button on the right side */}
+        <motion.button
+        onClick={() => {
+          setshowAI(false);
+        }}          style={{
+          padding: "10px 10px",
+            background: "#ff5100",
+            color: "white",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+          whileTap={{ scale: 0.9 }}  // Tap effect for the button
+        >
+          X
+        </motion.button>
+      </motion.div>
+      
+
+      {/* Warping Box with Animation */}
+      {loading2 && (
+        <motion.div
+  style={{
+    position: 'absolute',
+    top: '0%',
+    left: '0%',
+    transform: 'translate(-50%, -50%)',
+    width: '400px',
+    height: '500px',
+    background: 'linear-gradient(135deg, rgba(90, 72, 255, 0.51), rgba(168, 106, 255, 0.51), rgba(216, 109, 255, 0.57), rgba(158, 129, 255, 0.57))',
+    borderRadius: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontWeight: 'bold',
+    pointerEvents: 'none',
+    filter: 'blur(5px) saturate(250%) brightness(1.2)',
+    boxShadow: '0 0 100px rgb(247, 149, 103)',
+    backgroundSize: '400% 400%',
+  }}
+  initial={{ scale: 0.9, rotate: 0, opacity: 0 }}
+  animate={{
+    scale: [0.97, 0.94, 0.97],
+    rotate: [0.2, 0.4, -0.4, 0.2],
+    opacity: 0.7,
+    backgroundPosition: ['0% 10%', '10% 0%', '0% 10%',],
+  }}
+  transition={{
+    duration: 0.5,
+    ease: 'easeInOut',
+    repeatType: 'mirror',
+    repeat: Infinity,
+  }}
+>
+</motion.div>
+
+      )}
+      <div
+  style={{
+    flexGrow: 1,
+    overflowY: "auto",
+    padding: "10px 20px",
+    maxHeight: "calc(500px - 60px)", // 500 total height - 60 header height
+  }}
+>
+
+              {/* Logo*/}
+              <div
+  style={{
+    marginTop: '20px',
+    fontSize: '18px',
+    color: 'white',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column', // Stack items vertically
+    gap: '10px', // spacing between logo and text
+    color:'white'
+  }}
+>
+  <img
+    src="inkai-removebg-preview.png" // Replace with actual logo URL
+    alt="Logo"
+    style={{ height: '50px', width: '50px' }}
+  />
+  Gemini AI
+</div>
+
+
+        {/* Input Display */}
+        {userInput && userdone && (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'flex-end', // Pushes content to the right
+      width: '100%',
+      marginTop: '20px',
+    }}
+  >
+    <div
+      style={{
+        maxWidth: '90%',
+        fontSize: '18px',
+        color: 'white',
+        backgroundColor: 'rgba(65, 221, 185, 0.82)',
+        padding: '10px',
+        borderRadius: '8px',
+        textAlign: 'right', // Optional: aligns text inside the bubble
+      }}
+    >
+{`(Canvas Snip)\n${userInput}`}
+</div>
+  </div>
+)}
+
+
+      {/* Response Display */}
+      {response2 && !loading2 && (
+        <div style={{ width:"90%",marginBottom:'20px',marginTop: '20px', fontSize: '18px', color: 'white',backgroundColor: 'rgba(255, 134, 35, 0.82)', padding: '10px', borderRadius: '8px', }}>
+          {response2}
+        </div>
+      )}</div>
+
+{!userdone && ( <div
+  style={{
+    width: '400px',
+    height: '500px',
+    borderRadius: '12px',
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end', // Push to bottom
+    position: 'relative',
+  }}
+>
+  {/* User Input Box */}
+  <div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px', // adds space between input and button
+    width: '90%',
+    marginTop: '20px',
+  }}
+>
+  <input
+    type="text"
+    value={userInput}
+    onChange={(e) => setUserInput(e.target.value)}
+    placeholder="Enter something..."
+    style={{
+      padding: '10px',
+      fontSize: '16px',
+      borderRadius: '8px',
+      border: '1px solid #ccc',
+      flex: 1, // makes the input take up available space
+    }}
+  />
+  <button
+      onClick={() => {
+          handleSubmit();
+          setuserdone(true);
+      }}
+    style={{
+      padding: '10px 20px',
+      borderRadius: '8px',
+      background: '#ff5100',
+      color: 'white',
+      border: 'none',
+      cursor: 'pointer',
+    }}
+  >
+    ➤
+  </button>
+</div>
+
+</div>)}
+
+    </motion.div>)}
+
+          
 
           {showquiz && (
   <div

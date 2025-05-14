@@ -62,7 +62,7 @@ body::-webkit-scrollbar {
 /* 3) Content area */
 .landingContent {
   flex: 1;
-  background: #000239;
+  background: linear-gradient( rgb(41, 152, 255),rgb(0, 0, 0));
   padding: 6.5rem;
   display: flex;
   flex-direction: column;

@@ -359,11 +359,20 @@ def summarize_user_written():
 def summarize_AI_written():
     # Get the subtitle from the incoming request
     data = request.get_json()
+
+    image_data = base64.b64decode(data['img'])
+    image_file = BytesIO(image_data)
+    
+
+    response = client.models.generate_content(
+    model="gemini-2.0-flash", contents=[types.Part.from_bytes(data=image_file.read(),mime_type='image/png',),f"Can you generate a student-friendly response or definition to the information in the picture. Make sure the response is within the following context if given: {data['topic']}, and it should answer the user's question if given: {data['extra']}"
+    ]
+    )
     
     # Assuming you have a model object that can generate content based on the subtitle
-    response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 30-35 words to define the following phrase: {ocr_from_base64(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}"
-    )
+    # response = client.models.generate_content(
+    # model="gemini-2.0-flash", contents=f"Can you generate a short simplistic definition type response to the following phrase that is max 30-35 words to define the following phrase: {ocr_from_base64(data['img'])}, Make sure the definition is within the following context if given: {data['topic']}, and it should answer the user's question if given: {data['extra']}"
+    # )
     
     # Return the AI-generated summary as a JSON response
     return jsonify({"definition": response.text})  # Ensure the response is correctly wrapped in a dictionary for jsonify
