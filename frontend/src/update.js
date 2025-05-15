@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const CURRENT_VERSION = '1.8.0-beta';
+const CURRENT_VERSION = '1.9.0-beta';
 
 function UpdatePopup() {
   const [showPopup, setShowPopup] = useState(false);
@@ -18,14 +18,11 @@ function UpdatePopup() {
   return (
     <div style={styles.overlay}>
       <div style={styles.popup}>
-        <h2>🥳 New Stuff in InkQuizly! v{CURRENT_VERSION}</h2>
+        <h2>🥳 Welcome to InkQuizly Pilot Release! v{CURRENT_VERSION}</h2>
         <ul>
-          <li>Extraordinary new Gemini Capabilities with PDF (PRO)</li>
-          <li>💾 Auto-save every 5 minutes</li>
-          <li>🪄 Auto Correction for Lines and Circles</li>
-          <li>😌 UIX updates for smoother experience</li>
-          <li>📂 FOLDERS!! for your convenience</li>
-          <h3>Pilot releasing soon!</h3>
+          <li>Let us know any issues or feedback by clicking on ⚠️</li>
+          <li>Request a 15-day free trial to check out the PRO features!</li>
+          <h3>🎉 Congrats! You've just been entered into an exclusive raffle for 5 free PRO upgrades!</h3>
         </ul>
         <button onClick={() => setShowPopup(false)} style={styles.button}>
           Close

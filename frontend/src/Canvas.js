@@ -357,6 +357,8 @@ const CanvasEditor = () => {
           })
           .then(() => {})
           .catch((error) => {
+            // alert("Server facing high load, please try again later.");
+            // setLoading(false);
             console.error("Error:", error);
             setResponse("An Error occurred while submitting the form.");
           });
@@ -739,6 +741,8 @@ const CanvasEditor = () => {
           setIsSaving(false);
         })
         .catch((error) => {
+          alert("Please check your internet connection.");
+            // setLoading(false);
           console.error("Error:", error);
           setResponse("An Error occurred while submitting the form.");
         });
@@ -927,6 +931,8 @@ const CanvasEditor = () => {
             canvas.renderAll();
           })
           .catch((error) => {
+            alert("Google Gemini is currently overloaded, please try again later.");
+            setLoading(false);
             console.error("Error:", error);
             setResponse("An Error occurred while submitting the form.");
           });
@@ -976,6 +982,7 @@ const CanvasEditor = () => {
           console.log("img4:", img4);
         })
         .catch((error) => {
+          alert("Couldn't find images, please try later.");
           console.error("Error:", error);
           setResponse("An Error occurred while submitting the form.");
         });
@@ -1694,6 +1701,7 @@ const CanvasEditor = () => {
       setActiveTool("point");
       canvas.renderAll();
     } catch (error) {
+      
       console.error("Error loading image:", error);
     }
   };
@@ -1884,6 +1892,8 @@ const CanvasEditor = () => {
             canvas.renderAll();
           })
           .catch((error) => {
+            alert("Google Gemini is overloaded, please try again later.");
+            setLoading(false);
             console.error("Error:", error);
             setResponse("An Error occurred while submitting the form.");
           });
@@ -2133,6 +2143,8 @@ const CanvasEditor = () => {
         //canvas.renderAll();
       })
       .catch((error) => {
+        alert("Google Gemini is overloaded, please try again later.");
+        setLoading2(false);
         console.error("Error:", error);
         setResponse("An Error occurred while submitting the form.");
       });
