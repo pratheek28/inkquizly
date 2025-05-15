@@ -346,9 +346,9 @@ def summarize_user_written():
     
     # Assuming you have a model object that can generate content based on the subtitle
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=[types.Part.from_bytes(data=image_file.read(),mime_type='image/png',),"Can you generate a response to the photo with max 20 lines and is super understandable to any students like a textbook paragraph? " \
+    model="gemini-2.0-flash", contents=[types.Part.from_bytes(data=image_file.read(),mime_type='image/png',),"Can you generate a response to the information inside the photo with max 20 lines and is super understandable to any students like a textbook paragraph? " \
                                       "Make sure that it is comprehensive yet super concise so that any student, regardless of their prior knowledge, will quickly understand " \
-                                      f"and be able to also learn the implications of this and its application"]
+                                      f"and be able to also learn the implications of this and its application. Please don't say stuff like the photo shows."]
     )
     
     # Return the AI-generated summary as a JSON response
