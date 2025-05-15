@@ -7,6 +7,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from 'react-markdown';
+
 
 
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
@@ -2113,7 +2115,7 @@ const CanvasEditor = () => {
         setResponse(data.definition);
         console.log("log is", data.definition);
         console.log("response is", response);
-        setResponse2(data.definition+"When to avoid long sentences:Clarity:If a sentence becomes too long, it can become difficult to follow, leading to confusion for the reader. Overuse:Overusing long sentences can lead to a monotonous reading experience and can make the writing sound overly complex. Lack of Emphasis:If a long sentence doesn't have a clear main point, it can lose its effectiveness and become just a long, rambling thought. Run-on Sentences:Avoid incorrectly formed run-on sentences where multiple independent clauses are strung together without proper punctuation. ");
+        setResponse2(data.definition);
         setLoading2(false);
         setLoading(false);
         
@@ -3189,8 +3191,8 @@ const CanvasEditor = () => {
       {/* Response Display */}
       {response2 && !loading2 && (
         <div style={{ width:"90%",marginBottom:'20px',marginTop: '20px', fontSize: '18px', color: 'white',backgroundColor: 'rgba(255, 134, 35, 0.82)', padding: '10px', borderRadius: '8px', }}>
-          {response2}
-        </div>
+    <ReactMarkdown>{response2}</ReactMarkdown>
+    </div>
       )}</div>
 
 {!userdone && ( <div
@@ -3220,7 +3222,7 @@ const CanvasEditor = () => {
     type="text"
     value={userInput}
     onChange={(e) => setUserInput(e.target.value)}
-    placeholder="Enter something..."
+    placeholder="(Optional)Enter something..."
     style={{
       padding: '10px',
       fontSize: '16px',
