@@ -31,7 +31,7 @@ class DLM:
 
         # articles & determiners (words that don't add meaning to sentence)
         "a", "an", "the", "some", "any", "each", "every", "either", "neither", "this", "that", "these", "those",
-        "certain", "another", "such", "whatsoever", "whichever", "whomever", "whatever", "all",
+        "certain", "another", "such", "whatsoever", "whichever", "whomever", "whatever", "all", "inkquizly",
 
         # pronouns (general pronouns that don’t change meaning)
         "i", "me", "my", "mine",
