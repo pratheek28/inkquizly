@@ -300,7 +300,7 @@ export default function LandingPage() {
     fontSize: "2.5rem",
     fontWeight: "bold",
     lineHeight: "1.6",
-    marginTop: "1900px",
+    marginTop: "3100px",
   }}
 >
 <p
