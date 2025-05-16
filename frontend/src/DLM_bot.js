@@ -62,7 +62,7 @@ const DLMBot = () => {
   const circle = {
     position: "fixed",
     bottom: "1rem",
-    left: "1rem",
+    right: "1rem",
     width: "60px",
     height: "60px",
     borderRadius: "50%",
@@ -81,7 +81,7 @@ const DLMBot = () => {
   const windowStyle = {
     position: "fixed",
     bottom: "4rem",
-    left: "1rem",
+    right: "1rem",
     width: "320px",
     maxHeight: "450px",
     background: "#ffffff",
