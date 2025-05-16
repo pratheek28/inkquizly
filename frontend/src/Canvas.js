@@ -1565,8 +1565,8 @@ const CanvasEditor = () => {
     setIsOpen(true);
 
     let topics = "";
-    setLoadingText("Analyzing with context.");
-    setLoading(true);
+    // setLoadingText("Analyzing with context.");
+    // setLoading(true);
     canvas.remove(highlightRect);
 
     // Highlight bolding
