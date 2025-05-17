@@ -657,7 +657,7 @@ export default function LandingPage() {
   transition={{ duration: 1 }}
   style={{
     width: "100%",
-    padding: "50px 20px",
+    padding: "50px 0",
     textAlign: "center",
     fontSize: "2.5rem",
     fontWeight: "bold",
@@ -800,16 +800,16 @@ export default function LandingPage() {
 </section>  */}
 
 
-        {/* …add more sections here… */}
-      </div>
-      <div
-  style={{
-    color: 'white',
-    textAlign: 'center',
-    padding: '50px',
-    fontFamily: 'Segoe UI, sans-serif',
-    fontSize: '20px'
-  }}
+  {/* …add more sections here… */}
+  </div>
+    <div
+    style={{
+      color: 'white',
+      textAlign: 'center',
+      padding: '50px',
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: '20px'
+    }}
 >
   InkQuizly © 2025
 </div>
