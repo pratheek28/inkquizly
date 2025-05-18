@@ -3101,7 +3101,7 @@ const CanvasEditor = () => {
       
 
       {/* Warping Box with Animation */}
-      {loading2 && (
+      {/* {loading2 && (
         <motion.div
   style={{
     position: 'absolute',
@@ -3138,7 +3138,7 @@ const CanvasEditor = () => {
 >
 </motion.div>
 
-      )}
+      )} */}
       <div
   style={{
     flexGrow: 1,
