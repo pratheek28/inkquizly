@@ -1,30 +1,33 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import SignUp from './SignUp';
-import NavBar from './NavigationBar';
-import Login from './Login';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import SignUp from "./SignUp";
+import NavBar from "./NavigationBar";
+import Login from "./Login";
 import Landing from "./LandingPage";
-import reportWebVitals from './reportWebVitals';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; 
-import App from "./App"
+import reportWebVitals from "./reportWebVitals";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import App from "./App";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register('/service-worker.js')
+      .register("/service-worker.js")
       .then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
+        console.log(
+          "Service Worker registered with scope:",
+          registration.scope,
+        );
       })
       .catch((error) => {
-        console.log('Service Worker registration failed:', error);
+        console.log("Service Worker registration failed:", error);
       });
   });
 }

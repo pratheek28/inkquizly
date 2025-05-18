@@ -1,10 +1,10 @@
 {
-    "overrides": [
-      {
-        "files": ["src/service-worker.js"],
-        "env": {
-          "serviceworker": true
-        }
+  "overrides": [
+    {
+      "files": ["src/service-worker.js"],
+      "env": {
+        "serviceworker": true
       }
-    ]
-  }  
+    }
+  ]
+}

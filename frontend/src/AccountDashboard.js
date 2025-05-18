@@ -328,7 +328,11 @@ function AccountDashboard() {
 
     const params = new URLSearchParams({
       action: "sendEmail",
-      to: ["pranavgowrish@gmail.com","pratheek0928@gmail.com","vignesh.tho2006@gmail.com"],
+      to: [
+        "pranavgowrish@gmail.com",
+        "pratheek0928@gmail.com",
+        "vignesh.tho2006@gmail.com",
+      ],
       subject: "InkQuizly Feedback from " + user.name,
       body: feedback,
       fromName: "InkQuizly App",

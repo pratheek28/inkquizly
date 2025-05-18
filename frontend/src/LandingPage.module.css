@@ -6,7 +6,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: scroll;    /* no window-level scrolling or scrollbars */
+  overflow: scroll; /* no window-level scrolling or scrollbars */
 }
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
@@ -19,14 +19,17 @@ body::-webkit-scrollbar {
 
 /* 1) LandingPage: full-screen fixed container that scrolls vertically */
 .landingPage {
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
   display: flex;
   flex-direction: column;
   width: 100vw;
   height: 100vh;
 
-  overflow-y: auto;   /* allow vertical scrolling */
+  overflow-y: auto; /* allow vertical scrolling */
   overflow-x: hidden; /* prevent horizontal scrolling */
 
   /* hide its scrollbars in Firefox */
@@ -62,7 +65,7 @@ body::-webkit-scrollbar {
 /* 3) Content area */
 .landingContent {
   flex: 1;
-  background: linear-gradient( rgb(41, 152, 255),rgb(0, 0, 0));
+  background: linear-gradient(rgb(41, 152, 255), rgb(0, 0, 0));
   padding: 6.5rem;
   display: flex;
   flex-direction: column;
@@ -77,7 +80,7 @@ body::-webkit-scrollbar {
 }
 .section h2 {
   font-size: 3rem;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
   background: linear-gradient(90deg, #2893fe, #e52e71);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -85,7 +88,7 @@ body::-webkit-scrollbar {
 .section p {
   font-size: 1.5rem;
   line-height: 1.5;
-  margin: .5rem 0;
+  margin: 0.5rem 0;
   color: #f0f0f0;
 }
 .section ul {
@@ -98,7 +101,7 @@ body::-webkit-scrollbar {
 .section li {
   position: relative;
   padding-left: 1.5em;
-  margin: .7rem 0;
+  margin: 0.7rem 0;
   font-size: 1.8rem;
   color: #f0f0f0;
 }

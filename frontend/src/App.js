@@ -6,10 +6,9 @@ import NavigationBar from "./NavigationBar";
 import Login from "./Login";
 import SignUp from "./SignUp";
 import AccountDashboard from "./AccountDashboard";
-import CanvasEditor from './Canvas';
+import CanvasEditor from "./Canvas";
 import PWAInstallPrompt from "./pwa";
 import iOSInstallPopup from "./iOSInstallPopup";
-
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -25,17 +24,25 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{
-        height: '100vh',
-        width: '100vw',
-        backgroundColor: 'black',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column'
-      }}>
-        <img src="/512logo.png" alt="Loading..." style={{ width: '150px', height: '150px' }} />
-        <p style={{ marginTop: '20px', fontSize: '20px',color:'white' }}>InkQuizly</p>
+      <div
+        style={{
+          height: "100vh",
+          width: "100vw",
+          backgroundColor: "black",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        <img
+          src="/512logo.png"
+          alt="Loading..."
+          style={{ width: "150px", height: "150px" }}
+        />
+        <p style={{ marginTop: "20px", fontSize: "20px", color: "white" }}>
+          InkQuizly
+        </p>
       </div>
     );
   }

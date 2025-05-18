@@ -7,9 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactMarkdown from 'react-markdown';
-
-
+import ReactMarkdown from "react-markdown";
 
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -57,7 +55,7 @@ const CanvasEditor = () => {
   // State for floating icon (draggable)
   const [floatingIconPosition, setFloatingIconPosition] = useState({
     x: 150,
-    y: (window.innerHeight / 2)+20,
+    y: window.innerHeight / 2 + 20,
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -365,7 +363,6 @@ const CanvasEditor = () => {
       };
 
       handleSubmitload(); // Submit the data to the backend
-
     } else {
       for (let i = 0; i < numPages; i++) {
         const canvas = new fabric.Canvas(canvasRef.current[i], {
@@ -698,9 +695,7 @@ const CanvasEditor = () => {
     });
 
     const indices = canvases.map((canvas, index) => index);
-    const datas = canvases.map(
-      (canvas) => JSON.stringify(canvas.toJSON()),
-    );
+    const datas = canvases.map((canvas) => JSON.stringify(canvas.toJSON()));
 
     console.log("HELLOOOOdatasin:", datas);
     console.log("userkey:", key);
@@ -742,7 +737,7 @@ const CanvasEditor = () => {
         })
         .catch((error) => {
           alert("Please check your internet connection.");
-            // setLoading(false);
+          // setLoading(false);
           console.error("Error:", error);
           setResponse("An Error occurred while submitting the form.");
         });
@@ -766,28 +761,26 @@ const CanvasEditor = () => {
   const options = current
     ? [`A. ${current.A}`, `B. ${current.B}`, `C. ${current.C}`]
     : [];
-  const choiceIndex = current? { A: 0, B: 1, C: 2 }[current.Check] : null;
+  const choiceIndex = current ? { A: 0, B: 1, C: 2 }[current.Check] : null;
   console.log("choiceIndex", choiceIndex);
 
+  const handleNext = () => {
+    if (currentIndex < mcqs.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setSelectedOption(null);
+    }
+  };
 
-    const handleNext = () => {
-      if (currentIndex < mcqs.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedOption(null);
-      }
-    };
-  
-    const handleBack = () => {
-      if (currentIndex > 0) {
-        setCurrentIndex(currentIndex - 1);
-        setSelectedOption(null);
-      }
-    };
+  const handleBack = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setSelectedOption(null);
+    }
+  };
   const [selectedOption, setSelectedOption] = useState(null);
 
-
-  const handleMCQ = (state=false) => {
-    if(showquiz === true && state === false){
+  const handleMCQ = (state = false) => {
+    if (showquiz === true && state === false) {
       setshowquiz(false);
       const canvas = canvases[activeCanvasIndex];
       canvas.off("mouse:down");
@@ -796,7 +789,7 @@ const CanvasEditor = () => {
       setActiveTool("point");
       return;
     }
-    if(question!=null && state === false){
+    if (question != null && state === false) {
       setshowquiz(true);
       const canvas = canvases[activeCanvasIndex];
       canvas.off("mouse:down");
@@ -868,15 +861,12 @@ const CanvasEditor = () => {
     canvas.on("mouse:down", onMouseDown);
     canvas.on("mouse:move", onMouseMove);
     canvas.on("mouse:up", onMouseUp);
-
   };
-
 
   const createmcq = async (rect) => {
     const canvas = canvases[activeCanvasIndex];
 
     if (!canvas || !rect) return;
-
 
     canvas.renderAll();
 
@@ -897,51 +887,50 @@ const CanvasEditor = () => {
 
     //canvas.remove(rect);
 
+    console.log("mcq button was pressed with topic", topic);
+    // Send topic to Python code here for summary
+    let data = topic;
 
-      console.log("mcq button was pressed with topic", topic);
-      // Send topic to Python code here for summary
-      let data = topic;
+    const loadingGif = document.getElementById("loading-gif");
+    setLoadingText("Crafting quiz to test your knowledge.");
+    setLoading(true);
 
-      const loadingGif = document.getElementById("loading-gif");
-      setLoadingText("Crafting quiz to test your knowledge.");
-      setLoading(true);
+    // Handle form submission to backend
+    const handleSubmit = () => {
+      fetch("https://inkquizly.onrender.com/getmcq", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topic: data }), // Send data as an object with topic
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setResponse(data.summary);
+          console.log("log is", data);
 
-      // Handle form submission to backend
-      const handleSubmit = () => {
-        fetch("https://inkquizly.onrender.com/getmcq", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ topic: data }), // Send data as an object with topic
+          // Display the text summary after submission
+          setMcqs(data);
+          setCurrentIndex(0);
+          setSelectedOption(null);
+
+          setLoading(false);
+          canvas.remove(rect);
+
+          canvas.renderAll();
         })
-          .then((response) => response.json())
-          .then((data) => {
-            setResponse(data.summary);
-            console.log("log is", data);
+        .catch((error) => {
+          alert(
+            "Google Gemini is currently overloaded, please try again later.",
+          );
+          setLoading(false);
+          console.error("Error:", error);
+          setResponse("An Error occurred while submitting the form.");
+        });
+    };
 
-            // Display the text summary after submission
-            setMcqs(data);
-            setCurrentIndex(0);
-            setSelectedOption(null);
-      
-            setLoading(false);
-            canvas.remove(rect);
-
-            canvas.renderAll();
-          })
-          .catch((error) => {
-            alert("Google Gemini is currently overloaded, please try again later.");
-            setLoading(false);
-            console.error("Error:", error);
-            setResponse("An Error occurred while submitting the form.");
-          });
-      };
-
-      handleSubmit(); // Submit the data to the backend
-
+    handleSubmit(); // Submit the data to the backend
   };
-
 
   //let img1='';
   const [img1, setimg1] = useState(null);
@@ -1559,7 +1548,7 @@ const CanvasEditor = () => {
     // }
 
     console.log("rect=", highlightRect);
-    setUserInput('');
+    setUserInput("");
     setuserdone(false);
     setResponse2(null);
     setIsOpen(true);
@@ -1701,7 +1690,6 @@ const CanvasEditor = () => {
       setActiveTool("point");
       canvas.renderAll();
     } catch (error) {
-      
       console.error("Error loading image:", error);
     }
   };
@@ -2103,8 +2091,7 @@ const CanvasEditor = () => {
     };
   }, []); // Empty dependency array ensures the effect runs only once
 
-
-  const [userInput, setUserInput] = useState('');
+  const [userInput, setUserInput] = useState("");
   const [response2, setResponse2] = useState(null);
   const [loading2, setLoading2] = useState(false);
   const [userdone, setuserdone] = useState(false);
@@ -2118,7 +2105,11 @@ const CanvasEditor = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ topic: topicsforai, img: dataforai, extra:userInput }), // Send data as an object with topic
+      body: JSON.stringify({
+        topic: topicsforai,
+        img: dataforai,
+        extra: userInput,
+      }), // Send data as an object with topic
     })
       .then((response) => response.json())
       .then((data) => {
@@ -2128,7 +2119,6 @@ const CanvasEditor = () => {
         setResponse2(data.definition);
         setLoading2(false);
         setLoading(false);
-        
 
         // // Display the text summary after submission
         // highlightRect.on("mousedown", () => {
@@ -2150,7 +2140,6 @@ const CanvasEditor = () => {
       });
   };
 
-
   // const handleSubmit = async () => {
   //   setLoading2(true);
 
@@ -2161,17 +2150,16 @@ const CanvasEditor = () => {
   //   }, 10000); // Simulate backend loading time (2 seconds)
   // };
 
-    // State to control whether the accordion is open or closed
-    const [isOpen, setIsOpen] = useState(true);
-    const [showAI, setshowAI] = useState(false);
+  // State to control whether the accordion is open or closed
+  const [isOpen, setIsOpen] = useState(true);
+  const [showAI, setshowAI] = useState(false);
 
-    // Toggle function to open/close the accordion
-    const toggleAccordion = () => {
-      setIsOpen(prevState => !prevState);
-    };
+  // Toggle function to open/close the accordion
+  const toggleAccordion = () => {
+    setIsOpen((prevState) => !prevState);
+  };
 
   return (
-    
     <div
       style={
         isPhone
@@ -2208,9 +2196,6 @@ const CanvasEditor = () => {
           Use landscape for best experience📱🔄
         </div>
       )}
-
-      
-      
 
       {true && (
         <div
@@ -2952,7 +2937,8 @@ const CanvasEditor = () => {
                 }}
               >
                 <p style={{ margin: 0, whiteSpace: "pre" }}>
-                  PEN              MARKER            PALLET               HLTR              ERASER              TEXT             TITLE-HLTR      AI-HLTR            POINTER           UNDO            REDO
+                  PEN MARKER PALLET HLTR ERASER TEXT TITLE-HLTR AI-HLTR POINTER
+                  UNDO REDO
                 </p>
               </div>
             )}
@@ -3039,395 +3025,411 @@ const CanvasEditor = () => {
             />
           </div>
 
-          {showAI &&(<motion.div
-      style={{
-        position: "fixed",
-        top: "10vh",
-        margin: 20,
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        background: "linear-gradient(135deg, rgba(9, 102, 141), rgba(69, 3, 139))",
-        borderRadius: 16,
-        boxShadow: "0 0 20px rgba(0,0,0,0.2)",
-        fontFamily: "sans-serif",
-        width: "400px",
-        height: isOpen ? "500px" : "60px", // Changes height when opened
-        overflowY:  "hidden",
-        transition: "height 0.5s ease-in-out" // Smooth height transition
-      }}
-    >
-      {/* Header for Accordion */}
-      <motion.div
-        onClick={toggleAccordion}
-        style={{
-          padding: "15px",
-          color: "white",
-          borderRadius: "16px 16px 0 0",
-          cursor: "pointer",
-          textAlign: "center",
-          display: "flex",
-          justifyContent: "space-between", // Space between the toggle and button
-          alignItems: "center", // Align items in the center vertically
-        }}
-        whileTap={{ scale: 0.9 }}  // Tap effect
-      >
-        <div>{isOpen ? "﹣" : "＋"}</div> {/* Toggle Icon */}
-
-       {!isOpen &&( <img
-    src="inkai-removebg-preview.png" // Replace with actual logo URL
-    alt="Logo"
-    style={{ height: '30px', width: '30px' }}
-  />)}
-
-        {/* Button on the right side */}
-        <motion.button
-        onClick={() => {
-          setshowAI(false);
-        }}          style={{
-          padding: "10px 10px",
-            background: "#ff5100",
-            color: "white",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "14px",
-          }}
-          whileTap={{ scale: 0.9 }}  // Tap effect for the button
-        >
-          X
-        </motion.button>
-      </motion.div>
-      
-
-      {/* Warping Box with Animation */}
-      {loading2 && (
-        <motion.div
-  style={{
-    position: 'absolute',
-    top: '0%',
-    left: '0%',
-    transform: 'translate(-50%, -50%)',
-    width: '400px',
-    height: '500px',
-    background: 'linear-gradient(135deg, rgba(90, 72, 255, 0.51), rgba(168, 106, 255, 0.51), rgba(216, 109, 255, 0.57), rgba(158, 129, 255, 0.57))',
-    borderRadius: '24px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontWeight: 'bold',
-    pointerEvents: 'none',
-    filter: 'blur(5px) saturate(250%) brightness(1.2)',
-    boxShadow: '0 0 100px rgb(247, 149, 103)',
-    backgroundSize: '400% 400%',
-  }}
-  initial={{ scale: 0.9, rotate: 0, opacity: 0 }}
-  animate={{
-    scale: [0.97, 0.94, 0.97],
-    rotate: [0.2, 0.4, -0.4, 0.2],
-    opacity: 0.7,
-    backgroundPosition: ['0% 10%', '10% 0%', '0% 10%',],
-  }}
-  transition={{
-    duration: 0.5,
-    ease: 'easeInOut',
-    repeatType: 'mirror',
-    repeat: Infinity,
-  }}
->
-</motion.div>
-
-      )}
-      <div
-  style={{
-    flexGrow: 1,
-    overflowY: "auto",
-    padding: "10px 20px",
-    maxHeight: "calc(500px - 60px)", // 500 total height - 60 header height
-  }}
->
-
-              {/* Logo*/}
-              <div
-  style={{
-    marginTop: '20px',
-    fontSize: '18px',
-    color: 'white',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column', // Stack items vertically
-    gap: '10px', // spacing between logo and text
-    color:'white'
-  }}
->
-  <img
-    src="inkai-removebg-preview.png" // Replace with actual logo URL
-    alt="Logo"
-    style={{ height: '50px', width: '50px' }}
-  />
-  Gemini AI
-</div>
-
-
-        {/* Input Display */}
-        {userInput && userdone && (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'flex-end', // Pushes content to the right
-      width: '100%',
-      marginTop: '20px',
-    }}
-  >
-    <div
-      style={{
-        maxWidth: '90%',
-        fontSize: '18px',
-        color: 'white',
-        backgroundColor: 'rgba(65, 221, 185, 0.82)',
-        padding: '10px',
-        borderRadius: '8px',
-        textAlign: 'right', // Optional: aligns text inside the bubble
-      }}
-    >
-{`(Canvas Snip)\n${userInput}`}
-</div>
-  </div>
-)}
-
-
-      {/* Response Display */}
-      {response2 && !loading2 && (
-        <div style={{ width:"90%",marginBottom:'20px',marginTop: '20px', fontSize: '18px', color: 'white',backgroundColor: 'rgba(255, 134, 35, 0.82)', padding: '10px', borderRadius: '8px', }}>
-    <ReactMarkdown>{response2}</ReactMarkdown>
-    </div>
-      )}</div>
-
-{!userdone && ( <div
-  style={{
-    width: '400px',
-    height: '500px',
-    borderRadius: '12px',
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-end', // Push to bottom
-    position: 'relative',
-  }}
->
-  {/* User Input Box */}
-  <div
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '10px', // adds space between input and button
-    width: '90%',
-    marginTop: '20px',
-  }}
->
-  <input
-    type="text"
-    value={userInput}
-    onChange={(e) => setUserInput(e.target.value)}
-    placeholder="(Optional)Enter something..."
-    style={{
-      padding: '10px',
-      fontSize: '16px',
-      borderRadius: '8px',
-      border: '1px solid #ccc',
-      flex: 1, // makes the input take up available space
-    }}
-  />
-  <button
-      onClick={() => {
-          handleSubmit();
-          setuserdone(true);
-      }}
-    style={{
-      padding: '10px 20px',
-      borderRadius: '8px',
-      background: '#ff5100',
-      color: 'white',
-      border: 'none',
-      cursor: 'pointer',
-    }}
-  >
-    ➤
-  </button>
-</div>
-
-</div>)}
-
-    </motion.div>)}
-
-          
-
-          {showquiz && (
-  <div
-    style={{
-      position: "fixed",
-      top: question ? "45vh" : "85vh",
-      width: '400px',
-      padding: '20px',
-      border: '2px solid #333',
-      borderRadius: '10px',
-      backgroundColor: 'rgba(4, 8, 75, 0.87)',
-      margin: '20px auto',
-      boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.85)',
-      fontFamily: 'Arial, sans-serif',
-      zIndex: 10000,
-      color:"white",
-    }}
-  >
-{question ? (
-        <div
-        // style={{
-        //   width: '400px',
-        //   padding: '20px',
-        //   border: '2px solid #333',
-        //   borderRadius: '8px',
-        //   backgroundColor: '#f9f9f9',
-        //   margin: '20px auto',
-        //   boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-        //   fontFamily: 'Arial, sans-serif'
-        // }}
-      >
-        <div
-  style={{
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center", // Optional: use this if you want vertical centering too
-  }}
->
-        <button
+          {showAI && (
+            <motion.div
+              style={{
+                position: "fixed",
+                top: "10vh",
+                margin: 20,
+                zIndex: 9999,
+                display: "flex",
+                flexDirection: "column",
+                background:
+                  "linear-gradient(135deg, rgba(9, 102, 141), rgba(69, 3, 139))",
+                borderRadius: 16,
+                boxShadow: "0 0 20px rgba(0,0,0,0.2)",
+                fontFamily: "sans-serif",
+                width: "400px",
+                height: isOpen ? "500px" : "60px", // Changes height when opened
+                overflowY: "hidden",
+                transition: "height 0.5s ease-in-out", // Smooth height transition
+              }}
+            >
+              {/* Header for Accordion */}
+              <motion.div
+                onClick={toggleAccordion}
+                style={{
+                  padding: "15px",
+                  color: "white",
+                  borderRadius: "16px 16px 0 0",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  display: "flex",
+                  justifyContent: "space-between", // Space between the toggle and button
+                  alignItems: "center", // Align items in the center vertically
+                }}
+                whileTap={{ scale: 0.9 }} // Tap effect
+              >
+                <div>{isOpen ? "﹣" : "＋"}</div> {/* Toggle Icon */}
+                {!isOpen && (
+                  <img
+                    src="inkai-removebg-preview.png" // Replace with actual logo URL
+                    alt="Logo"
+                    style={{ height: "30px", width: "30px" }}
+                  />
+                )}
+                {/* Button on the right side */}
+                <motion.button
                   onClick={() => {
-                    setMcqs([]);
-                    handleMCQ(true);
+                    setshowAI(false);
                   }}
                   style={{
-                    background:
-                      "linear-gradient(135deg, rgba(0, 47, 255, 0.5), rgba(8, 252, 114, 0.5))", // Green background
+                    padding: "10px 10px",
+                    background: "#ff5100",
                     color: "white",
-                    padding: "5px 10px",
+                    borderRadius: "8px",
                     border: "none",
-                    borderRadius: "10px",
                     cursor: "pointer",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    transition: "background-color 0.3s, transform 0.2s",
-                    
+                    fontSize: "14px",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.target.style.backgroundColor = "#45a049")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.target.style.background =
-                      "linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))")
-                  }
+                  whileTap={{ scale: 0.9 }} // Tap effect for the button
                 >
-                  New Quiz
-                </button></div>
-        <h3
-          style={{
-            marginBottom: '15px',
-            fontSize: '18px',
-            fontWeight: 'bold'
-          }}
-        >
-            {question}
-          </h3>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {options.map((option, index) => (
-              <li
-                key={index}
+                  X
+                </motion.button>
+              </motion.div>
+
+              {/* Warping Box with Animation */}
+              {loading2 && (
+                <motion.div
+                  style={{
+                    position: "absolute",
+                    top: "0%",
+                    left: "0%",
+                    transform: "translate(-50%, -50%)",
+                    width: "400px",
+                    height: "500px",
+                    background:
+                      "linear-gradient(135deg, rgba(90, 72, 255, 0.51), rgba(168, 106, 255, 0.51), rgba(216, 109, 255, 0.57), rgba(158, 129, 255, 0.57))",
+                    borderRadius: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: "bold",
+                    pointerEvents: "none",
+                    filter: "blur(5px) saturate(250%) brightness(1.2)",
+                    boxShadow: "0 0 100px rgb(247, 149, 103)",
+                    backgroundSize: "400% 400%",
+                  }}
+                  initial={{ scale: 0.9, rotate: 0, opacity: 0 }}
+                  animate={{
+                    scale: [0.97, 0.94, 0.97],
+                    rotate: [0.2, 0.4, -0.4, 0.2],
+                    opacity: 0.7,
+                    backgroundPosition: ["0% 10%", "10% 0%", "0% 10%"],
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: "easeInOut",
+                    repeatType: "mirror",
+                    repeat: Infinity,
+                  }}
+                ></motion.div>
+              )}
+              <div
                 style={{
-                  padding: '10px 15px',
-                  marginBottom: '8px',
-                  border: '1px solid',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  backgroundColor:
-  selectedOption === null
-    ? 'grey'
-    : index === selectedOption
-    ? index === choiceIndex
-      ? '#b4fab7' // correct (green)
-      : '#ff9999' // incorrect (red)
-    : 'grey',
-                  borderColor: selectedOption === index ? '#3399ff' : '#aaa',
-                  transition: 'background-color 0.2s',
-                  color:'black'
-                }}
-                onClick={(e) => {
-                  setSelectedOption(index);
-                  console.log('Selected option:', index);
-                  e.target.style.backgroundColor = (choiceIndex==index) ? 'lightgreen' : '#ff9999';
+                  flexGrow: 1,
+                  overflowY: "auto",
+                  padding: "10px 20px",
+                  maxHeight: "calc(500px - 60px)", // 500 total height - 60 header height
                 }}
               >
-                {option}
-              </li>
-            ))}
-          </ul>
+                {/* Logo*/}
+                <div
+                  style={{
+                    marginTop: "20px",
+                    fontSize: "18px",
+                    color: "white",
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column", // Stack items vertically
+                    gap: "10px", // spacing between logo and text
+                    color: "white",
+                  }}
+                >
+                  <img
+                    src="inkai-removebg-preview.png" // Replace with actual logo URL
+                    alt="Logo"
+                    style={{ height: "50px", width: "50px" }}
+                  />
+                  Gemini AI
+                </div>
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: '20px'
-            }}
-          >
-            <button
-              onClick={handleBack}
-              disabled={currentIndex === 0}
+                {/* Input Display */}
+                {userInput && userdone && (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end", // Pushes content to the right
+                      width: "100%",
+                      marginTop: "20px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        maxWidth: "90%",
+                        fontSize: "18px",
+                        color: "white",
+                        backgroundColor: "rgba(65, 221, 185, 0.82)",
+                        padding: "10px",
+                        borderRadius: "8px",
+                        textAlign: "right", // Optional: aligns text inside the bubble
+                      }}
+                    >
+                      {`(Canvas Snip)\n${userInput}`}
+                    </div>
+                  </div>
+                )}
+
+                {/* Response Display */}
+                {response2 && !loading2 && (
+                  <div
+                    style={{
+                      width: "90%",
+                      marginBottom: "20px",
+                      marginTop: "20px",
+                      fontSize: "18px",
+                      color: "white",
+                      backgroundColor: "rgba(255, 134, 35, 0.82)",
+                      padding: "10px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <ReactMarkdown>{response2}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+
+              {!userdone && (
+                <div
+                  style={{
+                    width: "400px",
+                    height: "500px",
+                    borderRadius: "12px",
+                    padding: "20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end", // Push to bottom
+                    position: "relative",
+                  }}
+                >
+                  {/* User Input Box */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "10px", // adds space between input and button
+                      width: "90%",
+                      marginTop: "20px",
+                    }}
+                  >
+                    <input
+                      type="text"
+                      value={userInput}
+                      onChange={(e) => setUserInput(e.target.value)}
+                      placeholder="(Optional)Enter something..."
+                      style={{
+                        padding: "10px",
+                        fontSize: "16px",
+                        borderRadius: "8px",
+                        border: "1px solid #ccc",
+                        flex: 1, // makes the input take up available space
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        handleSubmit();
+                        setuserdone(true);
+                      }}
+                      style={{
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        background: "#ff5100",
+                        color: "white",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ➤
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {showquiz && (
+            <div
               style={{
-                padding: '8px 16px',
-                fontSize: '14px',
-                cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
-                backgroundColor: currentIndex === 0 ? '#ccc' : '#007bff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px'
+                position: "fixed",
+                top: question ? "45vh" : "85vh",
+                width: "400px",
+                padding: "20px",
+                border: "2px solid #333",
+                borderRadius: "10px",
+                backgroundColor: "rgba(4, 8, 75, 0.87)",
+                margin: "20px auto",
+                boxShadow: "2px 2px 8px rgba(0, 0, 0, 0.85)",
+                fontFamily: "Arial, sans-serif",
+                zIndex: 10000,
+                color: "white",
               }}
             >
-              Back
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={currentIndex === mcqs.length - 1}
-              style={{
-                padding: '8px 16px',
-                fontSize: '14px',
-                cursor: currentIndex === mcqs.length - 1 ? 'not-allowed' : 'pointer',
-                backgroundColor: currentIndex === mcqs.length - 1 ? '#ccc' : '#007bff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px'
-              }}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      ) : (
-      <p
-        style={{
-          fontSize: '16px',
-          textAlign: 'center',
-          color: 'lightgrey',
-          margin: 0
-        }}
-      >
-        Draw a box on the canvas to get quiz questions for the selected area!
-      </p>
-    )}
-  </div>
-)}
+              {question ? (
+                <div
+                // style={{
+                //   width: '400px',
+                //   padding: '20px',
+                //   border: '2px solid #333',
+                //   borderRadius: '8px',
+                //   backgroundColor: '#f9f9f9',
+                //   margin: '20px auto',
+                //   boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
+                //   fontFamily: 'Arial, sans-serif'
+                // }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center", // Optional: use this if you want vertical centering too
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        setMcqs([]);
+                        handleMCQ(true);
+                      }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, rgba(0, 47, 255, 0.5), rgba(8, 252, 114, 0.5))", // Green background
+                        color: "white",
+                        padding: "5px 10px",
+                        border: "none",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        transition: "background-color 0.3s, transform 0.2s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.target.style.backgroundColor = "#45a049")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.target.style.background =
+                          "linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(8, 36, 252, 0.5))")
+                      }
+                    >
+                      New Quiz
+                    </button>
+                  </div>
+                  <h3
+                    style={{
+                      marginBottom: "15px",
+                      fontSize: "18px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {question}
+                  </h3>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                    {options.map((option, index) => (
+                      <li
+                        key={index}
+                        style={{
+                          padding: "10px 15px",
+                          marginBottom: "8px",
+                          border: "1px solid",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                          backgroundColor:
+                            selectedOption === null
+                              ? "grey"
+                              : index === selectedOption
+                                ? index === choiceIndex
+                                  ? "#b4fab7" // correct (green)
+                                  : "#ff9999" // incorrect (red)
+                                : "grey",
+                          borderColor:
+                            selectedOption === index ? "#3399ff" : "#aaa",
+                          transition: "background-color 0.2s",
+                          color: "black",
+                        }}
+                        onClick={(e) => {
+                          setSelectedOption(index);
+                          console.log("Selected option:", index);
+                          e.target.style.backgroundColor =
+                            choiceIndex == index ? "lightgreen" : "#ff9999";
+                        }}
+                      >
+                        {option}
+                      </li>
+                    ))}
+                  </ul>
 
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: "20px",
+                    }}
+                  >
+                    <button
+                      onClick={handleBack}
+                      disabled={currentIndex === 0}
+                      style={{
+                        padding: "8px 16px",
+                        fontSize: "14px",
+                        cursor: currentIndex === 0 ? "not-allowed" : "pointer",
+                        backgroundColor:
+                          currentIndex === 0 ? "#ccc" : "#007bff",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      disabled={currentIndex === mcqs.length - 1}
+                      style={{
+                        padding: "8px 16px",
+                        fontSize: "14px",
+                        cursor:
+                          currentIndex === mcqs.length - 1
+                            ? "not-allowed"
+                            : "pointer",
+                        backgroundColor:
+                          currentIndex === mcqs.length - 1 ? "#ccc" : "#007bff",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p
+                  style={{
+                    fontSize: "16px",
+                    textAlign: "center",
+                    color: "lightgrey",
+                    margin: 0,
+                  }}
+                >
+                  Draw a box on the canvas to get quiz questions for the
+                  selected area!
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Fixed-position Pomodoro Rectangle with Timer and 6 inner rectangles */}
           {showPomodoroRect && (
@@ -3733,16 +3735,22 @@ const CanvasEditor = () => {
                 </div>
               )}
 
-              <button onClick={() => {
-                handleMCQ(false)
-              }}>
-              
-            <img
-              src="/mcq_image.png"
-              alt="MCQ Button"
-              style={{ width: '50px', height: '50px', borderRadius: '4px', objectFit: 'scale-down' }}
-            />
-          </button>
+              <button
+                onClick={() => {
+                  handleMCQ(false);
+                }}
+              >
+                <img
+                  src="/mcq_image.png"
+                  alt="MCQ Button"
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    borderRadius: "4px",
+                    objectFit: "scale-down",
+                  }}
+                />
+              </button>
 
               <button
                 onClick={handlePomodoroClick}
