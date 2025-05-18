@@ -3041,7 +3041,7 @@ const CanvasEditor = () => {
                 fontFamily: "sans-serif",
                 width: "400px",
                 height: isOpen ? "500px" : "60px", // Changes height when opened
-                overflowY: "hidden",
+                //  overflowY: "hidden",
                 transition: "height 0.5s ease-in-out", // Smooth height transition
               }}
             >
@@ -3129,7 +3129,7 @@ const CanvasEditor = () => {
               <div
                 style={{
                   flexGrow: 1,
-                  overflowY: "auto",
+                  // overflowY: "auto",
                   padding: "10px 20px",
                   maxHeight: "calc(500px - 60px)", // 500 total height - 60 header height
                 }}
