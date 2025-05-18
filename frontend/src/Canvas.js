@@ -3041,7 +3041,7 @@ const CanvasEditor = () => {
                 fontFamily: "sans-serif",
                 width: "400px",
                 height: isOpen ? "500px" : "60px", // Changes height when opened
-                //  overflowY: "hidden",
+                 overflowY: "hidden",
                 transition: "height 0.5s ease-in-out", // Smooth height transition
               }}
             >
@@ -3206,13 +3206,13 @@ const CanvasEditor = () => {
               {!userdone && (
                 <div
                   style={{
-                    width: "400px",
-                    height: "500px",
+                    // width: "400px",
+                    // height: "500px",
                     borderRadius: "12px",
                     padding: "20px",
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "flex-end", // Push to bottom
+                    //justifyContent: "flex-end", // Push to bottom
                     position: "relative",
                   }}
                 >
