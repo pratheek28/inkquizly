@@ -13,11 +13,9 @@
 
 To report any vulnerability found in **InkQuizly**, we strongly encourage you to report it responsibly:
 
-Please email us at one of the following emails:
+Please email our team by clicking below:
 
-* [vignesh.tho2006@gmail.com](mailto:vignesh.tho2006@gmail.com)
-* [pranavgowrish@gmail.com](mailto:pranavgowrish@gmail.com)
-* [pratheek0928@gmail.com](mailto:pratheek0928@gmail.com)
+ [InkQuizly Team](mailto:vignesh.tho2006@gmail.com,pranavgowrish@gmail.com,pratheek0928@gmail.com)
 
 With details. Include the following, if possible:
 - A description of the vulnerability
