@@ -1,5 +1,4 @@
 body {
-
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,8 +13,8 @@ body {
   background-attachment: fixed;
 }
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 textarea[data-fabric="textarea"] {

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import styles from './SignUp.module.css';
-import { useNavigate } from 'react-router-dom';
-import NavigationBar from "./NavigationBar"
+import styles from "./SignUp.module.css";
+import { useNavigate } from "react-router-dom";
+import NavigationBar from "./NavigationBar";
 
 function SignUp() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ function SignUp() {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const [response, setResponse] = useState("");
@@ -19,7 +19,7 @@ function SignUp() {
   const handleVarChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -31,35 +31,36 @@ function SignUp() {
     fetch("https://inkquizly.onrender.com/getSignUpDetails", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(formData),
     })
-    .then(response => response.json())
-    .then(data => {
-      setResponse(data.message);
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      setResponse("An error occurred. Please try again later!");
-    })
-    .finally(() => {
-      const baseUrl = "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
-      const params = new URLSearchParams({
-        action: "addUser",
-        name: formData.firstName+" "+formData.lastName,
-        email: formData.email,
+      .then((response) => response.json())
+      .then((data) => {
+        setResponse(data.message);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setResponse("An error occurred. Please try again later!");
+      })
+      .finally(() => {
+        const baseUrl =
+          "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+        const params = new URLSearchParams({
+          action: "addUser",
+          name: formData.firstName + " " + formData.lastName,
+          email: formData.email,
+        });
+
+        try {
+          const response = fetch(`${baseUrl}?${params.toString()}`);
+          const result = response.text();
+          console.log("Server response:", result);
+        } catch (error) {
+          console.log("Error:", error);
+        }
+        setLoading(false);
       });
-    
-      try {
-        const response =  fetch(`${baseUrl}?${params.toString()}`);
-        const result =  response.text();
-        console.log("Server response:", result);
-      } catch (error) {
-        console.log("Error:", error);
-      }
-      setLoading(false);
-  });
   };
 
   return (
@@ -124,41 +125,50 @@ function SignUp() {
         </div>
 
         <div className="submit">
-        <button type="submit" disabled={loading}>
-                    {loading ? "Incredible things take time, please wait..." : "Create Account"}
-                </button>
+          <button type="submit" disabled={loading}>
+            {loading
+              ? "Incredible things take time, please wait..."
+              : "Create Account"}
+          </button>
           {/* <button type="submit">Create Account</button> */}
         </div>
-        {response && <p style={{ marginTop: "1rem", color: response.includes("Successfully") ? "green" : "red"}}>{response}</p>}
+        {response && (
+          <p
+            style={{
+              marginTop: "1rem",
+              color: response.includes("Successfully") ? "green" : "red",
+            }}
+          >
+            {response}
+          </p>
+        )}
         <div
-  style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    marginTop: '20px',
-    fontSize: '16px',
-    fontFamily: 'Arial, sans-serif',
-    color: '#333',
-  }}
->
-<span
-        onClick={() => navigate('/LogIn')}
-        style={{
-          marginLeft: '5px',
-          textDecoration: 'none',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-        }}
-      >
-  Already have an account?
-  </span>
-</div>
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            marginTop: "20px",
+            fontSize: "16px",
+            fontFamily: "Arial, sans-serif",
+            color: "#333",
+          }}
+        >
+          <span
+            onClick={() => navigate("/LogIn")}
+            style={{
+              marginLeft: "5px",
+              textDecoration: "none",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            Already have an account?
+          </span>
+        </div>
       </form>
     </div>
   );
-
-
 }
 
 export default SignUp;

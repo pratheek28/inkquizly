@@ -20,7 +20,8 @@ const iOSInstallPopup = () => {
   return (
     <div style={popupStyle}>
       <p style={{ margin: 0 }}>
-        Install this app: Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>
+        Install this app: Tap <strong>Share</strong> →{" "}
+        <strong>Add to Home Screen</strong>
       </p>
       <button style={buttonStyle} onClick={() => setShowPopup(false)}>
         Close

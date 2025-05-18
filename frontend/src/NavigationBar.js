@@ -1,12 +1,12 @@
 // NavigationBar.js
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./NavigationBar.module.css";
 
 function NavigationBar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isCanvasEditor = location.pathname === '/CanvasEditor';
+  const isCanvasEditor = location.pathname === "/CanvasEditor";
 
   const handleClickLanding = () => {
     navigate("/");
@@ -33,7 +33,6 @@ function NavigationBar() {
           <button onClick={handleClickSignUp}>Sign Up</button>
           <button onClick={handleClickLogIn}>Log In</button>
           <button onClick={handleClickAccountDash}>Account Dashboard</button>
-
         </div>
       </header>
     </div>

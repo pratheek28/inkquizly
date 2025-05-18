@@ -6,8 +6,7 @@ import DLMBot from "./DLM_bot";
 import PWAInstallPrompt from "./pwa";
 import iOSInstallPopup from "./iOSInstallPopup";
 import { useScroll, useTransform, motion } from "framer-motion";
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -21,7 +20,11 @@ export default function LandingPage() {
 
   // Animate scale of the logo image
   const scale = useTransform(scrollY, [0, ZOOM_LIMIT], [1, MAX_SCALE]);
-  const opacity = useTransform(scrollY, [0, ZOOM_LIMIT * 0.7, ZOOM_LIMIT], [1, 0.5, 0]);
+  const opacity = useTransform(
+    scrollY,
+    [0, ZOOM_LIMIT * 0.7, ZOOM_LIMIT],
+    [1, 0.5, 0],
+  );
 
   // Set vh dynamically based on the screen height
   useEffect(() => {
@@ -31,19 +34,19 @@ export default function LandingPage() {
 
   // const scrollRef = useRef();
   // const [scrollProgress, setScrollProgress] = useState(0);
-  
+
   // useEffect(() => {
   //   const handleScroll = () => {
   //     const section = scrollRef.current;
   //     if (!section) return;
-  
+
   //     const rect = section.getBoundingClientRect();
   //     const totalHeight = window.innerHeight + section.offsetHeight;
   //     const progress = 1 - (rect.bottom - window.innerHeight) / totalHeight;
-  
+
   //     setScrollProgress(Math.min(Math.max(progress, 0), 1));
   //   };
-  
+
   //   window.addEventListener("scroll", handleScroll);
   //   return () => window.removeEventListener("scroll", handleScroll);
   // }, []);
@@ -61,10 +64,21 @@ export default function LandingPage() {
     offset: ["start start", "end start"],
   });
 
-  const step1Opacity = useTransform(scrollYProgress, [0.0, 0.1, 0.2], [1, 1, 0]);
-  const step2Opacity = useTransform(scrollYProgress, [0.2, 0.3, 0.4], [0, 1, 0]);
-  const step3Opacity = useTransform(scrollYProgress, [0.4, 0.5, 0.6], [0, 1, 1]);
-
+  const step1Opacity = useTransform(
+    scrollYProgress,
+    [0.0, 0.1, 0.2],
+    [1, 1, 0],
+  );
+  const step2Opacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.3, 0.4],
+    [0, 1, 0],
+  );
+  const step3Opacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.5, 0.6],
+    [0, 1, 1],
+  );
 
   const sections = [
     {
@@ -228,15 +242,13 @@ export default function LandingPage() {
     });
   };
 
-  
-
-
   return (
-
-      <>
+    <>
       <NavigationBar />
       {/* Background layer that fades out */}
-      <div style={{color:"white"}}>Under Construction. Please check back later</div>
+      <div style={{ color: "white" }}>
+        Under Construction. Please check back later
+      </div>
       <motion.div
         style={{
           position: "fixed",
@@ -273,7 +285,7 @@ export default function LandingPage() {
             width: "80px",
             height: "80px",
             scale,
-            opacity
+            opacity,
           }}
         />
       </div>
@@ -281,55 +293,58 @@ export default function LandingPage() {
       {/* Invisible spacer to push the main content down */}
       <div style={{ height: vh, width: "100%" }} />
 
-
-
       <div className={styles.landingContent}>
-      <div style={{ height: "100px" }} /> {/* Spacer */}
+        <div style={{ height: "100px" }} /> {/* Spacer */}
         <PWAInstallPrompt />
         <iOSInstallPopup />
         <DLMBot />
-
         <motion.div
-  initial={{ opacity: 0, y: 50 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 1 }}
-  style={{
-    width: "100%",
-    padding: "200px 20px",
-    textAlign: "center",
-    fontSize: "2.5rem",
-    fontWeight: "bold",
-    lineHeight: "1.6",
-    marginTop: "3100px",
-  }}
->
-<p
-  style={{
-    background: "linear-gradient(90deg, #2893fe, #e52e71)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    fontSize: "3rem", // optional styling
-    fontWeight: "bold",
-  }}
->What is InkQuizly?</p>
-  
-  <motion.p
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 0.8, duration: 1 }}
-    style={{
-      fontSize: "1.2rem",
-      fontWeight: "normal",
-      maxWidth: "700px",
-      margin: "30px auto 0",
-      color: "white",
-      lineHeight: "1.8",
-    }}
-  >
-    InkQuizly is your AI-powered companion for smarter, more effective note-taking. Enhanced by Google Gemini for smarter summaries, clearer explanations, and richer notes—typed or handwritten. Where timeless study methods like Pomodoro meet the latest machine intelligence technologies, InkQuizly reimagines how you learn, review, and grow.
-  </motion.p>
-</motion.div>
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          style={{
+            width: "100%",
+            padding: "200px 20px",
+            textAlign: "center",
+            fontSize: "2.5rem",
+            fontWeight: "bold",
+            lineHeight: "1.6",
+            marginTop: "3100px",
+          }}
+        >
+          <p
+            style={{
+              background: "linear-gradient(90deg, #2893fe, #e52e71)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontSize: "3rem", // optional styling
+              fontWeight: "bold",
+            }}
+          >
+            What is InkQuizly?
+          </p>
 
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: "normal",
+              maxWidth: "700px",
+              margin: "30px auto 0",
+              color: "white",
+              lineHeight: "1.8",
+            }}
+          >
+            InkQuizly is your AI-powered companion for smarter, more effective
+            note-taking. Enhanced by Google Gemini for smarter summaries,
+            clearer explanations, and richer notes—typed or handwritten. Where
+            timeless study methods like Pomodoro meet the latest machine
+            intelligence technologies, InkQuizly reimagines how you learn,
+            review, and grow.
+          </motion.p>
+        </motion.div>
         {/* Scroll-triggered Sections */}
         {sections.map((section, index) => (
           <motion.div
@@ -338,170 +353,191 @@ export default function LandingPage() {
             initial="offscreen"
             whileInView="onscreen"
           >
-    <motion.div
-      onMouseMove={handleMouseMove}
-      variants={{
-        hover: {
-          scale: 1.05,
-          rotateX: tilt.x, // Dynamic X-axis tilt
-          rotateY: tilt.y, // Dynamic Y-axis tilt
-          transition: { type: "spring", stiffness: 300, damping: 20 },
-        },
-      }}
-      initial="rest"
-      whileHover="hover"
-    >          <motion.div
-        variants={parallaxVariants}
-        initial="offscreen"
-        whileInView="onscreen"
-        style={{ padding: "50px", background: "rgba(127, 123, 123, 0.35)", textAlign: "center",borderRadius:"20px" }}
-        
-      >
-            {/* Your section content */}
-            <motion.section
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                overflow: "hidden",
+            <motion.div
+              onMouseMove={handleMouseMove}
+              variants={{
+                hover: {
+                  scale: 1.05,
+                  rotateX: tilt.x, // Dynamic X-axis tilt
+                  rotateY: tilt.y, // Dynamic Y-axis tilt
+                  transition: { type: "spring", stiffness: 300, damping: 20 },
+                },
               }}
+              initial="rest"
+              whileHover="hover"
             >
-
-            {/* Text on the left */}
-            <div style={{ width: "50%", fontSize: "1.5rem", lineHeight: "1.6" }}>
-              {section.texts.map((text, textIndex) => (
-                <motion.p
-                  key={textIndex}
-                  variants={textVariants}
-                  style={{ margin: "0 0 0 0",color: "white" }}
-                  initial="offscreen"
-                  whileInView="onscreen"
-                  transition={{
-                    delay: textIndex * 0.3, // Stagger text animation by delay
-                    duration: 1,
-                    ease: "easeOut",
+              {" "}
+              <motion.div
+                variants={parallaxVariants}
+                initial="offscreen"
+                whileInView="onscreen"
+                style={{
+                  padding: "50px",
+                  background: "rgba(127, 123, 123, 0.35)",
+                  textAlign: "center",
+                  borderRadius: "20px",
+                }}
+              >
+                {/* Your section content */}
+                <motion.section
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    overflow: "hidden",
                   }}
                 >
-                  {text}
-                </motion.p>
-              ))}
-            </div>
+                  {/* Text on the left */}
+                  <div
+                    style={{
+                      width: "50%",
+                      fontSize: "1.5rem",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    {section.texts.map((text, textIndex) => (
+                      <motion.p
+                        key={textIndex}
+                        variants={textVariants}
+                        style={{ margin: "0 0 0 0", color: "white" }}
+                        initial="offscreen"
+                        whileInView="onscreen"
+                        transition={{
+                          delay: textIndex * 0.3, // Stagger text animation by delay
+                          duration: 1,
+                          ease: "easeOut",
+                        }}
+                      >
+                        {text}
+                      </motion.p>
+                    ))}
+                  </div>
 
-            {/* Gif on the right */}
-            <div style={{ width: "50%" }}>
-              <motion.img
-                src={section.gifSrc}
-                alt="GIF"
-                variants={imageVariants}
-                style={{ maxWidth: "100%", height: "auto", borderRadius: "10px" }}
-              />
-            </div>
-          </motion.section></motion.div></motion.div></motion.div>
+                  {/* Gif on the right */}
+                  <div style={{ width: "50%" }}>
+                    <motion.img
+                      src={section.gifSrc}
+                      alt="GIF"
+                      variants={imageVariants}
+                      style={{
+                        maxWidth: "100%",
+                        height: "auto",
+                        borderRadius: "10px",
+                      }}
+                    />
+                  </div>
+                </motion.section>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         ))}
-
-<motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, amount: 0.3 }}
-      transition={{ duration: 1 }}
-      style={{
-        background: 'linear-gradient(135deg, rgb(0, 213, 255), rgb(8, 37, 252))',
-        padding: '100px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        minHeight: '100vh',
-        color: 'white',
-        borderRadius: '20px',
-      }}
-    >
-      <motion.h2
-        initial={{ opacity: 0, x: -50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.5, duration: 2 }}
-        style={{
-          fontSize: '3rem',
-          fontWeight: 'bold',
-          marginBottom: '20px',
-        }}
-      >
-        Join InkQuizly Today
-      </motion.h2>
-
-      <motion.p
-        initial={{ opacity: 0, x: -50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1, duration: 2 }}
-        style={{
-          fontSize: '1.2rem',
-          marginBottom: '30px',
-          maxWidth: '600px',
-        }}
-      >
-        Unlock smarter note-taking with Gemini AI. Sign up to start your learning journey with InkQuizly. It's quick, easy, and free!
-      </motion.p>
-
-      {/* Scroll-triggered Sign-Up Button */}
-      <motion.button
-        onClick={() => {
-          navigate('/SignUp')
-        }}
-        whileHover={{
-          scale: 1.1,
-          boxShadow: '0 10px 20px rgba(41, 147, 254, 0.6)',
-          textShadow: '0 0 8px rgba(41, 147, 254, 0.7)', // Glowing text effect
-        }}
-        whileTap={{
-          scale: 0.98,
-          boxShadow: '0 5px 10px rgba(41, 147, 254, 0.4)',
-        }}
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{
-          opacity: 1,
-          scale: 1,
-        }}
-        transition={{
-          delay: 1.1,
-          duration: 2,
-        }}
-        style={{
-          padding: '15px 30px',
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-          color: 'white',
-          background: 'linear-gradient(90deg,rgb(47, 40, 254),rgb(113, 46, 229))',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-          marginTop: '30px',
-        }}
-      >
-        Sign Up
-      </motion.button>
-    </motion.div>
-
-    {true && (
-          <motion.div
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.3 }}
           transition={{ duration: 1 }}
           style={{
-            background: "linear-gradient(135deg, rgba(8, 55, 72, 0.96), rgba(1, 3, 20, 0.93))",
-            padding: '100px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            minHeight: '50vh',
-            color: 'white',
-            borderRadius: '20px',
+            background:
+              "linear-gradient(135deg, rgb(0, 213, 255), rgb(8, 37, 252))",
+            padding: "100px 20px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            minHeight: "100vh",
+            color: "white",
+            borderRadius: "20px",
           }}
         >
+          <motion.h2
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5, duration: 2 }}
+            style={{
+              fontSize: "3rem",
+              fontWeight: "bold",
+              marginBottom: "20px",
+            }}
+          >
+            Join InkQuizly Today
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1, duration: 2 }}
+            style={{
+              fontSize: "1.2rem",
+              marginBottom: "30px",
+              maxWidth: "600px",
+            }}
+          >
+            Unlock smarter note-taking with Gemini AI. Sign up to start your
+            learning journey with InkQuizly. It's quick, easy, and free!
+          </motion.p>
+
+          {/* Scroll-triggered Sign-Up Button */}
+          <motion.button
+            onClick={() => {
+              navigate("/SignUp");
+            }}
+            whileHover={{
+              scale: 1.1,
+              boxShadow: "0 10px 20px rgba(41, 147, 254, 0.6)",
+              textShadow: "0 0 8px rgba(41, 147, 254, 0.7)", // Glowing text effect
+            }}
+            whileTap={{
+              scale: 0.98,
+              boxShadow: "0 5px 10px rgba(41, 147, 254, 0.4)",
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{
+              opacity: 1,
+              scale: 1,
+            }}
+            transition={{
+              delay: 1.1,
+              duration: 2,
+            }}
+            style={{
+              padding: "15px 30px",
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              color: "white",
+              background:
+                "linear-gradient(90deg,rgb(47, 40, 254),rgb(113, 46, 229))",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              transition:
+                "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+              marginTop: "30px",
+            }}
+          >
+            Sign Up
+          </motion.button>
+        </motion.div>
+        {true && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 1 }}
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(8, 55, 72, 0.96), rgba(1, 3, 20, 0.93))",
+              padding: "100px 20px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              minHeight: "50vh",
+              color: "white",
+              borderRadius: "20px",
+            }}
+          >
             <div
               style={{
                 background:
@@ -533,7 +569,9 @@ export default function LandingPage() {
                   }}
                 >
                   <h4 style={{ margin: 0 }}>Free Plan</h4>
-<h5 style={{ marginTop: 0,marginBottom:'0' }}>( $0 Forever )</h5>
+                  <h5 style={{ marginTop: 0, marginBottom: "0" }}>
+                    ( $0 Forever )
+                  </h5>
                   <ul
                     style={{
                       listStyle: "none",
@@ -591,9 +629,13 @@ export default function LandingPage() {
                     textAlign: "center",
                   }}
                 >
-<h4 style={{ margin: 0 }}>Pro Plan</h4>
-<h5 style={{ marginTop: 0,marginBottom:'0' }}>( $15 Lifetime Access )</h5>
-<h5 style={{ marginTop: 0,marginBottom:'10' }}>( 15-day free trial )</h5>
+                  <h4 style={{ margin: 0 }}>Pro Plan</h4>
+                  <h5 style={{ marginTop: 0, marginBottom: "0" }}>
+                    ( $15 Lifetime Access )
+                  </h5>
+                  <h5 style={{ marginTop: 0, marginBottom: "10" }}>
+                    ( 15-day free trial )
+                  </h5>
                   <ul
                     style={{
                       listStyle: "none",
@@ -646,87 +688,86 @@ export default function LandingPage() {
                   </button>
                 </div>
               </div>
-
             </div>
           </motion.div>
         )}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          style={{
+            width: "100%",
+            padding: "50px 0",
+            textAlign: "center",
+            fontSize: "2.5rem",
+            fontWeight: "bold",
+            lineHeight: "1.6",
+            marginTop: "100px", // Adjust as needed
+          }}
+        >
+          <p
+            style={{
+              background: "linear-gradient(90deg, #2893fe, #e52e71)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontSize: "3rem", // Optional styling
+              fontWeight: "bold",
+            }}
+          >
+            Contact Us
+          </p>
 
-<motion.div
-  initial={{ opacity: 0, y: 50 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 1 }}
-  style={{
-    width: "100%",
-    padding: "50px 0",
-    textAlign: "center",
-    fontSize: "2.5rem",
-    fontWeight: "bold",
-    lineHeight: "1.6",
-    marginTop: "100px", // Adjust as needed
-  }}
->
-  <p
-    style={{
-      background: "linear-gradient(90deg, #2893fe, #e52e71)",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-      fontSize: "3rem", // Optional styling
-      fontWeight: "bold",
-    }}
-  >
-    Contact Us
-  </p>
-
-  {/* Cool Framer Motion Button with Shape Transformation */}
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 1.2, duration: 1 }}
-  >
-    <motion.a
-      href="mailto:pranavgowrish@gmail.com,vignesh.tho2006@gmail.com,pratheek0928@gmail.com,sathvik.kum@gmail.com"
-      style={{
-        fontSize: "1.2rem",
-        fontWeight: "bold",
-        color: "white",
-        textDecoration: "none",
-        padding: "10px 20px",
-        border: "2px solid #2893fe",
-        borderRadius: "50px", // Rounded shape initially
-        background: "linear-gradient(90deg, #2893fe, #e52e71)",
-        boxShadow: "0 4px 15px rgba(41, 147, 254, 0.5)",
-        display: "inline-block",
-        transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-radius 0.3s ease",
-      }}
-      whileHover={{
-        scale: 1.1, // Slight scale up
-        boxShadow: "0 10px 20px rgba(41, 147, 254, 0.6)",
-        textShadow: "0 0 8px rgba(41, 147, 254, 0.7)", // Glowing text effect
-        cursor: "pointer",
-        borderRadius: "20px", // Transform to a less rounded rectangle
-      }}
-      whileTap={{
-        borderRadius: "100%", // Fully rounded when clicked
-      }}
-
-    >
-      Email the Team
-    </motion.a>
-      <div style={{ marginTop: "20px", fontSize: "20px", color: "#fff", textAlign: "center" }}>
-  <p style={{ margin: 0 }}>Created by</p>
-  <p style={{ margin: 0 }}>
-    Pranav Gowrishankar, Vignesh Thondikulam, Pratheek Sunilkumar, Sathvik Kumar
-  </p>
-</div>
-  </motion.div>
-</motion.div>
-
-
-
-
-
-
- 
+          {/* Cool Framer Motion Button with Shape Transformation */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 1 }}
+          >
+            <motion.a
+              href="mailto:pranavgowrish@gmail.com,vignesh.tho2006@gmail.com,pratheek0928@gmail.com,sathvik.kum@gmail.com"
+              style={{
+                fontSize: "1.2rem",
+                fontWeight: "bold",
+                color: "white",
+                textDecoration: "none",
+                padding: "10px 20px",
+                border: "2px solid #2893fe",
+                borderRadius: "50px", // Rounded shape initially
+                background: "linear-gradient(90deg, #2893fe, #e52e71)",
+                boxShadow: "0 4px 15px rgba(41, 147, 254, 0.5)",
+                display: "inline-block",
+                transition:
+                  "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-radius 0.3s ease",
+              }}
+              whileHover={{
+                scale: 1.1, // Slight scale up
+                boxShadow: "0 10px 20px rgba(41, 147, 254, 0.6)",
+                textShadow: "0 0 8px rgba(41, 147, 254, 0.7)", // Glowing text effect
+                cursor: "pointer",
+                borderRadius: "20px", // Transform to a less rounded rectangle
+              }}
+              whileTap={{
+                borderRadius: "100%", // Fully rounded when clicked
+              }}
+            >
+              Email the Team
+            </motion.a>
+            <div
+              style={{
+                marginTop: "20px",
+                fontSize: "20px",
+                color: "#fff",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ margin: 0 }}>Created by</p>
+              <p style={{ margin: 0 }}>
+                Pranav Gowrishankar, Vignesh Thondikulam, Pratheek Sunilkumar,
+                Sathvik Kumar
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
         {/* <section className={styles.section}>
           <h2>What is InkQuizly?</h2>
           <p>
@@ -798,31 +839,30 @@ export default function LandingPage() {
   </p>
 </div>
 </section>  */}
-
-
-  {/* …add more sections here… */}
-  </div>
-    <div
-    style={{
-      color: 'white',
-      textAlign: 'center',
-      padding: '50px',
-      fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '20px'
-    }}
->
-  InkQuizly © 2025
-</div>
-<div
-  style={{
-    color: 'white',
-    textAlign: 'center',
-    fontFamily: 'Segoe UI, sans-serif',
-    fontSize: '10px',
-    marginBottom: '30px',
-  }}
->
-Google Gemini can make mistakes, so double-check it.</div>
-</>
+        {/* …add more sections here… */}
+      </div>
+      <div
+        style={{
+          color: "white",
+          textAlign: "center",
+          padding: "50px",
+          fontFamily: "Segoe UI, sans-serif",
+          fontSize: "20px",
+        }}
+      >
+        InkQuizly © 2025
+      </div>
+      <div
+        style={{
+          color: "white",
+          textAlign: "center",
+          fontFamily: "Segoe UI, sans-serif",
+          fontSize: "10px",
+          marginBottom: "30px",
+        }}
+      >
+        Google Gemini can make mistakes, so double-check it.
+      </div>
+    </>
   );
 }
