@@ -3129,7 +3129,7 @@ const CanvasEditor = () => {
               <div
                 style={{
                   flexGrow: 1,
-                  // overflowY: "auto",
+                   overflowY: "auto",
                   padding: "10px 20px",
                   maxHeight: "calc(500px - 60px)", // 500 total height - 60 header height
                 }}
