@@ -1,1 +1,1 @@
-InkQuizly is an AI-powered PWA that transforms student notes with freehand drawing, subtitle detection, smart summaries, AI diagrams, and Pomodoro, Active Recall & Spaced Repetition. Built with React, Flask, Python & Google Gemini 2.0: responsive UI, & confidence-slider TOC.
+InkQuizly is an AI-powered PWA that transforms student notes with freehand drawing, subtitle detection, smart summaries, AI Quiz Generation, AI diagrams, and Pomodoro, Active Recall & Spaced Repetition. Built with React, Flask, Python & Google Gemini 2.0: responsive UI, & confidence-slider TOC.
