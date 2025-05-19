@@ -289,7 +289,7 @@ function AccountDashboard() {
           dat: datas,
           user: user.id,
           //user: "5f3fbb27-e377-4344-a805-b9ebd0a93311",
-          conf: "NA",
+          conf: "-",
         }),
       })
         .then((response) => response.json())
@@ -515,7 +515,7 @@ function AccountDashboard() {
           >
             <div
               style={{
-                fontFamily: "SF Pro Display,sans-serif", // Apply the futuristic font
+               // fontFamily: "SF Pro Display,sans-serif", // Apply the futuristic font
               }}
             >
               {splitText("Welcome, " + (user?.name || "Loading..."))}
@@ -564,7 +564,7 @@ function AccountDashboard() {
                 borderRadius: "12px",
                 maxWidth: "420px",
                 fontSize: "13.8px",
-                fontFamily: "Segoe UI, sans-serif",
+                //fontFamily: "Segoe UI, sans-serif",
                 textAlign: "center",
                 boxShadow: "0 6px 14px rgb(0, 0, 0)",
                 transition: "opacity 1s ease-in, transform 1s ease-in", // Smooth fade-in and slide-up
@@ -604,7 +604,7 @@ function AccountDashboard() {
                 borderRadius: "12px",
                 maxWidth: "420px",
                 fontSize: "13.8px",
-                fontFamily: "Segoe UI, sans-serif",
+                //fontFamily: "Segoe UI, sans-serif",
                 textAlign: "center",
                 boxShadow: "0 6px 14px rgb(0, 0, 0)",
                 transition: "opacity 1s ease-in, transform 1s ease-in", // Smooth fade-in and slide-up
@@ -636,7 +636,7 @@ function AccountDashboard() {
               padding: "10px 20px",
               fontSize: "24px",
               borderRadius: "10px",
-              fontFamily: "monospace",
+              //fontFamily: "monospace",
               display: "inline-flex",
               gap: "10px",
               flexDirection: "column",
@@ -659,7 +659,7 @@ function AccountDashboard() {
                   padding: "5px",
                   fontSize: "15px",
                   borderRadius: "10px",
-                  fontFamily: "monospace",
+                  //fontFamily: "monospace",
                   display: "inline-flex",
                   flexDirection: "column",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.71)",
@@ -678,7 +678,7 @@ function AccountDashboard() {
                   padding: "5px",
                   fontSize: "15px",
                   borderRadius: "5px",
-                  fontFamily: "monospace",
+                  //fontFamily: "monospace",
                   display: "inline-flex",
                   flexDirection: "column",
                   boxShadow: "0 4px 8px rgba(0, 6, 119, 0.77)",
@@ -779,7 +779,7 @@ function AccountDashboard() {
                       display: "flex",
                       flexDirection: "column",
                       gap: "5px",
-                      fontFamily: "monospace",
+                      //fontFamily: "monospace",
                       fontSize: "13px",
                       color: "white",
                     }}
@@ -837,7 +837,7 @@ function AccountDashboard() {
                       display: "flex",
                       flexDirection: "column",
                       gap: "5px",
-                      fontFamily: "monospace",
+                      //fontFamily: "monospace",
                       fontSize: "13px",
                       color: "white",
                     }}
@@ -1270,7 +1270,8 @@ function AccountDashboard() {
                     onClick={() => handleOptionClick(noteNames[index])}
                   >
                     <div className={styles.noteTitle}>{title}</div>
-                    <div>{conf[index]}</div>
+                      {conf[index] === "📊: NaN%" ? "📊 -" : conf[index]}
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent click from reaching the card
@@ -1364,7 +1365,7 @@ function AccountDashboard() {
                           onClick={() => handleOptionClick(noteNames[index])}
                         >
                           <div className={styles.noteTitle}>{title}</div>
-                          <div>{conf[index]}</div>
+                            {conf[index] === "📊: NaN%" ? "📊 -" : conf[index]}
                           <button
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent click from reaching the card
