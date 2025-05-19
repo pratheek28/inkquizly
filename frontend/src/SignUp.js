@@ -135,8 +135,8 @@ function SignUp() {
         {response && (
           <p
             style={{
-              marginTop: "1rem",
-              color: response.includes("Successfully") ? "green" : "red",
+              marginTop: "1rem",fontWeight: 1000,
+              color: response.includes("Successfully") ? "#98FB98" : "#FF0800",
             }}
           >
             {response}
