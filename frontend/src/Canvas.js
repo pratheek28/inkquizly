@@ -2941,8 +2941,7 @@ const CanvasEditor = () => {
                 }}
               >
                 <p style={{ margin: 0, whiteSpace: "pre" }}>
-                  PEN MARKER PALLET HLTR ERASER TEXT TITLE-HLTR AI-HLTR POINTER
-                  UNDO REDO
+                  PEN              MARKER             PALLET             HLTR               ERASER             TEXT             TITLE-HLTR       AI-HLTR           POINTER          UNDO             REDO
                 </p>
               </div>
             )}
