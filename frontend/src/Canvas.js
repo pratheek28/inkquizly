@@ -501,6 +501,10 @@ const CanvasEditor = () => {
         100
       ).toFixed(2),
     );
+    if (confidenceLevels.length === 0) {
+    setnotetitle("📊 -");
+    return;
+    }
     setnotetitle("📊: " + averageConfidence + "%");
     console.log("set conf=", averageConfidence);
     console.log("array is:", confidenceLevels);
@@ -2356,7 +2360,7 @@ const CanvasEditor = () => {
                 style={{
                   marginTop: "10px",
                   color: "#333",
-                  fontFamily: '"Helvatica", Courier, verdana', // Change font here
+                  //fontFamily: '"Helvatica", Courier, verdana', // Change font here
                   fontSize: "15px",
                 }}
               >
@@ -3038,7 +3042,7 @@ const CanvasEditor = () => {
                   "linear-gradient(135deg, rgba(9, 102, 141), rgba(69, 3, 139))",
                 borderRadius: 16,
                 boxShadow: "0 0 20px rgba(0,0,0,0.2)",
-                fontFamily: "sans-serif",
+                //fontFamily: "sans-serif",
                 width: "400px",
                 height: isOpen ? "500px" : "60px", // Changes height when opened
                  overflowY: "hidden",
@@ -3274,7 +3278,7 @@ const CanvasEditor = () => {
                 backgroundColor: "rgba(4, 8, 75, 0.87)",
                 margin: "20px auto",
                 boxShadow: "2px 2px 8px rgba(0, 0, 0, 0.85)",
-                fontFamily: "Arial, sans-serif",
+                //fontFamily: "Arial, sans-serif",
                 zIndex: 10000,
                 color: "white",
               }}
@@ -3450,7 +3454,7 @@ const CanvasEditor = () => {
                 justifyContent: "space-between",
                 padding: "10px",
                 color: "white", // <-- Better contrast text
-                fontFamily: "Arial, sans-serif", // <-- Cleaner font
+                //fontFamily: "Arial, sans-serif", // <-- Cleaner font
                 transition: "all 0.3s ease", // <-- Smooth visual feel
               }}
             >
