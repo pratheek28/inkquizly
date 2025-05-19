@@ -88,8 +88,8 @@ function Login() {
         {response && (
           <p
             style={{
-              marginTop: "1rem",
-              color: response.includes("Error") ? "red" : "green",
+              marginTop: "1rem",fontWeight: 1000,
+              color: response.includes("Error") ? "#FF0800" : "#98FB98",
             }}
           >
             {response}
