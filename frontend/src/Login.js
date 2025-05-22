@@ -87,7 +87,7 @@ function Login() {
             {loading ? "Incredible things take time, please wait..." : "Login"}
           </button>
         </div>
-
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <GoogleLogin
           onSuccess={(credentialResponse) => {
             const decoded = jwtDecode(credentialResponse.credential);
@@ -125,6 +125,7 @@ function Login() {
                   });
           }}
         />
+        </div>
 
         {response && (
           <p
