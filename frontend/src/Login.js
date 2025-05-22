@@ -2,6 +2,8 @@ import { useState } from "react";
 import styles from "./Login.module.css";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "./NavigationBar";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 function Login() {
   const navigate = useNavigate();
@@ -81,15 +83,54 @@ function Login() {
         </div>
 
         <div>
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} style={{ marginBottom: '10px' }}>
             {loading ? "Incredible things take time, please wait..." : "Login"}
           </button>
         </div>
+
+        <GoogleLogin
+          onSuccess={(credentialResponse) => {
+            const decoded = jwtDecode(credentialResponse.credential);
+            console.log(decoded); // contains name, email, etc.
+
+            setLoading(true);
+
+                fetch('https://inkquizly.onrender.com/getLoginDetails', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    email: decoded.email,
+                    password: 'GoogleAuth',
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setResponse(data.message);
+                    if (data.message.includes('Success:')) {
+                      navigate('/AccountDashboard', {
+                        state: { user: data.user },
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    console.error('Error:', error);
+                    setResponse(
+                      'An Error occurred. Please try again in a few mins.'
+                    );
+                  })
+                  .finally(() => {
+                    setLoading(false);
+                  });
+          }}
+        />
+
         {response && (
           <p
             style={{
-              marginTop: "1rem",fontWeight: 1000,
-              color: response.includes("Error") ? "#FF0800" : "#98FB98",
+              marginTop: "1rem",
+              color: response.includes("Error") ? "red" : "green",
             }}
           >
             {response}

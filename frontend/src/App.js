@@ -9,6 +9,8 @@ import AccountDashboard from "./AccountDashboard";
 import CanvasEditor from "./Canvas";
 import PWAInstallPrompt from "./pwa";
 import iOSInstallPopup from "./iOSInstallPopup";
+import { GoogleOAuthProvider } from "@react-oauth/google"; // ✅ Add this import
+
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -47,6 +49,7 @@ function App() {
     );
   }
   return (
+    <GoogleOAuthProvider clientId="465386176997-676bbvqp4hukkvl3evkidh5lm8ludt0n.apps.googleusercontent.com"> {/* ✅ Wrap with this */}
     <div>
       <Router>
         <Routes>
@@ -58,6 +61,8 @@ function App() {
         </Routes>
       </Router>
     </div>
+    </GoogleOAuthProvider>
+
   );
 }
 

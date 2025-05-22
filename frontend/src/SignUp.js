@@ -1,20 +1,22 @@
-import { useState } from "react";
-import styles from "./SignUp.module.css";
-import { useNavigate } from "react-router-dom";
-import NavigationBar from "./NavigationBar";
+import { useState } from 'react';
+import styles from './SignUp.module.css';
+import { useNavigate } from 'react-router-dom';
+import NavigationBar from './NavigationBar';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 function SignUp() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
 
-  const [response, setResponse] = useState("");
+  const [response, setResponse] = useState('');
 
   const handleVarChange = (e) => {
     setFormData({
@@ -28,10 +30,10 @@ function SignUp() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    fetch("https://inkquizly.onrender.com/getSignUpDetails", {
-      method: "POST",
+    fetch('https://inkquizly.onrender.com/getSignUpDetails', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(formData),
     })
@@ -40,26 +42,53 @@ function SignUp() {
         setResponse(data.message);
       })
       .catch((error) => {
-        console.error("Error:", error);
-        setResponse("An error occurred. Please try again later!");
+        console.error('Error:', error);
+        setResponse('An error occurred. Please try again later!');
       })
       .finally(() => {
         const baseUrl =
-          "https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec";
+          'https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec';
         const params = new URLSearchParams({
-          action: "addUser",
-          name: formData.firstName + " " + formData.lastName,
+          action: 'addUser',
+          name: formData.firstName + ' ' + formData.lastName,
           email: formData.email,
         });
 
         try {
           const response = fetch(`${baseUrl}?${params.toString()}`);
           const result = response.text();
-          console.log("Server response:", result);
+          console.log('Server response:', result);
         } catch (error) {
-          console.log("Error:", error);
+          console.log('Error:', error);
         }
-        setLoading(false);
+                        fetch('https://inkquizly.onrender.com/getLoginDetails', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    //setResponse(data.message);
+                    if (data.message.includes('Success:')) {
+                      navigate('/AccountDashboard', {
+                        state: { user: data.user },
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    console.error('Error:', error);
+                    setResponse(
+                      'An Error occurred. Please try again in a few mins.'
+                    );
+                  })
+                  .finally(() => {
+                    setLoading(false);
+                  });
       });
   };
 
@@ -124,19 +153,100 @@ function SignUp() {
           />
         </div>
 
-        <div className="submit">
+        <div className="submit" style={{ marginBottom: '10px' }}>
           <button type="submit" disabled={loading}>
             {loading
-              ? "Incredible things take time, please wait..."
-              : "Create Account"}
+              ? 'Incredible things take time, please wait...'
+              : 'Create Account'}
           </button>
           {/* <button type="submit">Create Account</button> */}
         </div>
+        <GoogleLogin
+          onSuccess={(credentialResponse) => {
+            const decoded = jwtDecode(credentialResponse.credential);
+            console.log(decoded); // contains name, email, etc.
+
+            setLoading(true);
+            fetch('https://inkquizly.onrender.com/getSignUpDetails', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                firstName: decoded.given_name,
+                lastName: decoded.family_name,
+                email: decoded.email,
+                password: 'GoogleAuth',
+                confirmPassword: 'GoogleAuth',
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                setResponse(data.message);
+              })
+              .catch((error) => {
+                console.error('Error:', error);
+                setResponse('An error occurred. Please try again later!');
+              })
+              .finally(() => {
+                const baseUrl =
+                  'https://script.google.com/macros/s/AKfycbwCI2de5lhYdI-5QEeVcQHlHaypqkQgrLmdTLw8U6JPcvtwZRHGVts2Vm4QvPSn5bP7/exec';
+                const params = new URLSearchParams({
+                  action: 'addUser',
+                  name:  decoded.given_name + ' ' + decoded.family_name+ "(GAuth)",
+                  email: decoded.email,
+                });
+
+                try {
+                  const response = fetch(`${baseUrl}?${params.toString()}`);
+                  // const result = response.text();
+                  // console.log("Server response:", result);
+                } catch (error) {
+                  console.log('Error:', error);
+                }
+                fetch('https://inkquizly.onrender.com/getLoginDetails', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    firstName: decoded.given_name,
+                    lastName: decoded.family_name,
+                    email: decoded.email,
+                    password: 'GoogleAuth',
+                    confirmPassword: 'GoogleAuth',
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    //setResponse(data.message);
+                    if (data.message.includes('Success:')) {
+                      navigate('/AccountDashboard', {
+                        state: { user: data.user },
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    console.error('Error:', error);
+                    setResponse(
+                      'An Error occurred. Please try again in a few mins.'
+                    );
+                  })
+                  .finally(() => {
+                    setLoading(false);
+                  });
+              });
+          }}
+          onError={() => {
+            console.log('Login Failed');
+          }}
+        />
         {response && (
           <p
             style={{
-              marginTop: "1rem",fontWeight: 1000,
-              color: response.includes("Successfully") ? "#98FB98" : "#FF0800",
+              marginTop: '1rem',
+              fontWeight: 1000,
+              color: response.includes('Successfully') ? '#98FB98' : '#FF0800',
             }}
           >
             {response}
@@ -144,23 +254,23 @@ function SignUp() {
         )}
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            marginTop: "20px",
-            fontSize: "16px",
-            fontFamily: "Arial, sans-serif",
-            color: "#333",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            marginTop: '20px',
+            fontSize: '16px',
+            fontFamily: 'Arial, sans-serif',
+            color: '#333',
           }}
         >
           <span
-            onClick={() => navigate("/LogIn")}
+            onClick={() => navigate('/LogIn')}
             style={{
-              marginLeft: "5px",
-              textDecoration: "none",
-              fontWeight: "bold",
-              cursor: "pointer",
+              marginLeft: '5px',
+              textDecoration: 'none',
+              fontWeight: 'bold',
+              cursor: 'pointer',
             }}
           >
             Already have an account?
