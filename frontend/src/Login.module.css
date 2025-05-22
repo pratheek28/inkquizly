@@ -36,3 +36,10 @@
 .form_container button:hover {
   background: #4954bb;
 }
+
+:global(.g_id_signin) {
+  display: block !important;
+  width: 90%    !important;
+  margin: 0 auto !important;
+  margin-bottom: 1rem  !important;
+}
