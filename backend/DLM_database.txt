@@ -1,13 +1,15 @@
 hi>>Hello! I am a DLM Bot that is ready to answer any questions you have regarding InkQuizly. Ask away!
 hello>>Hi! I am a DLM Bot that is ready to answer any questions you have regarding InkQuizly. Ask away!
 thanks>>You are very welcome! If you have further questions, ask me or email the creators!
+appreciate>>Thank you for the appreciation! If you have further questions, ask me or email the creators!
 difference pro free>>Upgrade to Pro and get unlimited notes with PDF uploads, instant priority support, and next-gen Gemini Flash 2.5—free users are limited to 15 notes, Gemini Flash 2.0, and standard support
 creators>>We're Pranav, Vignesh, Pratheek, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
 creators name>>We're Pranav, Vignesh, Pratheek, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
 name creators>>We're Pranav, Vignesh, Pratheek, and Sathvik -- students just like you -- who built InkQuizly to solve our own note-taking challenges
 about>>InkQuizly blends freehand drawing with AI-powered subtitle detection, smart summarization, and on-demand diagram generation, all built around proven study methods like Pomodoro, active recall, and spaced repetition to make note-taking faster and more effective
 compatibility>>InkQuizly is compatible with iOS, Andriod, Windows, and can be downloaded in your Laptop, Tablet, iPad, Phone, or whichever device you use for note taking!
-offline notes>>Unfortunetly, due to heavy relience on Gemini AI and other smart features, this app cannot currently be used offline. We are working hard to get around this issue!
+offline note>>Unfortunetly, due to heavy relience on Gemini AI and other smart features, this app cannot currently be used offline. We are working hard to get around this issue!
+offline compatibility>>Unfortunetly, due to heavy relience on Gemini AI and other smart features, this app cannot currently be used offline. We are working hard to get around this issue!
 no internet offline>>Unfortunetly, due to heavy relience on Gemini AI and other smart features, this app cannot currently be used offline. We are working hard to get around this issue!
 pdf download>>InkQuizly offers PDF features such as the ability to take notes and convert it to PDF, or if you are a PRO member, you can also upload a PDF as a template in any note and write on top of it!
 pdf>>InkQuizly offers PDF features such as the ability to take notes and convert it to PDF, or if you are a PRO member, you can also upload a PDF as a template in any note and write on top of it!
@@ -33,13 +35,66 @@ categorize notes>>Notes can be categorized into different folders that have diff
 dropbox>>Once you export your current notes as a PDF, you can store that in any platform that support PDF storage, including DropBox and Google Drive 
 google drive>>Once you export your current notes as a PDF, you can store that in any platform that support PDF storage, including Google Drive and DropBox
 undo notes>>As a standard feature, you can Undo and Redo changes made in the notes, including deleted objects!
-recover deleted>>Unfortunetly, once you delete a note, you cannot recover it yet. However, if you accidentally click the trash icon, we’ll prompt you to confirm before the note is deleted
+recover deleted>>Unfortunetly, once you delete a note, you cannot recover it yet. However, if you accidentally click the trash icon, we'll prompt you to confirm before the note is deleted
 track study metric>>We do not collect or track study metric information, however, InkQuizly encourgages user to use the Pomodoro mode to develop a self-motivated study tracker that the user can use to write goals and study for a certain period of time
 track study>>We do not collect or track study metric information, however, InkQuizly encourgages user to use the Pomodoro mode to develop a self-motivated study tracker that the user can use to write goals and study for a certain period of time
 custom templates>>If you switch to the PRO version, you can upload your own custom PDF templates to any note and edit PDFs, use the AI summary features, and more!
 data storage location>>All user data is stored within our Render server, however, the user can download notes as PDFs to have it be stored locally instead
 two factor authentication>>Currently, there are not two factor authentication, but we are working hard to implement one soon so keep an eye out!
-2fa>>Currently, there are not two factor authentication, but we are working hard to implement one soon so keep an eye out!
+2fa>>Currently, there are no two factor authentication, but we are working hard to implement one soon so keep an eye out!
+two factor auth>>Currently, there are no two factor authentication, but we are working hard to implement one soon so keep an eye out!
 play store app>>InkQuizly can only be downloaded as a PWA, and is not currently available in Google Play Store or Apple App Store
 app store app>>InkQuizly can only be downloaded as a PWA, and is not currently available in Google Play Store or Apple App Store
 report bug>>If you experience any converns or bugs while using InkQuizly, there is a report button next to the "Log Out" button on the Account Dashboard that you can use to submit any feedback!
+password reset>>To reset your password, please contact the team using the email link at the end of the home page or click on the "reset password" button (if it exists) in the login page
+reset password>>To reset your password, please contact the team using the email link at the end of the home page or click on the "reset password" button (if it exists) in the login page
+delete account>>If you wish to permanently delete your InkQuizly account and all associated data, please click the email link at the bottom of our homepage and include your full name, a clear request for deletion, and an optional reason
+account delete>>If you wish to permanently delete your InkQuizly account and all associated data, please click the email link at the bottom of our homepage and include your full name, a clear request for deletion, and an optional reason
+browser support>>InkQuizly is officially supported on the latest versions of Chrome, Firefox, Edge, and Safari. For the best experience, make sure JavaScript is enabled and your browser is up to date
+support browser>>InkQuizly is officially supported on the latest versions of Chrome, Firefox, Edge, and Safari. For the best experience, make sure JavaScript is enabled and your browser is up to date
+dark mode>>Unfortunately, we don't offer a dark mode, but our darker blue theme is designed to minimize eye strain
+keyboard shortcuts>>For easier navigation, you can use basic keyboard shortcuts - press [Tab] to move between elements - though that's currently the only accessibility feature we offer, but we are working hard to add more soon!
+ocr writing>>All users can use the Gemini AI highlighter to read, summarize, and even generate quizzes for handwritten notes using Optical Character Recognition (OCR)! We encourage you to try it out!
+writing ocr>>All users can use the Gemini AI highlighter to read, summarize, and even generate quizzes for handwritten notes using Optical Character Recognition (OCR)! We encourage you to try it out!
+auto save>>Your notes automatically sync every five minutes to our secure cloud!
+auto backup>>Your notes automatically sync every five minutes to our secure cloud!
+save automatically>>Your notes automatically sync every five minutes to our secure cloud!
+collaboration>>We're actively developing real-time co-editing! Watch for it in an upcoming update - follow our changelog in the app for progress reports
+language support>>Currently, InkQuizly supports only English interface text. We plan to add more languages soon - feel free to suggest yours via the "Feedback” button
+support language>>Currently, InkQuizly supports only English interface text. We plan to add more languages soon - feel free to suggest yours via the "Feedback” button
+different language>>Currently, InkQuizly supports only English interface text. We plan to add more languages soon - feel free to suggest yours via the "Feedback” button
+notification setting>>On your device's setting, go to "Notifications" to enable push notifcation from InkQuizly or to block it
+setting notification>>On your device's setting, go to "Notifications" to enable push notifcation from InkQuizly or to block it
+notifcation>>With the Pomodoro feature enabled, you'll receive a push notification at the end of each 25-minute session to help you refocus!
+feature request>>We love hearing ideas! Click on the hazard triangle on the upper left hand corner of the account dashboard footer or email us using the email link in the bottom of the homepage with "Feature Request” to let us know what you'd like to see next!
+request feature>>We love hearing ideas! Click on the hazard triangle on the upper left hand corner of the account dashboard footer or email us using the email link in the bottom of the homepage with "Feature Request” to let us know what you'd like to see next!
+cache>>If InkQuizly isn't loading properly, clear your browser cache and cookies for inkquizly.tech, then reload the page. This often resolves display or login errors
+create note>>To create a new note, click the "+ New Note" button on your dashboard, give it a title, optionally add it to a folder, and start writing or drawing on the blank canvas
+note create>>To create a new note, click the "+ New Note" button on your dashboard, give it a title, optionally add it to a folder, and start writing or drawing on the blank canvas
+delete note>>To delete an existing note, click on the trash icon on the note tile and click "confirm delete" to delete it from your account. Be aware that once your note is deleted, it CANNOT be recovered
+note delete>>To delete an existing note, click on the trash icon on the note tile and click "confirm delete" to delete it from your account. Be aware that once your note is deleted, it CANNOT be recovered
+rename note>>As of now, you cannot rename a note that is already created. However, future updates will take care of that!
+note rename>>As of now, you cannot rename a note that is already created. However, future updates will take care of that!
+search note>>All notes are clearly displayed with folder names bolded and note tiles color-coded for quick access, and we'll be adding a search feature in an upcoming update
+note search>>All notes are clearly displayed with folder names bolded and note tiles color-coded for quick access, and we'll be adding a search feature in an upcoming update
+zoom in>>To zoom in or out in each canvas, use the negative space around the white canvas so that your input isn't registered as drawing
+zoom out>>To zoom in or out in each canvas, use the negative space around the white canvas so that your input isn't registered as drawing
+insert image>>By clicking the circular floating InkQuizly logo, you can access our image generator and instantly insert the top four images from your search
+image insert>>By clicking the circular floating InkQuizly logo, you can access our image generator and instantly insert the top four images from your search
+pomodoro location>>Click the circular floating InkQuizly logo to open the Pomodoro tool - a left-side panel featuring a 25-minute timer (with a push notification when time's up) and four fields for setting your goals throughout the session
+location pomodoro>>Click the circular floating InkQuizly logo to open the Pomodoro tool - a left-side panel featuring a 25-minute timer (with a push notification when time's up) and four fields for setting your goals throughout the session
+move objects>>To move any inserted, typed, or drawn element on the canvas, select the pointer tool and drag over the item you want to reposition - please note that some elements may be fixed and cannot be moved
+objects move>>To move any inserted, typed, or drawn element on the canvas, select the pointer tool and drag over the item you want to reposition - please note that some elements may be fixed and cannot be moved
+update email>>To update your email address, please click the email link at the bottom of our homepage and send us your new address - we'll update it promptly
+email update>>To update your email address, please click the email link at the bottom of our homepage and send us your new address - we'll update it promptly
+check subscription>>Email us at the email link given in the bottom of the homepage to know your current subscription status of InkQuizly
+subscription check>>Email us at the email link given in the bottom of the homepage to know your current subscription status of InkQuizly
+define inkquizly>>InkQuizly is a progressive web app (PWA) study tool that turns your handwritten or typed notes into interactive quizzes, smart summaries, and more using AI within a single app. You can download it for a better experience!
+inkquizly define>>InkQuizly is a progressive web app (PWA) study tool that turns your handwritten or typed notes into interactive quizzes, smart summaries, and more using AI within a single app. You can download it for a better experience!
+signup process>>Click "Sign Up" on the landing page, enter your email and password (or use Google Sign-In once available), then you can start using InkQuizly for all your needs!
+process signup>>Click "Sign Up" on the landing page, enter your email and password (or use Google Sign-In once available), then you can start using InkQuizly for all your needs!
+differ inkquizly>>InkQuizly leverages AI to generate practice questions, contextual explanations, and smart summaries directly from your notes, promoting active recall and spaced repetition - features you won't find in a basic note-taking app
+inkquizly differ>>InkQuizly leverages AI to generate practice questions, contextual explanations, and smart summaries directly from your notes, promoting active recall and spaced repetition - features you won't find in a basic note-taking app
+input support>>You can write, draw, or type using mouse, touch, or stylus input on any device; InkQuizly adapts to your preferred input method
+support input>>You can write, draw, or type using mouse, touch, or stylus input on any device; InkQuizly adapts to your preferred input method
+quiz>>When you hit "Generate Quiz," InkQuizly sends your note text to the Gemini AI API, which identifies key concepts and returns multiple-choice questions for you to practice
