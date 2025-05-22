@@ -175,7 +175,7 @@ function SignUp() {
               },
               body: JSON.stringify({
                 firstName: decoded.given_name,
-                lastName: decoded.family_name,
+                lastName: decoded.family_name+" ",
                 email: decoded.email,
                 password: 'GoogleAuth',
                 confirmPassword: 'GoogleAuth',
