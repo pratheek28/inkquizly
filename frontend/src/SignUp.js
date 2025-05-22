@@ -161,6 +161,7 @@ function SignUp() {
           </button>
           {/* <button type="submit">Create Account</button> */}
         </div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <GoogleLogin
           onSuccess={(credentialResponse) => {
             const decoded = jwtDecode(credentialResponse.credential);
@@ -174,7 +175,7 @@ function SignUp() {
               },
               body: JSON.stringify({
                 firstName: decoded.given_name,
-                lastName: decoded.family_name+" ",
+                lastName: decoded.family_name,
                 email: decoded.email,
                 password: 'GoogleAuth',
                 confirmPassword: 'GoogleAuth',
@@ -241,6 +242,7 @@ function SignUp() {
             console.log('Login Failed');
           }}
         />
+        </div>
         {response && (
           <p
             style={{
